@@ -1,6 +1,7 @@
 package com.sumu.jobclient;
 
 import com.sumu.jobclient.annotation.JobHandler;
+import com.sumu.jobclient.common.Context;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
@@ -24,7 +25,6 @@ public class JobManager implements ApplicationContextAware {
 
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-    private ApplicationContext applicationContext;
 
     public JobManager() {
 
@@ -32,9 +32,7 @@ public class JobManager implements ApplicationContextAware {
 
 
     public void start() throws Exception {
-
-        ConfigurableEnvironment environment = (ConfigurableEnvironment) applicationContext.getEnvironment();
-//        LOG.info("job.enable+++++" + environment.getProperty("job.adminAddress"));
+        ConfigurableEnvironment environment = (ConfigurableEnvironment) Context.getApplicationContext().getEnvironment();
         String zkAddress = environment.getProperty("job.zkAddress");
         CuratorFramework client = CuratorFrameworkFactory.newClient(zkAddress, new ExponentialBackoffRetry(1000, 3));
         client.start();
@@ -42,12 +40,13 @@ public class JobManager implements ApplicationContextAware {
             LOG.error("[zk for path /job is not exist]");
         } else {
             String info = "Test Job Info";
-            String ph = getChildrenNode();
+            String appName = environment.getProperty("app.name");
+            String ph = getChildrenNode(appName);
             if (client.checkExists().forPath(ph) != null)
                 client.delete().forPath(ph);
             client.create().withMode(CreateMode.EPHEMERAL)
                     .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-                    .forPath(getChildrenNode(), info.getBytes());
+                    .forPath(getChildrenNode(appName), info.getBytes());
         }
         LOG.info("-----");
     }
@@ -56,8 +55,8 @@ public class JobManager implements ApplicationContextAware {
         System.out.println("======");
     }
 
-    public String getChildrenNode() {
-        String name = "job";
+    public String getChildrenNode(String appName) {
+        String name = appName;
         String ip = "127.0.0.1";
         String port = "8080";
 
@@ -66,9 +65,8 @@ public class JobManager implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-        Map<String, Object> serviceBeanMap = this.applicationContext.getBeansWithAnnotation(JobHandler.class);
+        Context.setApplicationContext(applicationContext);
+        Map<String, Object> serviceBeanMap = applicationContext.getBeansWithAnnotation(JobHandler.class);
         System.out.println(serviceBeanMap.toString());
-
     }
 }

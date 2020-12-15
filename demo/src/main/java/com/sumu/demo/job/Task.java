@@ -1,4 +1,4 @@
-package com.sumu.demo;
+package com.sumu.demo.job;
 
 import com.sumu.jobclient.annotation.JobHandler;
 import com.sumu.jobclient.handler.AbstractJobHandler;
