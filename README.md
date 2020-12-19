@@ -23,7 +23,6 @@
 
 ![image](image/ThreadPoolManager.png)
 
-https://github.com/xynuSuMu/image/blob/main/formmodeling/ThreadPoolManager.png
 ### 分布式任务调度
 
 待更新......
