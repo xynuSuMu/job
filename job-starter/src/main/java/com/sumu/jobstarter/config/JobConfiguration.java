@@ -3,9 +3,12 @@ package com.sumu.jobstarter.config;
 
 import com.sumu.jobclient.JobManager;
 import com.sumu.jobclient.handler.AbstractJobHandler;
+import com.sumu.jobclient.properties.AppProperties;
+import com.sumu.jobclient.properties.JobProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -19,6 +22,7 @@ import org.springframework.context.annotation.Bean;
         havingValue = "true",
         matchIfMissing = true
 )
+@EnableConfigurationProperties({JobProperties.class, AppProperties.class})
 public class JobConfiguration {
     public JobConfiguration() {
 
@@ -29,9 +33,9 @@ public class JobConfiguration {
             destroyMethod = "destroy"
     )
     @ConditionalOnMissingBean({JobManager.class})
-    public JobManager opjobManager() {
-        System.out.println("初始化");
-        return new JobManager();
+    public JobManager jobManager(JobProperties jobProperties, AppProperties appProperties) {
+        //
+        return new JobManager(jobProperties, appProperties);
     }
 
 }

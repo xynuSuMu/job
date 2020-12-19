@@ -1,5 +1,6 @@
 package com.sumu.jobclient.rpc;
 
+import com.sumu.jobclient.common.Context;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -24,10 +25,6 @@ public class JettyServer {
 
     private Thread thread;
 
-    //todo:暂固定
-    private final int PORT = 9090;
-    private final String IP = "127.0.0.1";
-
     public JettyServer() {
 
     }
@@ -40,8 +37,8 @@ public class JettyServer {
             // HTTP connector
             ServerConnector connector = new ServerConnector(server);
 
-            connector.setHost(IP);
-            connector.setPort(PORT);
+            connector.setHost(Context.getIP());
+            connector.setPort(Context.getPORT());
             server.setConnectors(new Connector[]{connector});
 
             HandlerCollection hc = new HandlerCollection();
@@ -54,7 +51,7 @@ public class JettyServer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            LOG.info("[Jetty] jetty server start successfully at port:{}.", PORT);
+            LOG.info("[Jetty] jetty server start successfully at  IP:{},port:{}.", Context.getIP(), Context.getPORT());
             try {
                 server.join();
                 LOG.info("[Jetty] jetty server join successfully");

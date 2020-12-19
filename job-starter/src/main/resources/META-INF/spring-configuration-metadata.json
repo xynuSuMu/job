@@ -3,13 +3,11 @@
   "groups": [],
   "properties": [
     {
-      "sourceType": "com.souche.opjobclient.OpjobManager",
       "name": "job.adminAddress",
       "description": "任务中心服务器的地址",
       "type": "java.lang.String"
     },
     {
-      "sourceType": "com.sumu.jobclient.JobManager",
       "name": "job.zkAddress",
       "defaultValue": "127.0.0.1",
       "description": "ZK注册中心地址",

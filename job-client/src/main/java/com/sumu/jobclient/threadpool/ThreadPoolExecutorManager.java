@@ -28,25 +28,10 @@ public class ThreadPoolExecutorManager extends ThreadPoolExecutor {
     //todo:后期全部入库
     private List<ThreadInfo> history = new CopyOnWriteArrayList<>();
 
+    private Boolean isRegister = false;
+
     private ThreadRegister threadRegister = new ThreadRegister();
-    private static final RejectedExecutionHandler defaultHandler =
-            new AbortPolicy();
 
-    private ThreadPoolExecutorManager(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
-                Executors.defaultThreadFactory(), defaultHandler);
-    }
-
-    private ThreadPoolExecutorManager(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
-                threadFactory, defaultHandler);
-
-    }
-
-    private ThreadPoolExecutorManager(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, RejectedExecutionHandler handler) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
-                Executors.defaultThreadFactory(), handler);
-    }
 
     public ThreadPoolExecutorManager(int corePoolSize,
                                      int maximumPoolSize,
@@ -54,41 +39,16 @@ public class ThreadPoolExecutorManager extends ThreadPoolExecutor {
                                      TimeUnit unit,
                                      BlockingQueue<Runnable> workQueue,
                                      ThreadFactory threadFactory,
-                                     RejectedExecutionHandler handler) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
+                                     RejectedExecutionHandler rejectedExecutionHandler) {
+        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, rejectedExecutionHandler);
         //注册
         StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
-//        for (StackTraceElement stackTraceElement : stacks) {
-//            String className = stackTraceElement.getClassName();
-//            String methodName = stackTraceElement.getMethodName();
-//            System.out.println(className + "-->" + methodName);
-//        }
-//        int len = stacks.length;
         //上一个调用栈
         String className = stacks[2].getClassName();
         String methodName = stacks[2].getMethodName();
         //初始化阶段-成员变量 方可注册
         if (methodName.contains("init")) {
-            if (Context.getApplicationContext() != null) {
-                ConfigurableEnvironment environment = (ConfigurableEnvironment) Context.getApplicationContext().getEnvironment();
-                String zkAddress = environment.getProperty("job.zkAddress");
-                String appName = environment.getProperty("app.name");
-                try {
-                    ThreadRegisterModal registerModal = new ThreadRegisterModal();
-                    InetAddress addr = InetAddress.getLocalHost();
-                    String ip = addr.getHostAddress();
-                    String port = "8080";
-                    registerModal.setZkAddress(zkAddress);
-                    registerModal.setAppName(appName);
-                    registerModal.setIp(ip);
-                    registerModal.setPort(port);
-                    registerModal.setClassName(className);
-                    threadRegister.register(registerModal);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            Context.addThreadPoolManger(className, this);
+            threadRegister.register(className, this);
         } else {
             LOG.error("[ ThreadPoolExecutorManager Invaild ]");
         }
@@ -137,6 +97,33 @@ public class ThreadPoolExecutorManager extends ThreadPoolExecutor {
 
     }
 
+    public Boolean getRegister() {
+        return isRegister;
+    }
+
+    public void setRegister(Boolean register) {
+        isRegister = register;
+    }
+
+    public static class DBPolicy implements RejectedExecutionHandler {
+
+        public DBPolicy() {
+        }
+
+        public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+            //db
+        }
+    }
+
+    public static class AlarmPolicy implements RejectedExecutionHandler {
+
+        public AlarmPolicy() {
+        }
+
+        public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+            //alarm
+        }
+    }
 
 }
 

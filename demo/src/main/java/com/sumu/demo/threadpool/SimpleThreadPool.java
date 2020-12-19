@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,7 +25,7 @@ public class SimpleThreadPool {
             0, TimeUnit.MINUTES,
             new LinkedBlockingQueue<>(),
             Executors.defaultThreadFactory(),
-            new ThreadPoolExecutor.AbortPolicy()
+            new ThreadPoolExecutorManager.DBPolicy()
     );
 
     public void test() {

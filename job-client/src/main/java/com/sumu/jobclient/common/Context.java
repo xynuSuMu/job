@@ -1,8 +1,12 @@
 package com.sumu.jobclient.common;
 
+import com.sumu.jobclient.properties.AppProperties;
+import com.sumu.jobclient.properties.JobProperties;
 import com.sumu.jobclient.threadpool.ThreadPoolExecutorManager;
 import org.springframework.context.ApplicationContext;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +19,29 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Context {
 
+    //todo:暂定9090
+    private final static int PORT = 9090;
+
+    private final static String IP;
+
+
+    private static JobProperties jobProperties;
+
+    private static AppProperties appProperties;
+
     private static ApplicationContext applicationContext;
 
     private static Map<String, List<ThreadPoolExecutorManager>> threadManager = new ConcurrentHashMap();
+
+    static {
+        InetAddress addr = null;
+        try {
+            addr = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        IP = addr.getHostAddress();
+    }
 
     public static ApplicationContext getApplicationContext() {
         return applicationContext;
@@ -58,5 +82,29 @@ public class Context {
             return null;
         List<ThreadPoolExecutorManager> real = threadManager.get(className);
         return real;
+    }
+
+    public static int getPORT() {
+        return PORT;
+    }
+
+    public static String getIP() {
+        return IP;
+    }
+
+    public static JobProperties getJobProperties() {
+        return jobProperties;
+    }
+
+    public static void setJobProperties(JobProperties jobProperties) {
+        Context.jobProperties = jobProperties;
+    }
+
+    public static AppProperties getAppProperties() {
+        return appProperties;
+    }
+
+    public static void setAppProperties(AppProperties appProperties) {
+        Context.appProperties = appProperties;
     }
 }

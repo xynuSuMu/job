@@ -13,7 +13,7 @@ public class ThreadRegisterModal {
 
     private String ip;
 
-    private String port;
+    private int port;
 
     private String className;
 
@@ -43,11 +43,11 @@ public class ThreadRegisterModal {
         this.ip = ip;
     }
 
-    public String getPort() {
+    public int getPort() {
         return port;
     }
 
-    public void setPort(String port) {
+    public void setPort(int port) {
         this.port = port;
     }
 
