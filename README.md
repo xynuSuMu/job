@@ -21,9 +21,9 @@
 基于上面问题，对于JDK原生ThreadPoolExecutor进行改造，改造类为ThreadPoolExecutorManager，
 该类的核心目标为：任务堆积时告警、拒绝任务时告警、核心参数修改、线程执行情况监听、线程中断。
 
-![image](https://github.com/xynuSuMu/image/blob/main/formmodeling/ThreadPoolManager.png)
+![image](image/ThreadPoolManager.png)
 
-
+https://github.com/xynuSuMu/image/blob/main/formmodeling/ThreadPoolManager.png
 ### 分布式任务调度
 
 待更新......
