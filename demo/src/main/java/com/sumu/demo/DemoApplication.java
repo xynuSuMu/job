@@ -1,5 +1,6 @@
 package com.sumu.demo;
 
+import com.sumu.jobclient.rpc.JettyServer;
 import com.sumu.jobstarter.config.EnableJob;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

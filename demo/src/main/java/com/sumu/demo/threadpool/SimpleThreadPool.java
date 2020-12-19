@@ -3,6 +3,7 @@ package com.sumu.demo.threadpool;
 import com.alibaba.fastjson.JSONObject;
 import com.sumu.jobclient.modal.threadpool.ThreadInfo;
 import com.sumu.jobclient.threadpool.ThreadPoolExecutorManager;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -15,9 +16,11 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0
  * @date 2020-12-15 16:03
  */
+@Service
 public class SimpleThreadPool {
 
-    private ThreadPoolExecutorManager threadPoolExecutor2 = new ThreadPoolExecutorManager(
+    //2个核心线程，其他任务进入无界限队列
+    private ThreadPoolExecutorManager threadPoolExecutor = new ThreadPoolExecutorManager(
             2,
             2,
             0, TimeUnit.MINUTES,
@@ -27,16 +30,6 @@ public class SimpleThreadPool {
     );
 
     public void test() {
-        //2个核心线程，其他任务进入无界限队列
-        ThreadPoolExecutorManager threadPoolExecutor = new ThreadPoolExecutorManager(
-                2,
-                2,
-                0, TimeUnit.MINUTES,
-                new LinkedBlockingQueue<>(),
-                Executors.defaultThreadFactory(),
-                new ThreadPoolExecutor.AbortPolicy()
-        );
-
         threadPoolExecutor.execute(() -> {
             try {
                 Thread.sleep(6000);

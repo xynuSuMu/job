@@ -4,6 +4,10 @@ import com.sumu.jobclient.common.Context;
 import com.sumu.jobclient.modal.threadpool.ThreadInfo;
 import com.sumu.jobclient.modal.threadpool.ThreadRegisterModal;
 import com.sumu.jobclient.zk.ThreadRegister;
+import com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import java.net.InetAddress;
@@ -17,6 +21,7 @@ import java.util.concurrent.*;
  */
 public class ThreadPoolExecutorManager extends ThreadPoolExecutor {
 
+    protected Logger LOG = LoggerFactory.getLogger(ThreadPoolExecutorManager.class);
 
     private Map<Thread, ThreadInfo> threadMap = new ConcurrentHashMap<>();
 
@@ -24,8 +29,6 @@ public class ThreadPoolExecutorManager extends ThreadPoolExecutor {
     private List<ThreadInfo> history = new CopyOnWriteArrayList<>();
 
     private ThreadRegister threadRegister = new ThreadRegister();
-
-
     private static final RejectedExecutionHandler defaultHandler =
             new AbortPolicy();
 
@@ -53,7 +56,6 @@ public class ThreadPoolExecutorManager extends ThreadPoolExecutor {
                                      ThreadFactory threadFactory,
                                      RejectedExecutionHandler handler) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
-
         //注册
         StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
 //        for (StackTraceElement stackTraceElement : stacks) {
@@ -61,36 +63,36 @@ public class ThreadPoolExecutorManager extends ThreadPoolExecutor {
 //            String methodName = stackTraceElement.getMethodName();
 //            System.out.println(className + "-->" + methodName);
 //        }
-        int len = stacks.length;
+//        int len = stacks.length;
         //上一个调用栈
         String className = stacks[2].getClassName();
         String methodName = stacks[2].getMethodName();
         //初始化阶段-成员变量 方可注册
         if (methodName.contains("init")) {
-            System.out.println("成员变量");
-            //配置文件
-            ConfigurableEnvironment environment = (ConfigurableEnvironment)
-                    Context.getApplicationContext().getEnvironment();
-            String zkAddress = environment.getProperty("job.zkAddress");
-            String appName = environment.getProperty("app.name");
-            try {
-                ThreadRegisterModal registerModal = new ThreadRegisterModal();
-                InetAddress addr = InetAddress.getLocalHost();
-                String ip = addr.getHostAddress();
-                String port = "8080";
-                registerModal.setZkAddress(zkAddress);
-                registerModal.setAppName(appName);
-                registerModal.setIp(ip);
-                registerModal.setPort(port);
-                registerModal.setClassName(className);
-                registerModal.setMethodName(methodName);
-                threadRegister.register(registerModal);
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (Context.getApplicationContext() != null) {
+                ConfigurableEnvironment environment = (ConfigurableEnvironment) Context.getApplicationContext().getEnvironment();
+                String zkAddress = environment.getProperty("job.zkAddress");
+                String appName = environment.getProperty("app.name");
+                try {
+                    ThreadRegisterModal registerModal = new ThreadRegisterModal();
+                    InetAddress addr = InetAddress.getLocalHost();
+                    String ip = addr.getHostAddress();
+                    String port = "8080";
+                    registerModal.setZkAddress(zkAddress);
+                    registerModal.setAppName(appName);
+                    registerModal.setIp(ip);
+                    registerModal.setPort(port);
+                    registerModal.setClassName(className);
+                    threadRegister.register(registerModal);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+            Context.addThreadPoolManger(className, this);
         } else {
-            System.out.println("非成员变量");
+            LOG.error("[ ThreadPoolExecutorManager Invaild ]");
         }
+
     }
 
     //运行中线程数量
@@ -130,10 +132,11 @@ public class ThreadPoolExecutorManager extends ThreadPoolExecutor {
             ThreadInfo threadInfo = threadMap.get(thread);
             threadInfo.setEndTime(new Date(System.currentTimeMillis()));
             history.add(threadInfo);
-            threadMap.remove(r);
+            threadMap.remove(thread);
         }
 
     }
 
 
 }
+
