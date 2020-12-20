@@ -6,9 +6,12 @@ import com.sumu.jobclient.threadpool.ThreadPoolExecutorManager;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author 陈龙
@@ -22,66 +25,68 @@ public class SimpleThreadPool {
     private ThreadPoolExecutorManager threadPoolExecutor = new ThreadPoolExecutorManager(
             2,
             2,
-            0, TimeUnit.MINUTES,
-            new LinkedBlockingQueue<>(),
+            new ArrayBlockingQueue<>(1),
             Executors.defaultThreadFactory(),
-            new ThreadPoolExecutorManager.DBPolicy()
+            new ThreadPoolExecutorManager.AlarmPolicy(),
+            2
     );
 
+
     public void test() {
+        Lock lock = new ReentrantLock();
+        lock.lock();
+        threadPoolExecutor.execute(() -> {
+            System.out.println("=====");
+
+            lock.lock();
+            System.out.println("+++++");
+//            while (true) {
+//                System.out.println(System.currentTimeMillis());
+//            }
+        });
         threadPoolExecutor.execute(() -> {
             try {
                 Thread.sleep(6000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("Test");
+            System.out.println("Test2");
         });
-
         try {
-            Thread.sleep(500);
-            System.out.println("正在运行的线程数量" + threadPoolExecutor.getRunThread());
-            System.out.println("空闲的线程数量" + (2 - threadPoolExecutor.getRunThread()));
-            List<ThreadInfo> run = threadPoolExecutor.getRunThreadInfo();
-            for (ThreadInfo threadInfo : run) {
-                System.out.println(JSONObject.toJSONString(threadInfo));
-            }
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        threadPoolExecutor.getThreadInfoByMXBean(1);
+        threadPoolExecutor.interrupt("thread-pool-1", 1);
 
-        threadPoolExecutor.execute(() -> {
-            try {
-                Thread.sleep(6000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println("Test");
-        });
+//        threadPoolExecutor.execute(() -> {
+//            try {
+//                Thread.sleep(6000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            System.out.println("Test3");
+//        });
+//        threadPoolExecutor.execute(() -> {
+//            try {
+//                Thread.sleep(6000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            System.out.println("Test4");
+//        });
+//
+//
+//        threadPoolExecutor.execute(() -> {
+//            try {
+//                Thread.sleep(6000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            System.out.println("Test5");
+//        });
 
-        try {
-            Thread.sleep(500);
-            System.out.println("正在运行的线程数量" + threadPoolExecutor.getRunThread());
-            System.out.println("空闲的线程数量" + (2 - threadPoolExecutor.getRunThread()));
-            List<ThreadInfo> run = threadPoolExecutor.getRunThreadInfo();
-            for (ThreadInfo threadInfo : run) {
-                System.out.println(JSONObject.toJSONString(threadInfo));
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            Thread.sleep(12000);
-            System.out.println("正在运行的线程数量" + threadPoolExecutor.getRunThread());
-            System.out.println("空闲的线程数量" + (2 - threadPoolExecutor.getRunThread()));
-            List<ThreadInfo> historyThreadInfo = threadPoolExecutor.getHistoryThreadInfo();
-            for (ThreadInfo threadInfo : historyThreadInfo) {
-                System.out.println(JSONObject.toJSONString(threadInfo));
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
 

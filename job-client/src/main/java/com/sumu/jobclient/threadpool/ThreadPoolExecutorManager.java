@@ -1,16 +1,13 @@
 package com.sumu.jobclient.threadpool;
 
-import com.sumu.jobclient.common.Context;
+import com.alibaba.fastjson.JSONObject;
 import com.sumu.jobclient.modal.threadpool.ThreadInfo;
-import com.sumu.jobclient.modal.threadpool.ThreadRegisterModal;
 import com.sumu.jobclient.zk.ThreadRegister;
-import com.sun.corba.se.spi.orbutil.threadpool.ThreadPoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.env.ConfigurableEnvironment;
 
-import java.net.InetAddress;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -21,39 +18,62 @@ import java.util.concurrent.*;
  */
 public class ThreadPoolExecutorManager extends ThreadPoolExecutor {
 
-    protected Logger LOG = LoggerFactory.getLogger(ThreadPoolExecutorManager.class);
+    private Logger LOG = LoggerFactory.getLogger(ThreadPoolExecutorManager.class);
 
+    //运行线程数量
     private Map<Thread, ThreadInfo> threadMap = new ConcurrentHashMap<>();
 
     //todo:后期全部入库
     private List<ThreadInfo> history = new CopyOnWriteArrayList<>();
 
+    //是否注册ZK
     private Boolean isRegister = false;
 
+    //
     private ThreadRegister threadRegister = new ThreadRegister();
+
+    //默认阀值
+    private final long defaultThreshold = Long.MAX_VALUE;
+
+    //初始化线程池方法时进行监控
+    private final String LOCAL_VARIABLE_NAME = "init";
+
+    //
+    private volatile boolean openAlarm = true;
+
+    //队列-预警阀值
+    private long alarmThreshold;
 
 
     public ThreadPoolExecutorManager(int corePoolSize,
                                      int maximumPoolSize,
-                                     long keepAliveTime,
-                                     TimeUnit unit,
                                      BlockingQueue<Runnable> workQueue,
                                      ThreadFactory threadFactory,
-                                     RejectedExecutionHandler rejectedExecutionHandler) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, rejectedExecutionHandler);
+                                     RejectedExecutionHandler rejectedExecutionHandler,
+                                     long alarmThreshold) {
+        //非核心线程无任务存活3分钟
+        super(corePoolSize, maximumPoolSize,
+                3,
+                TimeUnit.MINUTES,
+                workQueue,
+                threadFactory,
+                rejectedExecutionHandler);
+
+        //预警阀值小于0，则为默认
+        this.alarmThreshold = alarmThreshold < 0 ? defaultThreshold : alarmThreshold;
         //注册
         StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
         //上一个调用栈
         String className = stacks[2].getClassName();
         String methodName = stacks[2].getMethodName();
         //初始化阶段-成员变量 方可注册
-        if (methodName.contains("init")) {
+        if (methodName.contains(LOCAL_VARIABLE_NAME)) {
             threadRegister.register(className, this);
         } else {
             LOG.error("[ ThreadPoolExecutorManager Invaild ]");
         }
-
     }
+
 
     //运行中线程数量
     public long getRunThread() {
@@ -76,15 +96,50 @@ public class ThreadPoolExecutorManager extends ThreadPoolExecutor {
         return history;
     }
 
+    //中断线程，todo:对于IO造成的阻塞或死循环内无检测中断，目前无很好解决方案
+    public void interrupt(String threadName, long startTime) {
+        Set<Map.Entry<Thread, ThreadInfo>> set = threadMap.entrySet();
+        LOG.info("[ ThreadPoolManager ] interrupt thread:{}", threadName);
+        for (Map.Entry<Thread, ThreadInfo> entry : set) {
+            if (entry.getKey().getName().equals(threadName)
+                    &&
+                    entry.getValue().getStartTime().getTime() == startTime) {
+                entry.getKey().interrupt();
+            }
+        }
+    }
+
+    public java.lang.management.ThreadInfo getThreadInfoByMXBean(long id) {
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+        java.lang.management.ThreadInfo threadInfo = threadMXBean.getThreadInfo(id);
+        return threadInfo;
+    }
+
+    @Override
+    public void execute(Runnable command) {
+        //队列
+        if (openAlarm) {
+            long queueSize = getQueue().size();
+            if (queueSize + 1 > alarmThreshold) {
+                //todo
+                LOG.info("发送预警");
+            }
+        }
+        super.execute(command);
+    }
+
+    //任务执行前
     @Override
     protected void beforeExecute(Thread t, Runnable r) {
         String threadName = t.getName();
         ThreadInfo threadInfo = new ThreadInfo();
+        threadInfo.setId(t.getId());
         threadInfo.setThreadName(threadName);
         threadInfo.setStartTime(new Date(System.currentTimeMillis()));
         threadMap.put(t, threadInfo);
     }
 
+    //任务执行完成后
     @Override
     protected void afterExecute(Runnable r, Throwable t) {
         Thread thread = Thread.currentThread();
@@ -105,15 +160,6 @@ public class ThreadPoolExecutorManager extends ThreadPoolExecutor {
         isRegister = register;
     }
 
-    public static class DBPolicy implements RejectedExecutionHandler {
-
-        public DBPolicy() {
-        }
-
-        public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-            //db
-        }
-    }
 
     public static class AlarmPolicy implements RejectedExecutionHandler {
 
@@ -121,9 +167,13 @@ public class ThreadPoolExecutorManager extends ThreadPoolExecutor {
         }
 
         public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-            //alarm
+            //todo:alarm
+            System.out.println("[ALARM] Runable Rejected");
         }
     }
 
+    public void setOpenAlarm(boolean openAlarm) {
+        this.openAlarm = openAlarm;
+    }
 }
 
