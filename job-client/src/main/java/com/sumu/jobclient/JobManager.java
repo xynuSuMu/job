@@ -8,7 +8,6 @@ import com.sumu.jobclient.properties.AppProperties;
 import com.sumu.jobclient.properties.JobProperties;
 import com.sumu.jobclient.rpc.JettyServer;
 import com.sumu.jobclient.zk.JobRegister;
-import com.sumu.jobclient.zk.ThreadRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -31,7 +30,6 @@ public class JobManager implements ApplicationContextAware {
 
     private JettyServer jettyServer;
 
-    private ThreadRegister threadRegister;
 
     private JobRegister jobRegister;
 
@@ -50,15 +48,10 @@ public class JobManager implements ApplicationContextAware {
 
         jettyServer = new JettyServer(jobData);
 
-        threadRegister = new ThreadRegister();
-
         jobRegister = new JobRegister();
 
         //JOB REGISTER
         jobRegister.register();
-
-        //Thread REGISTER
-        threadRegister.register();
 
         //jetty start
         jettyServer.start();

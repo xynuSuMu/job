@@ -30,7 +30,7 @@ public class ThreadRegister {
 
     public void register(String className, ThreadPoolExecutorManager threadPoolExecutorManager) {
         if (Context.getApplicationContext() != null) {
-            LOG.info("[ ThreadPoolExecutorManager JobRegister ]");
+            LOG.info("[  ThreadPoolExecutorManager JobRegister In Run Time ]");
             try {
                 ThreadRegisterModal registerModal = getRegisterModal(className);//new ThreadRegisterModal();
                 register(registerModal);
@@ -43,7 +43,6 @@ public class ThreadRegister {
     }
 
     public void register() {
-        LOG.info("[ ThreadPoolExecutorManager JobRegister ]");
         Map<String, List<ThreadPoolExecutorManager>> map = Context.getThreadManager();
 
         Set<Map.Entry<String, List<ThreadPoolExecutorManager>>> set = map.entrySet();
@@ -55,6 +54,7 @@ public class ThreadRegister {
                     try {
                         ThreadRegisterModal registerModal = getRegisterModal(entry.getKey());
                         threadRegister.register(registerModal);
+                        threadPoolExecutorManager.setRegister(true);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
