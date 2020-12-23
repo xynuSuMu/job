@@ -1,5 +1,7 @@
 package com.sumu.jobclient.handler;
 
+import com.sumu.common.core.Result;
+
 /**
  * @author 陈龙
  * @version 1.0
@@ -7,6 +9,6 @@ package com.sumu.jobclient.handler;
  */
 public abstract class AbstractJobHandler {
 
-    public abstract <T> T execute(String var1) throws Exception;
+    public abstract <T> Result<T> execute(String var1) throws Exception;
 
 }

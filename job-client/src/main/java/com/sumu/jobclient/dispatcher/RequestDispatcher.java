@@ -3,13 +3,13 @@ package com.sumu.jobclient.dispatcher;
 import com.sumu.jobclient.handler.DispatcherHandler;
 import com.sumu.jobclient.handler.JobDispatcherHandler;
 import com.sumu.jobclient.handler.ThreadPoolDispatcherHandler;
-import com.sumu.common.modal.rpc.RpcResult;
+import com.sumu.common.util.rpc.RpcResult;
 import com.sumu.jobclient.modal.job.JobData;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
-import com.sumu.common.modal.rpc.URLConstants;
+import com.sumu.common.core.URLConstants;
 
 /**
  * @author 陈龙

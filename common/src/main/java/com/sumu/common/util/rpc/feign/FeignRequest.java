@@ -1,6 +1,7 @@
-package com.sumu.common.modal.rpc.feign;
+package com.sumu.common.util.rpc.feign;
 
-import com.sumu.common.modal.rpc.RpcResult;
+import com.sumu.common.core.URLConstants;
+import com.sumu.common.util.rpc.RpcResult;
 import feign.Param;
 import feign.RequestLine;
 
@@ -11,7 +12,8 @@ import feign.RequestLine;
  */
 public interface FeignRequest {
 
-    @RequestLine("PUT /job/notify?handlerName={handlerName}")
+    @RequestLine("PUT " + URLConstants.JOB_NOTIFY + "?handlerName={handlerName}")
     RpcResult<Void> fire(@Param("handlerName") String handlerName);
+
 
 }

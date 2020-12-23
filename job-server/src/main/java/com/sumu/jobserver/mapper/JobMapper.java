@@ -19,6 +19,8 @@ public interface JobMapper {
     @Select("select count(id) from JOB_CUSTOM_JOB_DEFINITION where job_name  = #{jobName}")
     int countByJobName(@Param("jobName") String jobName);
 
+    JobDefinitionDO getJobDefinitionByID(@Param("id") String id);
+
     List<JobDefinitionDO> jobDefinitionList(@Param("jobDefinitionQuery") JobDefinitionQuery jobDefinitionQuery);
 
     List<JobInstanceDO> jobInstanceList(@Param("jobInstanceQuery") JobInstanceQuery jobInstanceQuery);

@@ -46,6 +46,12 @@
             )
     </insert>
 
+    <select id="getJobDefinitionByID" resultMap="jobDefinitionMap">
+        select
+        <include refid="definition_column"/>
+        from JOB_CUSTOM_JOB_DEFINITION where id = #{id}
+    </select>
+
     <select id="jobDefinitionList" parameterType="com.sumu.jobserver.api.vo.query.JobDefinitionQuery"
             resultMap="jobDefinitionMap">
         select

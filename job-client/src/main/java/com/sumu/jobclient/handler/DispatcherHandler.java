@@ -1,6 +1,6 @@
 package com.sumu.jobclient.handler;
 
-import com.sumu.common.modal.rpc.RpcResult;
+import com.sumu.common.util.rpc.RpcResult;
 
 import javax.servlet.http.HttpServletRequest;
 

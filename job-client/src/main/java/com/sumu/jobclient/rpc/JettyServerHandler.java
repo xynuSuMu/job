@@ -2,7 +2,7 @@ package com.sumu.jobclient.rpc;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumu.jobclient.dispatcher.RequestDispatcher;
-import com.sumu.common.modal.rpc.RpcResult;
+import com.sumu.common.util.rpc.RpcResult;
 import com.sumu.jobclient.modal.job.JobData;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;

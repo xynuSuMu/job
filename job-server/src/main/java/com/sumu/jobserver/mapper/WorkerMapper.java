@@ -1,6 +1,9 @@
 package com.sumu.jobserver.mapper;
 
+import com.sumu.jobserver.modal.worker.WorkerDO;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @author 陈龙
@@ -18,5 +21,7 @@ public interface WorkerMapper {
     void unRegisterWorker(@Param("ip") String ip,
                           @Param("port") int port,
                           @Param("zxid") long zxid);
+
+    List<WorkerDO> getRunWorkerByAppID(@Param("appID") int appID);
 
 }

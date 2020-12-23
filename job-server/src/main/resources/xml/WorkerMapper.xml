@@ -22,4 +22,25 @@
           and #{zxid} >= zxid
 
     </update>
+
+    <select id="getRunWorkerByAppID" resultMap="workerMap">
+        select
+        <include refid="worker"/>
+        from JOB_CUSTOM_WORKER where
+        app_id = #{appID}
+        and
+        enable = 1
+    </select>
+
+    <sql id="worker">
+         id,app_id,ip,port,host_name
+    </sql>
+
+    <resultMap id="workerMap" type="com.sumu.jobserver.modal.worker.WorkerDO">
+        <result column="id" property="id"/>
+        <result column="app_id" property="appID"/>
+        <result column="ip" property="ip"/>
+        <result column="port" property="port"/>
+        <result column="host_name" property="hostName"/>
+    </resultMap>
 </mapper>

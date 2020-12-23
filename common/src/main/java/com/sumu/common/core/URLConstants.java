@@ -1,4 +1,4 @@
-package com.sumu.common.modal.rpc;
+package com.sumu.common.core;
 
 /**
  * @author 陈龙
@@ -8,6 +8,7 @@ package com.sumu.common.modal.rpc;
 public class URLConstants {
 
     public final static String JOB_NOTIFY = "/job/notify";
+
     public final static String THREAD_POOL_INFO = "/thread/pool/info";
 
 }

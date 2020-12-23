@@ -1,4 +1,4 @@
-package com.sumu.common.modal.rpc;
+package com.sumu.common.util.rpc;
 
 /**
  * @author 陈龙

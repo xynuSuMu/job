@@ -1,6 +1,6 @@
 package com.sumu.jobclient.handler;
 
-import com.sumu.common.modal.rpc.RpcResult;
+import com.sumu.common.util.rpc.RpcResult;
 import com.sumu.jobclient.modal.job.JobData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
