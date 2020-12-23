@@ -38,9 +38,9 @@ Server模块监听注册中心的应用信息，提供Job定义(JobDefinition)�
 
 #### Client
 
-![image](http://www.study-java.cn/v2/image/1608624227635JobClient.png)
+![image](image/JobClient.png)
 
 
 ### Server
 
-![image](http://www.study-java.cn/v2/image/1608624678483JobServer.png)
+![image](image/JobServer.png)
