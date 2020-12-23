@@ -14,4 +14,5 @@ import java.lang.annotation.*;
 @Inherited
 @Component
 public @interface JobHandler {
+    String value();
 }

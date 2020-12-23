@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Bean;
  */
 @ConditionalOnBean({AbstractJobHandler.class})
 @ConditionalOnProperty(
-        value = {"job.enable"},
+        value = {"zk.enable"},
         havingValue = "true",
         matchIfMissing = true
 )

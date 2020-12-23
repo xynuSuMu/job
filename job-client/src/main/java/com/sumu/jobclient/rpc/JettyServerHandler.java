@@ -2,7 +2,8 @@ package com.sumu.jobclient.rpc;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumu.jobclient.dispatcher.RequestDispatcher;
-import com.sumu.jobclient.modal.rpc.RpcResult;
+import com.sumu.common.modal.rpc.RpcResult;
+import com.sumu.jobclient.modal.job.JobData;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
@@ -25,8 +26,8 @@ public class JettyServerHandler extends AbstractHandler {
 
     private RequestDispatcher requestDispatcher;
 
-    public JettyServerHandler() {
-        requestDispatcher = new RequestDispatcher();
+    public JettyServerHandler(JobData jobData) {
+        requestDispatcher = new RequestDispatcher(jobData);
     }
 
     @Override

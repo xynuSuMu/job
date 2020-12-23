@@ -1,9 +1,9 @@
-package com.sumu.jobclient.modal.rpc;
+package com.sumu.common.modal.rpc;
 
 /**
  * @author 陈龙
  * @version 1.0
- * @date 2020-12-18 09:38
+ * @date 2020-12-18 21:38
  */
 public class RpcResult<T> {
 

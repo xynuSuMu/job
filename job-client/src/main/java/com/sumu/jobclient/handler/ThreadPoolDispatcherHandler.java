@@ -1,7 +1,7 @@
 package com.sumu.jobclient.handler;
 
 import com.sumu.jobclient.common.Context;
-import com.sumu.jobclient.modal.rpc.RpcResult;
+import com.sumu.common.modal.rpc.RpcResult;
 import com.sumu.jobclient.modal.threadpool.ThreadPoolManagerInfo;
 import com.sumu.jobclient.threadpool.ThreadPoolExecutorManager;
 

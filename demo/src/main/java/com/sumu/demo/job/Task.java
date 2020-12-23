@@ -8,7 +8,7 @@ import com.sumu.jobclient.handler.AbstractJobHandler;
  * @version 1.0
  * @date 2020-12-04 10:16
  */
-@JobHandler
+@JobHandler("demoTask")
 public class Task extends AbstractJobHandler {
     @Override
     public <T> T execute(String s) throws Exception {

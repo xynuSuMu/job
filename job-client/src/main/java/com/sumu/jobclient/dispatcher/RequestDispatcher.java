@@ -1,12 +1,15 @@
 package com.sumu.jobclient.dispatcher;
 
 import com.sumu.jobclient.handler.DispatcherHandler;
+import com.sumu.jobclient.handler.JobDispatcherHandler;
 import com.sumu.jobclient.handler.ThreadPoolDispatcherHandler;
-import com.sumu.jobclient.modal.rpc.RpcResult;
+import com.sumu.common.modal.rpc.RpcResult;
+import com.sumu.jobclient.modal.job.JobData;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import com.sumu.common.modal.rpc.URLConstants;
 
 /**
  * @author 陈龙
@@ -15,14 +18,11 @@ import java.util.Map;
  */
 public class RequestDispatcher {
 
-    private final String JOB_NOTIFY = "/job/notify";
-    private final String THREAD_POOL_INFO = "/thread/pool/info";
-
     private Map<String, DispatcherHandler> urlHandlerMap = new HashMap<>();
 
-
-    public RequestDispatcher() {
-        urlHandlerMap.put(THREAD_POOL_INFO, new ThreadPoolDispatcherHandler());
+    public RequestDispatcher(JobData jobData) {
+        urlHandlerMap.put(URLConstants.THREAD_POOL_INFO, new ThreadPoolDispatcherHandler());
+        urlHandlerMap.put(URLConstants.JOB_NOTIFY, new JobDispatcherHandler(jobData));
     }
 
     public RpcResult<?> dispatcher(HttpServletRequest request) {

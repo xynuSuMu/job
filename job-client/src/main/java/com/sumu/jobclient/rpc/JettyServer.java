@@ -1,6 +1,7 @@
 package com.sumu.jobclient.rpc;
 
 import com.sumu.jobclient.common.Context;
+import com.sumu.jobclient.modal.job.JobData;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -21,12 +22,14 @@ public class JettyServer {
 
     private volatile JettyServerHandler handler;
 
+    private JobData jobData;
+
     private Server server;
 
     private Thread thread;
 
-    public JettyServer() {
-
+    public JettyServer(JobData jobData) {
+        this.jobData = jobData;
     }
 
     public void start() {
@@ -42,7 +45,7 @@ public class JettyServer {
             server.setConnectors(new Connector[]{connector});
 
             HandlerCollection hc = new HandlerCollection();
-            handler = new JettyServerHandler();
+            handler = new JettyServerHandler(jobData);
             hc.setHandlers(new Handler[]{handler});
             server.setHandler(hc);
             // Start server

@@ -24,6 +24,8 @@ public class Context {
 
     private final static String IP;
 
+    private final static String HOSTNAME;
+
 
     private static JobProperties jobProperties;
 
@@ -40,6 +42,7 @@ public class Context {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+        HOSTNAME = addr.getHostName();
         IP = addr.getHostAddress();
     }
 
@@ -106,5 +109,9 @@ public class Context {
 
     public static void setAppProperties(AppProperties appProperties) {
         Context.appProperties = appProperties;
+    }
+
+    public static String getHOSTNAME() {
+        return HOSTNAME;
     }
 }

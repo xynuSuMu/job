@@ -26,7 +26,7 @@ public class ThreadRegister {
 
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-    private final String PATH = "/job/thread/pool";
+    private final String PATH = "/zk/thread/pool";
 
     public void register(String className, ThreadPoolExecutorManager threadPoolExecutorManager) {
         if (Context.getApplicationContext() != null) {
