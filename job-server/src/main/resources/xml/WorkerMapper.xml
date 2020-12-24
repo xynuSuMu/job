@@ -9,8 +9,8 @@
         on duplicate key update
             app_id = IF((#{zxid} > zxid), #{appId}, app_id),
             host_name = IF((#{zxid} > zxid), #{hostname}, host_name),
-            zxid = IF((#{zxid} > zxid), #{zxid}, zxid),
-            enable = IF((#{zxid} > zxid), 1, enable)
+            enable = IF((#{zxid} > zxid), 1, enable),
+             zxid = IF((#{zxid} > zxid), #{zxid}, zxid)
             ;
     </insert>
 

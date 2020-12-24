@@ -11,17 +11,30 @@
             `job_name`,
             `job_desc`,
             `job_cron`,
-            `handler_name`,
             `enable`,
-            `execute_strategy`
+            `task_type`
             )
             values (
             #{appId},
             #{jobName},
             #{jobDesc},
             #{cron},
-            #{handlerName},
             #{enable},
+            #{taskType}
+            )
+    </insert>
+
+    <insert id="insertJavaJobDefinition" parameterType="com.sumu.jobserver.modal.job.JavaJobDO"
+            useGeneratedKeys="true"
+            keyProperty="id" keyColumn="id">
+            insert into JOB_CUSTOM_JOB_DEFINITION_JAVA(
+            `definition_id`,
+            `handler_name`,
+            `strategy`
+            )
+            values (
+            #{definitionID},
+            #{handlerName},
             #{strategy}
             )
     </insert>
@@ -81,9 +94,21 @@
         limit #{jobInstanceQuery.pageIndex},#{jobInstanceQuery.pageSize}
     </select>
 
+    <select id="getJavaJobDefinitionByDefId" resultMap="javaJobDefinitionMap">
+        select
+        <include refid="java_definition_column"/>
+        from JOB_CUSTOM_JOB_DEFINITION_JAVA
+        where definition_id = #{definitionID}
+    </select>
+
     <sql id="definition_column">
-         id,app_id,job_name,job_desc,job_cron,handler_name,enable,execute_strategy
+         id,app_id,job_name,job_desc,job_cron,enable,task_type
     </sql>
+
+    <sql id="java_definition_column">
+         id,definition_id,handler_name,strategy
+    </sql>
+
     <sql id="instance_column">
         id,job_definition_id,start_time,end_time,trigger_type,trigger_worker,trigger_result
     </sql>
@@ -94,9 +119,15 @@
         <result property="jobName" column="job_name"/>
         <result property="jobDesc" column="job_desc"/>
         <result property="cron" column="job_cron"/>
-        <result property="handlerName" column="handler_name"/>
         <result property="enable" column="enable"/>
-        <result property="strategy" column="execute_strategy"/>
+        <result property="taskType" column="task_type"/>
+    </resultMap>
+
+    <resultMap id="javaJobDefinitionMap" type="com.sumu.jobserver.modal.job.JavaJobDO">
+        <result property="id" column="id"/>
+        <result property="definitionID" column="definition_id"/>
+        <result property="handlerName" column="handler_name"/>
+        <result property="strategy" column="strategy"/>
     </resultMap>
 
     <resultMap id="jobInstanceMap" type="com.sumu.jobserver.modal.job.JobInstanceDO">

@@ -3,6 +3,7 @@ package com.sumu.jobserver.mapper;
 import com.sumu.jobserver.modal.app.AppDO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  * @version 1.0
  * @date 2020-12-21 20:50
  */
+@Repository
 public interface AppMapper {
 
 

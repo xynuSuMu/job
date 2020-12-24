@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.sumu.common.core.ZKConstants.THREAD_REGISTER;
+
 /**
  * @author 陈龙
  * @version 1.0
@@ -26,7 +28,7 @@ public class ThreadRegister {
 
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-    private final String PATH = "/zk/thread/pool";
+    private final String PATH = THREAD_REGISTER;
 
     public void register(String className, ThreadPoolExecutorManager threadPoolExecutorManager) {
         if (Context.getApplicationContext() != null) {

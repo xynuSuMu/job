@@ -3,6 +3,7 @@ package com.sumu.common.util.rpc.feign;
 import com.sumu.common.util.rpc.RpcAddress;
 import com.sumu.common.util.rpc.RpcResult;
 import feign.Feign;
+import feign.Request;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 
@@ -22,13 +23,16 @@ public class FeignUtil {
     static {
         builder = Feign.builder()
                 .encoder(new JacksonEncoder())//使用Jackson进行参数处理
-                .decoder(new JacksonDecoder());
+                .decoder(new JacksonDecoder())
+                .options(new Request.Options(5000, 8000))
+        ;
     }
+
 
     public static RpcResult jobNotify(RpcAddress rpcAddress, String handlerName) {
         String address = rpcAddress.getRpcAddress();
         Function<FeignRequest, RpcResult> function = (feignRequest) -> {
-            return feignRequest.fire(handlerName);
+            return feignRequest.jobNotify(handlerName);
         };
         return send(address, function);
     }
@@ -36,7 +40,13 @@ public class FeignUtil {
 
     private static RpcResult send(String address, Function<FeignRequest, RpcResult> function) {
         FeignRequest request = builder.target(FeignRequest.class, address);
-        RpcResult rpcResult = function.apply(request);
-        return rpcResult;
+        try {
+            RpcResult rpcResult = function.apply(request);
+            return rpcResult;
+        } catch (Throwable e) {
+            String msg = e.getMessage();
+            return RpcResult.fail(msg);
+        }
+
     }
 }

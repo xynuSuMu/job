@@ -6,14 +6,37 @@ package com.sumu.jobserver.api.vo.param;
  * @date 2020-12-22 19:40
  */
 public class AddJobVO {
+    //应用
     private int appId;
+    //名称
     private String jobName;
+    //任务描述
     private String jobDesc;
-    private String handlerName;
+    //任务类型 1-Java 2-Shell
+    private int taskType;
+
+    private JavaJobVO javaJobVO;
+
+
     private String cron;
+
     private Boolean enable;
-    //策略，1-默认 2-集群 3-分片
-    private int strategy;
+
+    public int getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(int taskType) {
+        this.taskType = taskType;
+    }
+
+    public JavaJobVO getJavaJobVO() {
+        return javaJobVO;
+    }
+
+    public void setJavaJobVO(JavaJobVO javaJobVO) {
+        this.javaJobVO = javaJobVO;
+    }
 
     public int getAppId() {
         return appId;
@@ -39,13 +62,6 @@ public class AddJobVO {
         this.jobDesc = jobDesc;
     }
 
-    public String getHandlerName() {
-        return handlerName;
-    }
-
-    public void setHandlerName(String handlerName) {
-        this.handlerName = handlerName;
-    }
 
     public String getCron() {
         return cron;
@@ -63,11 +79,5 @@ public class AddJobVO {
         this.enable = enable;
     }
 
-    public int getStrategy() {
-        return strategy;
-    }
 
-    public void setStrategy(int strategy) {
-        this.strategy = strategy;
-    }
 }

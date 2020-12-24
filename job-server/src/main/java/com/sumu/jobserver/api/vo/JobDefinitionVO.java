@@ -9,9 +9,9 @@ public class JobDefinitionVO {
 
     private String appName;
     private String jobName;
-    private String handlerName;
     private String cron;
     private String lastExecuteTime;
+    private int taskType;
     private Boolean enable;
 
 
@@ -31,13 +31,6 @@ public class JobDefinitionVO {
         this.jobName = jobName;
     }
 
-    public String getHandlerName() {
-        return handlerName;
-    }
-
-    public void setHandlerName(String handlerName) {
-        this.handlerName = handlerName;
-    }
 
     public String getCron() {
         return cron;
@@ -61,5 +54,13 @@ public class JobDefinitionVO {
 
     public void setEnable(Boolean enable) {
         this.enable = enable;
+    }
+
+    public int getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(int taskType) {
+        this.taskType = taskType;
     }
 }

@@ -2,6 +2,7 @@ package com.sumu.jobserver.mapper;
 
 import com.sumu.jobserver.modal.worker.WorkerDO;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ import java.util.List;
  * @version 1.0
  * @date 2020-12-21 17:12
  */
+@Repository
 public interface WorkerMapper {
 
     void registerWorker(@Param("appId") int appId,

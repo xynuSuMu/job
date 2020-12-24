@@ -11,6 +11,8 @@ import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.sumu.common.core.ZKConstants.JOB_REGISTER;
+
 /**
  * @author 陈龙
  * @version 1.0
@@ -20,14 +22,15 @@ public class JobRegister {
 
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-    private final String JOB_WORKS_DIR = "/zk/workers";
+    private final String JOB_WORKS_DIR = JOB_REGISTER;
 
     public void register() throws Exception {
         String zkAddress = Context.getJobProperties().getZkAddress();
-        CuratorFramework client = CuratorFrameworkFactory.newClient(zkAddress, new ExponentialBackoffRetry(1000, 3));
+        CuratorFramework client = CuratorFrameworkFactory
+                .newClient(zkAddress, new ExponentialBackoffRetry(1000, 3));
         client.start();
         if (client.checkExists().forPath(JOB_WORKS_DIR) == null) {
-            LOG.error("[zk for path /zk/workers is not exist]");
+            LOG.error("[zk for path /job/workers is not exist]");
         } else {
             //组册信息
             ZkDataModal zkDataModal = new ZkDataModal();

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 
+import static com.sumu.common.core.ZKConstants.JOB_REGISTER;
 import static org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type.CHILD_ADDED;
 import static org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type.CHILD_REMOVED;
 
@@ -42,17 +43,17 @@ public class ZkMonitor {
 
     private static final int ZK_MAX_RETRIES = 3;
 
-    private final String DIR = "/zk/workers";
+    private final String DIR = JOB_REGISTER;
 
     @PostConstruct
     private void initZkListener() throws Exception {
         String zkAddress = jobProperties.getZkAddress();
-        LOG.debug("[zk] zkAddress = " + zkAddress);
+        LOG.debug("[JOB] zkAddress = " + zkAddress);
         CuratorFramework client = CuratorFrameworkFactory.newClient(zkAddress,
                 new ExponentialBackoffRetry(ZK_BASE_SLEEP_TIME_MS, ZK_MAX_RETRIES));
         client.start();
 
-        LOG.info("[zk] rootDir = " + DIR);
+        LOG.info("[JOB] rootDir = " + DIR);
 
         cache = new PathChildrenCache(client, DIR, true);
         cache.start();

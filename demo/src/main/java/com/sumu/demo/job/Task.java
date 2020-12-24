@@ -16,6 +16,9 @@ public class Task extends AbstractJobHandler {
     @Override
     public <T> Result<T> execute(String s) throws Exception {
         System.out.println("My Task");
+        //测试超时
+//        Thread.sleep(9999);
+//        throw new RuntimeException("测试异常");
         return Result.success();
     }
 }

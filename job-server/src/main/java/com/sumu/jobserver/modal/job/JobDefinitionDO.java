@@ -11,11 +11,10 @@ public class JobDefinitionDO {
     private int appId;
     private String jobName;
     private String jobDesc;
-    private String handlerName;
     private String cron;
+    private int taskType;
     private Boolean enable;
-    //策略，1-默认 2-集群 3-分片
-    private int strategy;
+
 
     public int getId() {
         return id;
@@ -49,14 +48,6 @@ public class JobDefinitionDO {
         this.jobDesc = jobDesc;
     }
 
-    public String getHandlerName() {
-        return handlerName;
-    }
-
-    public void setHandlerName(String handlerName) {
-        this.handlerName = handlerName;
-    }
-
     public String getCron() {
         return cron;
     }
@@ -73,11 +64,11 @@ public class JobDefinitionDO {
         this.enable = enable;
     }
 
-    public int getStrategy() {
-        return strategy;
+    public int getTaskType() {
+        return taskType;
     }
 
-    public void setStrategy(int strategy) {
-        this.strategy = strategy;
+    public void setTaskType(int taskType) {
+        this.taskType = taskType;
     }
 }

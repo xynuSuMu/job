@@ -6,6 +6,7 @@ import com.sumu.jobserver.api.JobApi;
 import com.sumu.jobserver.api.vo.JobDefinitionVO;
 import com.sumu.jobserver.api.vo.JobInstanceVO;
 import com.sumu.jobserver.api.vo.param.AddJobVO;
+import com.sumu.jobserver.api.vo.param.JavaJobVO;
 import com.sumu.jobserver.api.vo.query.JobDefinitionQuery;
 import com.sumu.jobserver.api.vo.query.JobInstanceQuery;
 import org.junit.jupiter.api.Test;
@@ -37,23 +38,29 @@ class JobServerApplicationTests {
     void addJobTest() {
 
         int appId = 1;
-        String jobName = "测试Job的名称2";
+        String jobName = "测试Job的名称7";
         String jobDesc = "测试Job的描述";
         String handlerName = "demoTask";
-        //每五分钟执行一次
-        String cron = "0 0/5 * * * ?";
+        //每一分钟执行一次
+        String cron = "0 0/1 * * * ?";
         Boolean enable = true;
         //策略，1-默认 2-集群 3-分片
         int strategy = 1;
+        //任务类型
+        int type = 1;
+        JavaJobVO javaJobVO = new JavaJobVO();
+        javaJobVO.setHandlerName(handlerName);
+        javaJobVO.setStrategy(strategy);
 
         AddJobVO addJobVO = new AddJobVO();
         addJobVO.setAppId(appId);
         addJobVO.setJobName(jobName);
         addJobVO.setJobDesc(jobDesc);
-        addJobVO.setHandlerName(handlerName);
         addJobVO.setCron(cron);
         addJobVO.setEnable(enable);
-        addJobVO.setStrategy(strategy);
+        addJobVO.setTaskType(type);
+        addJobVO.setJavaJobVO(javaJobVO);
+
         jobApi.addJob(addJobVO);
 
     }

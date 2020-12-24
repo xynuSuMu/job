@@ -3,12 +3,14 @@ package com.sumu.jobserver.api.service;
 import com.sumu.jobserver.api.vo.JobDefinitionVO;
 import com.sumu.jobserver.api.vo.JobInstanceVO;
 import com.sumu.jobserver.api.vo.param.AddJobVO;
+import com.sumu.jobserver.api.vo.param.JavaJobVO;
 import com.sumu.jobserver.api.vo.query.JobDefinitionQuery;
 import com.sumu.jobserver.api.vo.query.JobInstanceQuery;
 import com.sumu.jobserver.core.schedule.JobSchedule;
 import com.sumu.jobserver.mapper.AppMapper;
 import com.sumu.jobserver.mapper.JobMapper;
 import com.sumu.jobserver.modal.app.AppDO;
+import com.sumu.jobserver.modal.job.JavaJobDO;
 import com.sumu.jobserver.modal.job.JobDefinitionDO;
 import com.sumu.jobserver.modal.job.JobInstanceDO;
 import org.quartz.SchedulerException;
@@ -52,7 +54,17 @@ public class JobService {
         JobDefinitionDO jobDefinitionDO = new JobDefinitionDO();
         BeanUtils.copyProperties(addJobVO, jobDefinitionDO);
         jobMapper.insertJobDefinition(jobDefinitionDO);
-        //增加到
+        //任务类型分类
+        if (addJobVO.getTaskType() == 1) {
+            JavaJobVO javaJobVO = addJobVO.getJavaJobVO();
+            JavaJobDO javaJobDO = new JavaJobDO();
+            BeanUtils.copyProperties(javaJobVO, javaJobDO);
+            javaJobDO.setDefinitionID(jobDefinitionDO.getId());
+            jobMapper.insertJavaJobDefinition(javaJobDO);
+        } else {
+
+        }
+        //增加到调度中心
         jobSchedule.addJob(String.valueOf(jobDefinitionDO.getId()),
                 appDO.getAppName(),
                 addJobVO.getCron());
@@ -69,7 +81,7 @@ public class JobService {
             JobDefinitionVO jobDefinitionVO = new JobDefinitionVO();
             jobDefinitionVO.setAppName(map.get(jobDefinitionDO.getAppId()).getAppName());
             jobDefinitionVO.setCron(jobDefinitionDO.getCron());
-            jobDefinitionVO.setHandlerName(jobDefinitionDO.getHandlerName());
+            jobDefinitionVO.setTaskType(jobDefinitionDO.getTaskType());
             jobDefinitionVO.setEnable(jobDefinitionDO.getEnable());
             jobDefinitionVO.setJobName(jobDefinitionDO.getJobName());
             res.add(jobDefinitionVO);

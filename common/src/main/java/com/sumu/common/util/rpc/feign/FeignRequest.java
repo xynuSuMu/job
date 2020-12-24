@@ -13,7 +13,7 @@ import feign.RequestLine;
 public interface FeignRequest {
 
     @RequestLine("PUT " + URLConstants.JOB_NOTIFY + "?handlerName={handlerName}")
-    RpcResult<Void> fire(@Param("handlerName") String handlerName);
+    RpcResult<Void> jobNotify(@Param("handlerName") String handlerName);
 
 
 }
