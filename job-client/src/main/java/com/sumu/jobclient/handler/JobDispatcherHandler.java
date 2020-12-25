@@ -1,7 +1,9 @@
 package com.sumu.jobclient.handler;
 
+import com.sumu.common.core.URLConstants;
 import com.sumu.common.util.rpc.RpcResult;
 import com.sumu.jobclient.modal.job.JobData;
+import com.sumu.jobclient.modal.job.JobParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +16,9 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class JobDispatcherHandler implements DispatcherHandler {
 
-    private final String HANDLER_NAME = "handlerName";
+    private final String HANDLER_NAME = URLConstants.HANDLER_NAME;
+    private final String SHARD_INDEX = URLConstants.SHARD_INDEX;
+    private final String SHARD_TOTAL = URLConstants.SHARD_TOTAL;
 
     private Logger LOG = LoggerFactory.getLogger(JobDispatcherHandler.class);
 
@@ -27,10 +31,13 @@ public class JobDispatcherHandler implements DispatcherHandler {
     @Override
     public RpcResult<?> handler(HttpServletRequest request) {
         String handlerName = request.getParameter(HANDLER_NAME);
+        String shardIndex = request.getParameter(SHARD_INDEX);
+        String shardTotal = request.getParameter(SHARD_TOTAL);
         LOG.info("[ JobDispatcherHandler ] handlerName:{}", handlerName);
         AbstractJobHandler jobHandler = jobData.getJobHandlers().get(handlerName);
         try {
-            jobHandler.execute("");
+            JobParam jobParam = new JobParam("", shardIndex, shardTotal);
+            jobHandler.execute(jobParam);
             return RpcResult.success("Success");
         } catch (Exception e) {
             e.printStackTrace();

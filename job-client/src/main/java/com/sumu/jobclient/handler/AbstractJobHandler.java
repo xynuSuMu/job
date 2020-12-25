@@ -1,6 +1,7 @@
 package com.sumu.jobclient.handler;
 
 import com.sumu.common.core.Result;
+import com.sumu.jobclient.modal.job.JobParam;
 
 /**
  * @author 陈龙
@@ -9,6 +10,14 @@ import com.sumu.common.core.Result;
  */
 public abstract class AbstractJobHandler {
 
-    public abstract <T> Result<T> execute(String var1) throws Exception;
+    public void post() {
+
+    }
+
+    public abstract <T> Result<T> execute(JobParam jobParam) throws Exception;
+
+    public void destroy() {
+
+    }
 
 }

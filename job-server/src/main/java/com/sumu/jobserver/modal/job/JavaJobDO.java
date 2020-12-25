@@ -16,6 +16,8 @@ public class JavaJobDO {
     //策略，1-默认 2-集群 3-分片
     private int strategy;
 
+    private int shardNum;
+
     public int getDefinitionID() {
         return definitionID;
     }
@@ -38,5 +40,21 @@ public class JavaJobDO {
 
     public void setHandlerName(String handlerName) {
         this.handlerName = handlerName;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getShardNum() {
+        return shardNum;
+    }
+
+    public void setShardNum(int shardNum) {
+        this.shardNum = shardNum;
     }
 }

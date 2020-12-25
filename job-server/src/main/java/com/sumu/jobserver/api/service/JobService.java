@@ -7,6 +7,8 @@ import com.sumu.jobserver.api.vo.param.JavaJobVO;
 import com.sumu.jobserver.api.vo.query.JobDefinitionQuery;
 import com.sumu.jobserver.api.vo.query.JobInstanceQuery;
 import com.sumu.jobserver.core.schedule.JobSchedule;
+import com.sumu.jobserver.enume.JavaJobInfo;
+import com.sumu.jobserver.enume.JobInfo;
 import com.sumu.jobserver.mapper.AppMapper;
 import com.sumu.jobserver.mapper.JobMapper;
 import com.sumu.jobserver.modal.app.AppDO;
@@ -55,8 +57,11 @@ public class JobService {
         BeanUtils.copyProperties(addJobVO, jobDefinitionDO);
         jobMapper.insertJobDefinition(jobDefinitionDO);
         //任务类型分类
-        if (addJobVO.getTaskType() == 1) {
+        if (addJobVO.getTaskType() == JobInfo.Type.JAVA.getCode()) {
             JavaJobVO javaJobVO = addJobVO.getJavaJobVO();
+            if (javaJobVO.getStrategy() == JavaJobInfo.Strategy.SHARD.getCode()) {
+                Assert.isTrue(javaJobVO.getStrategy() > 0, "分片数量不合法");
+            }
             JavaJobDO javaJobDO = new JavaJobDO();
             BeanUtils.copyProperties(javaJobVO, javaJobDO);
             javaJobDO.setDefinitionID(jobDefinitionDO.getId());

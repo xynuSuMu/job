@@ -35,4 +35,6 @@ public interface JobMapper {
     int insertJavaJobDefinition(JavaJobDO javaJobDO);
 
     int insertJobInstance(JobInstanceDO jobInstanceDO);
+
+    int updateJobInstance(JobInstanceDO jobInstanceDO);
 }

@@ -3,6 +3,9 @@ package com.sumu.demo.job;
 import com.sumu.common.core.Result;
 import com.sumu.jobclient.annotation.JobHandler;
 import com.sumu.jobclient.handler.AbstractJobHandler;
+import com.sumu.jobclient.modal.job.JobParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
@@ -13,9 +16,14 @@ import java.util.Date;
  */
 @JobHandler("demoTask")
 public class Task extends AbstractJobHandler {
+
+    private Logger LOG = LoggerFactory.getLogger(Task.class);
+
     @Override
-    public <T> Result<T> execute(String s) throws Exception {
-        System.out.println("My Task");
+    public <T> Result<T> execute(JobParam jobParam) throws Exception {
+
+        LOG.info("[Shard] index = {},total={}", jobParam.getShardIndex(), jobParam.getShardTotal());
+        LOG.info(" Demo Task");
         //测试超时
 //        Thread.sleep(9999);
 //        throw new RuntimeException("测试异常");

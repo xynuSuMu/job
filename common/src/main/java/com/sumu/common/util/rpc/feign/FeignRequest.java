@@ -12,8 +12,17 @@ import feign.RequestLine;
  */
 public interface FeignRequest {
 
-    @RequestLine("PUT " + URLConstants.JOB_NOTIFY + "?handlerName={handlerName}")
-    RpcResult<Void> jobNotify(@Param("handlerName") String handlerName);
+    @RequestLine("PUT " + URLConstants.JOB_NOTIFY + "?" +
+            URLConstants.HANDLER_NAME + "={handlerName}&" +
+            URLConstants.JOB_INSTANCE_ID + "={jobInstanceID}&" +
+            URLConstants.SHARD_INDEX + "={shardIndex}&" +
+            URLConstants.SHARD_TOTAL + "={shardTotal}")
+    RpcResult<Void> jobNotify(
+            @Param("handlerName") String handlerName,
+            @Param("jobInstanceID") String jobInstanceID,
+            @Param("shardIndex") String shardIndex,
+            @Param("shardTotal") String shardTotal
+    );
 
 
 }

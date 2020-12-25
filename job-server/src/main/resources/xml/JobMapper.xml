@@ -30,12 +30,14 @@
             insert into JOB_CUSTOM_JOB_DEFINITION_JAVA(
             `definition_id`,
             `handler_name`,
-            `strategy`
+            `strategy`,
+            `shard_num`
             )
             values (
             #{definitionID},
             #{handlerName},
-            #{strategy}
+            #{strategy},
+            #{shardNum}
             )
     </insert>
 
@@ -44,20 +46,22 @@
             insert into JOB_CUSTOM_JOB_INSTANCE(
             `job_definition_id`,
             `start_time`,
-            `end_time`,
-            `trigger_type`,
-            `trigger_worker`,
-            `trigger_result`
+            `trigger_type`
             )
             values (
                 #{jobDefinitionId},
                 #{startTime},
-                #{endTime},
-                #{triggerType},
-                #{triggerWorker},
-                #{triggerResult}
+                #{triggerType}
             )
     </insert>
+
+    <update id="updateJobInstance" parameterType="com.sumu.jobserver.modal.job.JobInstanceDO">
+        update JOB_CUSTOM_JOB_INSTANCE set
+         `trigger_worker` = #{triggerWorker},
+         `trigger_result` = #{triggerResult},
+          `end_time` = #{endTime}
+         where id = #{id}
+    </update>
 
     <select id="getJobDefinitionByID" resultMap="jobDefinitionMap">
         select
@@ -106,7 +110,7 @@
     </sql>
 
     <sql id="java_definition_column">
-         id,definition_id,handler_name,strategy
+         id,definition_id,handler_name,strategy,shard_num
     </sql>
 
     <sql id="instance_column">
@@ -128,6 +132,7 @@
         <result property="definitionID" column="definition_id"/>
         <result property="handlerName" column="handler_name"/>
         <result property="strategy" column="strategy"/>
+        <result property="shardNum" column="shard_num"/>
     </resultMap>
 
     <resultMap id="jobInstanceMap" type="com.sumu.jobserver.modal.job.JobInstanceDO">

@@ -4,6 +4,7 @@ import com.sumu.common.util.rpc.RpcAddress;
 import com.sumu.common.util.rpc.RpcResult;
 import com.sumu.common.util.rpc.feign.FeignUtil;
 import com.sumu.jobserver.core.schedule.AbstractJobExecutor;
+import com.sumu.jobserver.enume.JavaJobInfo;
 import com.sumu.jobserver.mapper.JobMapper;
 import com.sumu.jobserver.mapper.WorkerMapper;
 import com.sumu.jobserver.modal.job.JavaJobDO;
@@ -14,9 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author 陈龙
@@ -49,38 +50,127 @@ public class JobExecutor extends AbstractJobExecutor {
         jobInstanceDO.setJobDefinitionId(jobDefinitionId);
         jobInstanceDO.setStartTime(new Date());
         jobInstanceDO.setTriggerType(1);//1-自动 0-手动
+        jobMapper.insertJobInstance(jobInstanceDO);
+        JavaJobInfo.Strategy schedulerStrategy = JavaJobInfo.Strategy.getStrategy(strategy);
         //todo:调度
-        switch (strategy) {
-            case 1://默认
+        switch (schedulerStrategy) {
+            case DEFAULT:
                 defaultStrategy(workers, handlerName, jobInstanceDO);
                 break;
-            case 2://集群
+            case BROADCAST:
+                clusterStrategy(workers, handlerName, jobInstanceDO);
                 break;
-            case 3://分片
+            case SHARD:
+                int total = javaJobDO.getShardNum();
+                shardStrategy(total, workers, handlerName, jobInstanceDO);
                 break;
             default:
                 break;
         }
         //
         jobInstanceDO.setEndTime(new Date());
-        jobMapper.insertJobInstance(jobInstanceDO);
+        jobMapper.updateJobInstance(jobInstanceDO);
         LOG.info("执行Job,jobDefinitionId = {}", jobDefinitionId);
     }
 
     private void defaultStrategy(List<WorkerDO> workers, String handlerName, JobInstanceDO jobInstanceDO) {
         StringBuilder sb = new StringBuilder();
+        jobInstanceDO.setTriggerResult(0);
         for (WorkerDO workerDO : workers) {
             RpcAddress rpcAddress = new RpcAddress(workerDO.getIp(), workerDO.getPort());
             sb.append(rpcAddress.getRpcAddress());
             LOG.info("RpcAddress,{},handlerName,{}", rpcAddress.getRpcAddress(), handlerName);
-            RpcResult<Void> rpcResult = FeignUtil.jobNotify(rpcAddress, handlerName);
+            RpcResult<Void> rpcResult = FeignUtil.jobNotify(rpcAddress,
+                    handlerName,
+                    String.valueOf(jobInstanceDO.getId()));
             if (!rpcResult.isSuccess()) {
                 LOG.error("Error , {}", rpcResult.getMsg());
+                continue;
             }
             jobInstanceDO.setTriggerResult(rpcResult.isSuccess() ? 1 : 0);
             break;
         }
         jobInstanceDO.setTriggerWorker(sb.toString());
-
     }
+
+    private void clusterStrategy(List<WorkerDO> workers, String handlerName, JobInstanceDO jobInstanceDO) {
+        StringBuilder sb = new StringBuilder();
+        jobInstanceDO.setTriggerResult(0);
+        for (WorkerDO workerDO : workers) {
+            RpcAddress rpcAddress = new RpcAddress(workerDO.getIp(), workerDO.getPort());
+            sb.append(rpcAddress.getRpcAddress());
+            LOG.info("RpcAddress,{},handlerName,{}", rpcAddress.getRpcAddress(), handlerName);
+            RpcResult<Void> rpcResult = FeignUtil.jobNotify(rpcAddress,
+                    handlerName,
+                    String.valueOf(jobInstanceDO.getId()));
+            if (!rpcResult.isSuccess()) {
+                LOG.error("Error , {}", rpcResult.getMsg());
+            }
+            jobInstanceDO.setTriggerResult(rpcResult.isSuccess() ? 1 : 0);
+        }
+        jobInstanceDO.setTriggerWorker(sb.toString());
+    }
+
+    //分片策略
+    private void shardStrategy(int toatal, List<WorkerDO> workers, String handlerName, JobInstanceDO jobInstanceDO) {
+        //
+        Map<WorkerDO, List<Integer>> map = new HashMap<>();
+        //分片索引
+        int[] shard = new int[toatal];
+        for (int i = 0; i < toatal; ++i) {
+            shard[i] = i;
+        }
+        //对每个分片进行机器分配
+        int size = workers.size();
+        if (toatal <= size) {
+            for (int i = 0; i < size; ++i) {
+                List<Integer> list = new ArrayList<>();
+                list.add(i);
+                map.put(workers.get(i), list);
+            }
+        } else {
+            for (int i = 0; i < toatal; ++i) {
+                if (i < size) {
+                    List<Integer> list = new ArrayList<>();
+                    list.add(i);
+                    map.put(workers.get(i), list);
+                } else {
+                    int temp = i % size;
+                    map.get(workers.get(temp)).add(i);
+                }
+
+            }
+        }
+        //
+        Set<Map.Entry<WorkerDO, List<Integer>>> set = map.entrySet();
+        StringBuilder sb = new StringBuilder();
+        jobInstanceDO.setTriggerResult(1);
+        for (Map.Entry<WorkerDO, List<Integer>> entry : set) {
+            WorkerDO workerDO = entry.getKey();
+            //分片索引
+            List<Integer> shardIndex = entry.getValue();
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Integer i : shardIndex) {
+                stringBuilder.append(i + ",");
+            }
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+            RpcAddress rpcAddress = new RpcAddress(workerDO.getIp(), workerDO.getPort());
+            sb.append(rpcAddress.getRpcAddress());
+            LOG.info("RpcAddress,{},handlerName,{}", rpcAddress.getRpcAddress(), handlerName);
+            RpcResult<Void> rpcResult = FeignUtil.jobNotify(rpcAddress,
+                    handlerName,
+                    String.valueOf(jobInstanceDO.getId()),
+                    stringBuilder.toString(),
+                    String.valueOf(toatal));
+            if (!rpcResult.isSuccess()) {
+                LOG.error(" [Shard Error],address={},index ={},msg={}",
+                        rpcAddress.getRpcAddress(),
+                        stringBuilder.toString(),
+                        rpcResult.getMsg());
+                jobInstanceDO.setTriggerResult(0);
+            }
+        }
+        jobInstanceDO.setTriggerWorker(sb.toString());
+    }
+
 }

@@ -29,10 +29,14 @@ public class FeignUtil {
     }
 
 
-    public static RpcResult jobNotify(RpcAddress rpcAddress, String handlerName) {
+    public static RpcResult jobNotify(RpcAddress rpcAddress, String handlerName, String jobInstanceID) {
+        return jobNotify(rpcAddress, handlerName, jobInstanceID, null, null);
+    }
+
+    public static RpcResult jobNotify(RpcAddress rpcAddress, String handlerName, String jobInstanceID, String shardIndex, String shardTotal) {
         String address = rpcAddress.getRpcAddress();
         Function<FeignRequest, RpcResult> function = (feignRequest) -> {
-            return feignRequest.jobNotify(handlerName);
+            return feignRequest.jobNotify(handlerName, jobInstanceID, shardIndex, shardTotal);
         };
         return send(address, function);
     }

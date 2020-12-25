@@ -12,6 +12,9 @@ public class JavaJobVO {
     //策略，1-默认 2-集群 3-分片
     private int strategy;
 
+    //分片数
+    private int shardNum;
+
     public int getStrategy() {
         return strategy;
     }
@@ -26,5 +29,13 @@ public class JavaJobVO {
 
     public void setHandlerName(String handlerName) {
         this.handlerName = handlerName;
+    }
+
+    public int getShardNum() {
+        return shardNum;
+    }
+
+    public void setShardNum(int shardNum) {
+        this.shardNum = shardNum;
     }
 }
