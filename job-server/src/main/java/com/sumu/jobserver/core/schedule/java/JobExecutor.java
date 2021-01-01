@@ -122,6 +122,9 @@ public class JobExecutor extends AbstractJobExecutor {
         }
         //对每个分片进行机器分配
         int size = workers.size();
+        if (size == 0){
+            throw new RuntimeException("workers number must more than 0!");
+        }
         if (toatal <= size) {
             for (int i = 0; i < size; ++i) {
                 List<Integer> list = new ArrayList<>();

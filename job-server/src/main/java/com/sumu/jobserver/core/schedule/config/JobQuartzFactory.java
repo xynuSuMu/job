@@ -1,4 +1,4 @@
-package com.sumu.jobserver.core.schedule;
+package com.sumu.jobserver.core.schedule.config;
 
 import com.sumu.jobserver.util.SpringContextUtils;
 import org.quartz.Job;
@@ -16,7 +16,6 @@ import java.lang.reflect.Method;
  * @date 2020-12-24 18:03
  * @desc 无需实现 JobFactory，Spring对Quartz有扩展实现：AdaptableJobFactory。
  */
-@Deprecated
 public class JobQuartzFactory implements JobFactory {
 
     @Override

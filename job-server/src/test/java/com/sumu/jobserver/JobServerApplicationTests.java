@@ -38,11 +38,11 @@ class JobServerApplicationTests {
     void addJobTest() {
 
         int appId = 1;
-        String jobName = "测试Job的名称7";
+        String jobName = "测试Job的名称9";
         String jobDesc = "测试Job的描述";
         String handlerName = "demoTask";
         //每一分钟执行一次
-        String cron = "0 0/1 * * * ?";
+        String cron = "0 0/2 * * * ?";
         Boolean enable = true;
         //策略，1-默认 2-集群 3-分片
         int strategy = 1;

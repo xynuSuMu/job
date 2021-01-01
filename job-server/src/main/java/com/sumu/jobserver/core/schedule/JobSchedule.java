@@ -33,9 +33,11 @@ public class JobSchedule {
 
         CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(cronExpr)
                 .withMisfireHandlingInstructionDoNothing();
+
         CronTrigger cronTrigger = newTrigger()
                 .withIdentity(triggerKey)
-                .withSchedule(cronScheduleBuilder).build();
+                .withSchedule(cronScheduleBuilder)
+                .build();
 
         JobDetail jobDetail = JobBuilder.newJob(JobBean.class)
                 .withIdentity(jobName, jobGroup).build();
