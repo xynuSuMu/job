@@ -10,4 +10,6 @@ public class ZKConstants {
     public static final String JOB_REGISTER = "/job/workers";
 
     public static final String THREAD_REGISTER = "/job/thread/pool";
+
+    public static final String NODE_REGISTER = "/job/schedulerNode";
 }

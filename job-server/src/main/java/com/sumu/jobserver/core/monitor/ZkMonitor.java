@@ -9,6 +9,8 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 import static com.sumu.common.core.ZKConstants.JOB_REGISTER;
+import static com.sumu.common.core.ZKConstants.NODE_REGISTER;
 import static org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type.CHILD_ADDED;
 import static org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type.CHILD_REMOVED;
 
@@ -52,12 +55,16 @@ public class ZkMonitor {
         CuratorFramework client = CuratorFrameworkFactory.newClient(zkAddress,
                 new ExponentialBackoffRetry(ZK_BASE_SLEEP_TIME_MS, ZK_MAX_RETRIES));
         client.start();
-
+        //todo：临时顺序结点（待测试）
+        client.create().withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
+                .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
+                .forPath(NODE_REGISTER+"/es", "1".getBytes());
         LOG.info("[JOB] rootDir = " + DIR);
 
         cache = new PathChildrenCache(client, DIR, true);
         cache.start();
         cache.getListenable().addListener((client1, event) -> handleEvent(event));
+
     }
 
     void handleEvent(PathChildrenCacheEvent event) {
