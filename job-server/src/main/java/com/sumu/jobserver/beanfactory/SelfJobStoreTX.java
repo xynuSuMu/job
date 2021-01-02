@@ -115,7 +115,6 @@ public class SelfJobStoreTX extends JobStoreCMT {
             Set<JobKey> acquiredJobKeysForNoConcurrentExec = new HashSet();
             int currentLoopCount = 0;
             while (true) {
-                this.getLog().info("执行自定义acquireNextTrigger2");
                 ++currentLoopCount;
                 try {
                     List<TriggerKey> keys = this.getDelegate().selectTriggerToAcquire(conn, noLaterThan + timeWindow, this.getMisfireTime(), maxCount);
@@ -126,7 +125,7 @@ public class SelfJobStoreTX extends JobStoreCMT {
                             TriggerKey triggerKey = (TriggerKey) i$.next();
                             //计算hash
                             int hash = triggerKey.getName().hashCode() % all;
-                            this.getLog().info(triggerKey.getName() + "---" + triggerKey.getGroup()+"--"+hash);
+                            this.getLog().info("Name = " + triggerKey.getName() + "---Group=" + triggerKey.getGroup() + "--Hash=" + hash);
 
                             if (hash == c) {
                                 this.getLog().info("归属本机执行");
@@ -187,7 +186,7 @@ public class SelfJobStoreTX extends JobStoreCMT {
                 if (acquiredTriggers.size() == 0 && currentLoopCount < 3) {
                     continue;
                 }
-                this.getLog().info("执行自定义acquireNextTrigger3");
+                this.getLog().info("执行自定义acquireNextTriggerEnd,currentLoopCount=" + currentLoopCount);
                 return acquiredTriggers;
             }
         }

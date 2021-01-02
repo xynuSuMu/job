@@ -55,6 +55,11 @@
             )
     </insert>
 
+    <update id="updateJobDefinitionState">
+        UPDATE JOB_CUSTOM_JOB_DEFINITION set enable = #{state}
+        where id = #{id}
+    </update>
+
     <update id="updateJobInstance" parameterType="com.sumu.jobserver.modal.job.JobInstanceDO">
         update JOB_CUSTOM_JOB_INSTANCE set
          `trigger_worker` = #{triggerWorker},

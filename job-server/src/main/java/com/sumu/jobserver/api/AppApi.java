@@ -4,9 +4,7 @@ import com.sumu.common.core.Result;
 import com.sumu.jobserver.api.service.AppService;
 import com.sumu.jobserver.api.vo.AppVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,12 +15,13 @@ import java.util.List;
  */
 @RestController()
 @RequestMapping("app/")
+@CrossOrigin
 public class AppApi {
 
     @Autowired
     private AppService appService;
 
-    @RequestMapping("getAppList")
+    @GetMapping(value = "getAppList")
     @ResponseBody
     public Result<List<AppVO>> getAppList() {
 

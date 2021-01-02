@@ -7,6 +7,7 @@ package com.sumu.jobserver.api.vo;
  */
 public class JobDefinitionVO {
 
+    private int id;
     private String appName;
     private String jobName;
     private String cron;
@@ -14,6 +15,13 @@ public class JobDefinitionVO {
     private int taskType;
     private Boolean enable;
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getAppName() {
         return appName;

@@ -46,6 +46,18 @@ public class JobSchedule {
         LOG.info("add Job: jobDetail:{}, cronTrigger:{}, date:{}", jobDetail, cronTrigger, date);
     }
 
+    public void pause(String jobName, String jobGroup) throws SchedulerException {
+
+        TriggerKey triggerKey = TriggerKey.triggerKey(jobName, jobGroup);
+
+        boolean exists = scheduler.checkExists(triggerKey);
+
+        if (!exists) {
+            throw new JobExistException("quartz job not¬ exists! triggerKey = " + triggerKey);
+        }
+        scheduler.unscheduleJob(triggerKey);
+    }
+
     private void sureJobNotExist(TriggerKey triggerKey) throws SchedulerException {
         boolean exists = scheduler.checkExists(triggerKey);
         if (exists) {

@@ -34,6 +34,8 @@ public interface JobMapper {
 
     int insertJavaJobDefinition(JavaJobDO javaJobDO);
 
+    int updateJobDefinitionState(@Param("id") int id, @Param("state") boolean state);
+
     int insertJobInstance(JobInstanceDO jobInstanceDO);
 
     int updateJobInstance(JobInstanceDO jobInstanceDO);

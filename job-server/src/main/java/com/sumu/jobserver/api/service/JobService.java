@@ -75,6 +75,27 @@ public class JobService {
                 addJobVO.getCron());
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public void pause(int id) throws SchedulerException {
+        JobDefinitionDO jobDefinitionDO = jobMapper.getJobDefinitionByID(String.valueOf(id));
+        Assert.isTrue(jobDefinitionDO != null, "当前任务不存在");
+        AppDO appDO = appMapper.getAppById(jobDefinitionDO.getAppId());
+        jobMapper.updateJobDefinitionState(id, false);
+        jobSchedule.pause(String.valueOf(jobDefinitionDO.getId()), appDO.getAppName());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void resume(int id) throws SchedulerException {
+        JobDefinitionDO jobDefinitionDO = jobMapper.getJobDefinitionByID(String.valueOf(id));
+        Assert.isTrue(jobDefinitionDO != null, "当前任务不存在");
+        AppDO appDO = appMapper.getAppById(jobDefinitionDO.getAppId());
+        jobMapper.updateJobDefinitionState(id, true);
+        //增加到调度中心
+        jobSchedule.addJob(String.valueOf(jobDefinitionDO.getId()),
+                appDO.getAppName(),
+                jobDefinitionDO.getCron());
+    }
+
     public List<JobDefinitionVO> jobDefinitionList(JobDefinitionQuery jobDefinitionQuery) {
         jobDefinitionQuery.setPageIndex((jobDefinitionQuery.getPageIndex() - 1) * jobDefinitionQuery.getPageSize());
 
@@ -84,6 +105,7 @@ public class JobService {
         List<JobDefinitionVO> res = new ArrayList<>();
         list.stream().forEach(jobDefinitionDO -> {
             JobDefinitionVO jobDefinitionVO = new JobDefinitionVO();
+            jobDefinitionVO.setId(jobDefinitionDO.getId());
             jobDefinitionVO.setAppName(map.get(jobDefinitionDO.getAppId()).getAppName());
             jobDefinitionVO.setCron(jobDefinitionDO.getCron());
             jobDefinitionVO.setTaskType(jobDefinitionDO.getTaskType());
