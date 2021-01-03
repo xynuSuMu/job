@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,9 +71,27 @@ public class JobService {
 
         }
         //增加到调度中心
-        jobSchedule.addJob(String.valueOf(jobDefinitionDO.getId()),
-                appDO.getAppName(),
-                addJobVO.getCron());
+        if (addJobVO.getEnable()) {
+            jobSchedule.addJob(String.valueOf(jobDefinitionDO.getId()),
+                    appDO.getAppName(),
+                    addJobVO.getCron());
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void editJob(AddJobVO addJobVO) throws SchedulerException {
+        //
+        Assert.isTrue(addJobVO.getId() != 0, "JobDefinitionId不合法");
+        //
+        JobDefinitionDO jobDefinitionDO = jobMapper.getJobDefinitionByID(String.valueOf(addJobVO.getId()));
+        //
+        Assert.isTrue(jobDefinitionDO != null, "JobDefinitionId不存在");
+        //删除
+        jobMapper.removeJobDefinition(jobDefinitionDO.getId());
+        AppDO appDO = appMapper.getAppById(jobDefinitionDO.getAppId());
+        jobSchedule.removeIfExist(String.valueOf(jobDefinitionDO.getId()), appDO.getAppName());
+        //新增
+        addJob(addJobVO);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -81,7 +100,7 @@ public class JobService {
         Assert.isTrue(jobDefinitionDO != null, "当前任务不存在");
         AppDO appDO = appMapper.getAppById(jobDefinitionDO.getAppId());
         jobMapper.updateJobDefinitionState(id, false);
-        jobSchedule.pause(String.valueOf(jobDefinitionDO.getId()), appDO.getAppName());
+        jobSchedule.removeIfExist(String.valueOf(jobDefinitionDO.getId()), appDO.getAppName());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -101,7 +120,15 @@ public class JobService {
 
         List<JobDefinitionDO> list = jobMapper.jobDefinitionList(jobDefinitionQuery);
 
+        if (list == null || list.size() == 0)
+            return new ArrayList<>();
+
+//        List<Integer> definitionIds = list.stream().map(jobDefinitionDO -> jobDefinitionDO.getId()).collect(Collectors.toList());
+        //APP Info
         Map<Integer, AppDO> map = appMapper.getApps().stream().collect(Collectors.toMap(AppDO::getId, Function.identity()));
+        //
+//        Map<Integer, JavaJobDO> javaJobDOS = jobMapper.getJavaJobDefinitionByDefIds(definitionIds).stream()
+//                .collect((Collectors.toMap(JavaJobDO::getDefinitionID, Function.identity())));
         List<JobDefinitionVO> res = new ArrayList<>();
         list.stream().forEach(jobDefinitionDO -> {
             JobDefinitionVO jobDefinitionVO = new JobDefinitionVO();
@@ -111,9 +138,44 @@ public class JobService {
             jobDefinitionVO.setTaskType(jobDefinitionDO.getTaskType());
             jobDefinitionVO.setEnable(jobDefinitionDO.getEnable());
             jobDefinitionVO.setJobName(jobDefinitionDO.getJobName());
+            JavaJobVO javaJobVO = new JavaJobVO();
+//            if (jobDefinitionDO.getTaskType() == 1 && javaJobDOS.containsKey(jobDefinitionDO.getId())) {
+//                BeanUtils.copyProperties(javaJobDOS.get(jobDefinitionDO.getId()), javaJobVO);
+//                jobDefinitionVO.setJavaJobVO(javaJobVO);
+//            }
             res.add(jobDefinitionVO);
         });
         return res;
+    }
+
+    public JobDefinitionVO jobDefinitionDetail(int id) {
+
+        JobDefinitionDO jobDefinitionDO = jobMapper.getJobDefinitionByID(String.valueOf(id));
+
+        //APP Info
+        Map<Integer, AppDO> map = appMapper.getApps().stream().collect(Collectors.toMap(AppDO::getId, Function.identity()));
+        //
+        JavaJobDO javaJobDO = jobMapper.getJavaJobDefinitionByDefId(id);
+
+
+        JobDefinitionVO jobDefinitionVO = new JobDefinitionVO();
+        jobDefinitionVO.setId(jobDefinitionDO.getId());
+        if (map.containsKey(jobDefinitionDO.getAppId())) {
+            jobDefinitionVO.setAppName(map.get(jobDefinitionDO.getAppId()).getAppName());
+            jobDefinitionVO.setAppId(map.get(jobDefinitionDO.getAppId()).getId());
+        }
+        jobDefinitionVO.setCron(jobDefinitionDO.getCron());
+        jobDefinitionVO.setTaskType(jobDefinitionDO.getTaskType());
+        jobDefinitionVO.setEnable(jobDefinitionDO.getEnable());
+        jobDefinitionVO.setJobName(jobDefinitionDO.getJobName());
+        jobDefinitionVO.setJobDesc(jobDefinitionDO.getJobDesc());
+        if (jobDefinitionDO.getTaskType() == 1) {
+            JavaJobVO javaJobVO = new JavaJobVO();
+            BeanUtils.copyProperties(javaJobDO, javaJobVO);
+            jobDefinitionVO.setJavaJobVO(javaJobVO);
+        }
+
+        return jobDefinitionVO;
     }
 
     public List<JobInstanceVO> jobInstanceList(JobInstanceQuery jobInstanceQuery) {
@@ -122,11 +184,12 @@ public class JobService {
         List<JobInstanceDO> list = jobMapper.jobInstanceList(jobInstanceQuery);
 
         List<JobInstanceVO> res = new ArrayList<>();
-
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         list.stream().forEach(jobInstanceDO -> {
             JobInstanceVO jobInstanceVO = new JobInstanceVO();
-            jobInstanceVO.setStartTime(jobInstanceDO.getStartTime());
-            jobInstanceVO.setEndTime(jobInstanceDO.getEndTime());
+            jobInstanceVO.setId(jobInstanceDO.getId());
+            jobInstanceVO.setStartTime(jobInstanceDO.getStartTime() != null ? format.format(jobInstanceDO.getStartTime()) : "");
+            jobInstanceVO.setEndTime(jobInstanceDO.getEndTime() != null ? format.format(jobInstanceDO.getEndTime()) : "");
             jobInstanceVO.setTriggerResult(jobInstanceDO.getTriggerResult());
             jobInstanceVO.setTriggerWorker(jobInstanceDO.getTriggerWorker());
             jobInstanceVO.setTriggerType(jobInstanceDO.getTriggerType());

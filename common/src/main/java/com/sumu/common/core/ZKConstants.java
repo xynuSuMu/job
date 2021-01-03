@@ -11,5 +11,5 @@ public class ZKConstants {
 
     public static final String THREAD_REGISTER = "/job/thread/pool";
 
-    public static final String NODE_REGISTER = "/job/schedulerNode";
+    public static final String NODE_REGISTER = "/job/schedulerNode/es";
 }

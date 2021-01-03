@@ -26,6 +26,8 @@ public interface JobMapper {
 
     JavaJobDO getJavaJobDefinitionByDefId(@Param("definitionID") int definitionID);
 
+    List<JavaJobDO> getJavaJobDefinitionByDefIds(@Param("definitionIDs") List<Integer> definitionIDs);
+
     List<JobDefinitionDO> jobDefinitionList(@Param("jobDefinitionQuery") JobDefinitionQuery jobDefinitionQuery);
 
     List<JobInstanceDO> jobInstanceList(@Param("jobInstanceQuery") JobInstanceQuery jobInstanceQuery);
@@ -35,6 +37,8 @@ public interface JobMapper {
     int insertJavaJobDefinition(JavaJobDO javaJobDO);
 
     int updateJobDefinitionState(@Param("id") int id, @Param("state") boolean state);
+
+    int removeJobDefinition(@Param("id") int id);
 
     int insertJobInstance(JobInstanceDO jobInstanceDO);
 

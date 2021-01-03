@@ -71,17 +71,16 @@ public class ThreadRegister {
                 new ExponentialBackoffRetry(1000, 3));
         client.start();
         if (client.checkExists().forPath(PATH) == null) {
-            //todo
             LOG.info("[ " + PATH + " Not Exist]");
-        } else {
-            String ph = getChildrenNode(threadRegisterModal);
-            if (client.checkExists().forPath(ph) != null)
-                client.delete().forPath(ph);
-            client.create().withMode(CreateMode.EPHEMERAL)
-                    .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-                    .forPath(getChildrenNode(threadRegisterModal),
-                            JSONObject.toJSONBytes(threadRegisterModal));
+            client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(PATH);
         }
+        String ph = getChildrenNode(threadRegisterModal);
+        if (client.checkExists().forPath(ph) != null)
+            client.delete().forPath(ph);
+        client.create().withMode(CreateMode.EPHEMERAL)
+                .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
+                .forPath(getChildrenNode(threadRegisterModal),
+                        JSONObject.toJSONBytes(threadRegisterModal));
     }
 
 

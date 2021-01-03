@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>任务调度系统</title>
-    <link href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <title>任务调度系统-任务列表</title>
+    <link href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
     <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
     <script type="text/javascript">
-        var url = "http://127.0.0.1:8089/"
+        var id = 0;
+        var url = "/"
         $.ajax({
             url: url + "app/getAppList",
             type: 'get',
@@ -44,10 +45,10 @@
                         "      <td>" + (obj.enable ? '启动' : '暂停') + "</td>\n" +
                         "      <td>" + (obj.taskType == 1 ? 'Java' : '其他') + "</td>\n" +
                         '      <td>' +
-//                        '     <button type="button" class="btn btn-default">编辑</button>' +
+                        '     <button type="button" class="btn btn-default" onclick="editJob(' + obj.id + ')">编辑</button>' +
                         '         ' + (obj.enable ? '<button type="button" class="btn btn-danger" onclick="pauseJob(' + obj.id + ')">暂停</button>'
                             : '<button type="button" class="btn btn-success" onclick="resumeJob(' + obj.id + ')">启动</button>') +
-//                        '          <button type="button" class="btn btn-primary">执行记录</button>' +
+                        '          <button type="button" class="btn btn-primary"  onclick="jumpInstance(' + obj.id + ')">执行记录</button>' +
                         '      </td>' +
                         "    </tr>"
                 }
@@ -69,14 +70,14 @@
     </div>
     <div align="right" style="margin: 0 60px;">
         <div class="navbar-form navbar-left" role="search" style="width: 100%;">
-            <div class="form-group">
-                <input type="text" class="form-control" placeholder="应用">
-            </div>
-            <div class="form-group">
-                <input type="text" class="form-control" placeholder="类型">
-            </div>
-            <button type="submit" class="btn btn-default">搜索</button>
-            <button class="btn btn-info" data-toggle="modal" data-target="#myModal">新建任务</button>
+            <!--<div class="form-group">-->
+                <!--<input type="text" class="form-control" placeholder="应用">-->
+            <!--</div>-->
+            <!--<div class="form-group">-->
+                <!--<input type="text" class="form-control" placeholder="类型">-->
+            <!--</div>-->
+            <!--<button type="submit" class="btn btn-default">搜索</button>-->
+            <button class="btn btn-info" onclick="addJob()">新建任务</button>
 
         </div>
     </div>
@@ -165,6 +166,11 @@
 
 </body>
 <script type="text/javascript">
+    function addJob() {
+        id = 0;
+        $('#myModal').modal('show');
+    }
+
     function submit() {
         var appId = $("#appSelect").val();
         if (!appId) {
@@ -209,6 +215,7 @@
             "shardNum": jobShard,
         };
         var addJobVO = {
+            "id": id,
             "appId": appId,
             "jobName": jobName,
             "jobDesc": jobDesc,
@@ -217,21 +224,68 @@
             "cron": jobCron,
             "enable": jobState == 1,
         };
+        if (id == 0) {
+            $.ajax({
+                url: url + "job/add",
+                type: 'post',
+                dataType: 'json',
+                data: JSON.stringify(addJobVO),
+                cache: false,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                success: function (res) {
+                    console.log(res)
+                    if (res.success)
+                        $('#myModal').modal('hide');
+                    else
+                        alert(res.msg)
+                }
+            })
+        } else {
+            $.ajax({
+                url: url + "job/edit",
+                type: 'post',
+                dataType: 'json',
+                data: JSON.stringify(addJobVO),
+                cache: false,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                success: function (res) {
+                    console.log(res)
+                    if (res.success)
+                        $('#myModal').modal('hide');
+                    else
+                        alert(res.msg)
+                }
+            })
+        }
+    }
+
+    function editJob(definitionId) {
+        id = definitionId
         $.ajax({
-            url: url + "job/add",
-            type: 'post',
-            dataType: 'json',
-            data: JSON.stringify(addJobVO),
-            cache: false,
+            url: url + "job/definition/detail/" + id,
+            type: 'get',
             headers: {
                 'Content-Type': 'application/json'
             },
             success: function (res) {
-                console.log(res)
-                if (res.success)
-                    $('#myModal').modal('hide');
-                else
-                    alert(res.msg)
+                var obj = res.data;
+                $("#appSelect").val(obj.appId);
+                $("#jobName").val(obj.jobName);
+                $("#jobDesc").val(obj.jobDesc);
+                $("#jobCron").val(obj.cron);
+                if (obj.enable) {
+                    $('input[name=jobState]').get(0).checked = true;
+                } else {
+                    $('input[name=jobState]').get(1).checked = true;
+                }
+                $("#handlerName").val(obj.javaJobVO.handlerName);
+                $("#jobShard").val(obj.javaJobVO.shardNum);
+                $("#jobStrategy").val(obj.javaJobVO.strategy);
+                $('#myModal').modal('show');
             }
         })
     }
@@ -260,6 +314,10 @@
                 console.log(res)
             }
         })
+    }
+
+    function jumpInstance(id) {
+        window.open("job-instance.html?definitionID=" + id)
     }
 </script>
 </html>

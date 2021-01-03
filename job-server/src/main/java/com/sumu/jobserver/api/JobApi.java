@@ -31,10 +31,21 @@ public class JobApi {
     public Result<String> addJob(@RequestBody AddJobVO addJobVO) {
         try {
             jobService.addJob(addJobVO);
-            return Result.success("Success");
+            return Result.success("addJob Success");
         } catch (Exception e) {
             e.printStackTrace();
-            return Result.fail("Fail:" + e.getMessage());
+            return Result.fail("addJob Fail:" + e.getMessage());
+        }
+    }
+
+    @PostMapping("edit")
+    public Result<String> editJob(@RequestBody AddJobVO addJobVO) {
+        try {
+            jobService.editJob(addJobVO);
+            return Result.success("editJob Success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.fail("editJob Fail:" + e.getMessage());
         }
     }
 
@@ -45,7 +56,7 @@ public class JobApi {
             return Result.success("Pause Success");
         } catch (Exception e) {
             e.printStackTrace();
-            return Result.fail("Fail:" + e.getMessage());
+            return Result.fail("Pause Fail:" + e.getMessage());
         }
     }
 
@@ -53,7 +64,7 @@ public class JobApi {
     public Result<String> resume(@PathVariable int id) {
         try {
             jobService.resume(id);
-            return Result.success("resume Success");
+            return Result.success("Resume Success");
         } catch (Exception e) {
             e.printStackTrace();
             return Result.fail("Resume Fail:" + e.getMessage());
@@ -65,6 +76,13 @@ public class JobApi {
     @ResponseBody
     public Result<List<JobDefinitionVO>> jobDefinitionList(@RequestBody JobDefinitionQuery jobDefinitionQuery) {
         return Result.success(jobService.jobDefinitionList(jobDefinitionQuery));
+    }
+
+
+    @GetMapping(value = "definition/detail/{id}")
+    @ResponseBody
+    public Result<JobDefinitionVO> jobDefinitionDetail(@PathVariable int id ) {
+        return Result.success(jobService.jobDefinitionDetail(id));
     }
 
     @PostMapping("instance/list")

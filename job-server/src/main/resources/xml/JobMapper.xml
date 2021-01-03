@@ -59,6 +59,9 @@
         UPDATE JOB_CUSTOM_JOB_DEFINITION set enable = #{state}
         where id = #{id}
     </update>
+    <update id="removeJobDefinition">
+        DELETE from JOB_CUSTOM_JOB_DEFINITION where id = #{id}
+    </update>
 
     <update id="updateJobInstance" parameterType="com.sumu.jobserver.modal.job.JobInstanceDO">
         update JOB_CUSTOM_JOB_INSTANCE set
@@ -100,6 +103,7 @@
         where
 
         job_definition_id = #{jobInstanceQuery.jonDefinitionID}
+        order by id desc
         limit #{jobInstanceQuery.pageIndex},#{jobInstanceQuery.pageSize}
     </select>
 
@@ -108,6 +112,17 @@
         <include refid="java_definition_column"/>
         from JOB_CUSTOM_JOB_DEFINITION_JAVA
         where definition_id = #{definitionID}
+    </select>
+
+    <select id="getJavaJobDefinitionByDefIds" resultMap="javaJobDefinitionMap">
+        select
+        <include refid="java_definition_column"/>
+        from JOB_CUSTOM_JOB_DEFINITION_JAVA
+        where definition_id in (
+        <foreach collection="definitionIDs" item="item" separator=",">
+            #{item}
+        </foreach>
+        )
     </select>
 
     <sql id="definition_column">

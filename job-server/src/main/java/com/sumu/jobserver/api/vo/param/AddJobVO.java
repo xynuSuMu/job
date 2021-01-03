@@ -6,6 +6,7 @@ package com.sumu.jobserver.api.vo.param;
  * @date 2020-12-22 19:40
  */
 public class AddJobVO {
+    private int id ;
     //应用
     private int appId;
     //名称
@@ -21,6 +22,14 @@ public class AddJobVO {
     private String cron;
 
     private Boolean enable;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public int getTaskType() {
         return taskType;

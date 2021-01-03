@@ -1,5 +1,7 @@
 package com.sumu.jobserver.api.vo;
 
+import com.sumu.jobserver.api.vo.param.JavaJobVO;
+
 /**
  * @author 陈龙
  * @version 1.0
@@ -9,11 +11,39 @@ public class JobDefinitionVO {
 
     private int id;
     private String appName;
+    private int appId;
     private String jobName;
+    private String jobDesc;
     private String cron;
     private String lastExecuteTime;
     private int taskType;
     private Boolean enable;
+
+    private JavaJobVO javaJobVO;
+
+    public JavaJobVO getJavaJobVO() {
+        return javaJobVO;
+    }
+
+    public void setJavaJobVO(JavaJobVO javaJobVO) {
+        this.javaJobVO = javaJobVO;
+    }
+
+    public int getAppId() {
+        return appId;
+    }
+
+    public void setAppId(int appId) {
+        this.appId = appId;
+    }
+
+    public String getJobDesc() {
+        return jobDesc;
+    }
+
+    public void setJobDesc(String jobDesc) {
+        this.jobDesc = jobDesc;
+    }
 
     public int getId() {
         return id;

@@ -15,10 +15,14 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("manager/")
 public class JobController {
 
-    @RequestMapping("jobList")
-    public String jobList(HttpServletRequest request,
-                        @RequestParam(value = "name", required = false, defaultValue = "springboot-thymeleaf") String name) {
-        request.setAttribute("name", name);
+    @RequestMapping("jobList.html")
+    public String jobList() {
+
         return "job.html";
+    }
+
+    @RequestMapping("job-instance.html")
+    public String jobInstanceList() {
+        return "job-instance.html";
     }
 }

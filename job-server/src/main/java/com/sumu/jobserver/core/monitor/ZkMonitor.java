@@ -1,6 +1,7 @@
 package com.sumu.jobserver.core.monitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sumu.jobserver.context.JobApplicationContext;
 import com.sumu.jobserver.mapper.AppMapper;
 import com.sumu.jobserver.modal.zk.ZkDataModal;
 import com.sumu.jobserver.properties.JobProperties;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import static com.sumu.common.core.ZKConstants.JOB_REGISTER;
 import static com.sumu.common.core.ZKConstants.NODE_REGISTER;
@@ -55,10 +58,13 @@ public class ZkMonitor {
         CuratorFramework client = CuratorFrameworkFactory.newClient(zkAddress,
                 new ExponentialBackoffRetry(ZK_BASE_SLEEP_TIME_MS, ZK_MAX_RETRIES));
         client.start();
-        //todo：临时顺序结点（待测试）
+        JobApplicationContext.setClient(client);
+        if (client.checkExists().forPath(NODE_REGISTER) == null) {
+            client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(NODE_REGISTER);
+        }
         client.create().withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
                 .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-                .forPath(NODE_REGISTER+"/es", "1".getBytes());
+                .forPath(NODE_REGISTER + "/_", JobApplicationContext.getIP().getBytes());
         LOG.info("[JOB] rootDir = " + DIR);
 
         cache = new PathChildrenCache(client, DIR, true);
@@ -66,6 +72,8 @@ public class ZkMonitor {
         cache.getListenable().addListener((client1, event) -> handleEvent(event));
 
     }
+
+
 
     void handleEvent(PathChildrenCacheEvent event) {
         try {

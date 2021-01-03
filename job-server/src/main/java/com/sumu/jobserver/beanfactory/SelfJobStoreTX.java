@@ -1,5 +1,8 @@
 package com.sumu.jobserver.beanfactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sumu.jobserver.context.JobApplicationContext;
+import com.sumu.jobserver.modal.zk.ZkDataModal;
 import org.quartz.*;
 import org.quartz.impl.jdbcjobstore.JobStoreCMT;
 import org.quartz.impl.jdbcjobstore.SimpleSemaphore;
@@ -19,6 +22,8 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.*;
+
+import static com.sumu.common.core.ZKConstants.NODE_REGISTER;
 
 /**
  * @author 陈龙
@@ -77,7 +82,7 @@ public class SelfJobStoreTX extends JobStoreCMT {
                     this.setUseDBLocks(false);
                     this.setLockHandler(new SimpleSemaphore());
                 }
-            } catch (MetaDataAccessException var6) {
+            } catch (MetaDataAccessException e) {
                 this.logWarnIfNonZero(1, "Could not detect database type. Assuming locks can be taken.");
             }
 
@@ -91,23 +96,44 @@ public class SelfJobStoreTX extends JobStoreCMT {
 
     @Override
     public List<OperableTrigger> acquireNextTriggers(long noLaterThan, int maxCount, long timeWindow) throws JobPersistenceException {
-        //TODO:需要重写的地方，保证集群机器不会闲置
-
-        //分布式锁
-
-
+        //todo：分布式锁
         return super.acquireNextTriggers(noLaterThan, maxCount, timeWindow);
     }
 
     @Override
     protected List<OperableTrigger> acquireNextTrigger(Connection conn, long noLaterThan, int maxCount, long timeWindow) throws JobPersistenceException {
-
-        //总机器数量
-        int all = 10;
-
+        List<String> list = null;
+        try {
+            list = JobApplicationContext.getClient().getChildren().forPath(NODE_REGISTER);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (list == null || list.size() == 0) {
+            return new ArrayList();
+        }
+        String currentNodeIP;
+        String path;
         //获取当前机器编号
-        int c = 5;
-        this.getLog().info("执行自定义acquireNextTrigger");
+        int c = 0;
+        for (String nodeName : list) {
+            currentNodeIP = JobApplicationContext.getIP();
+            path = NODE_REGISTER + "/" + nodeName;
+            try {
+                byte[] data = JobApplicationContext.getClient().getData().forPath(path);
+                String value = new String(data);
+                c++;
+                if (currentNodeIP.equals(value)) {
+                    break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (c == 0) {
+            return new ArrayList<>();
+        }
+        //总机器数量
+        int all = list.size();
         if (timeWindow < 0L) {
             throw new IllegalArgumentException();
         } else {
@@ -117,7 +143,11 @@ public class SelfJobStoreTX extends JobStoreCMT {
             while (true) {
                 ++currentLoopCount;
                 try {
-                    List<TriggerKey> keys = this.getDelegate().selectTriggerToAcquire(conn, noLaterThan + timeWindow, this.getMisfireTime(), maxCount);
+                    //获取noLaterThan + timeWindow范围内的Trigger
+                    List<TriggerKey> keys = this.getDelegate().selectTriggerToAcquire(conn,
+                            noLaterThan + timeWindow,
+                            this.getMisfireTime(),
+                            maxCount);
                     if (keys != null && keys.size() != 0) {
                         long batchEnd = noLaterThan;
                         Iterator i$ = keys.iterator();
@@ -126,23 +156,20 @@ public class SelfJobStoreTX extends JobStoreCMT {
                             //计算hash
                             int hash = triggerKey.getName().hashCode() % all;
                             this.getLog().info("Name = " + triggerKey.getName() + "---Group=" + triggerKey.getGroup() + "--Hash=" + hash);
-
-                            if (hash == c) {
-                                this.getLog().info("归属本机执行");
+                            if (all == 1 || hash == c) {
                                 OperableTrigger nextTrigger = this.retrieveTrigger(conn, triggerKey);
                                 if (nextTrigger != null) {
                                     JobKey jobKey = nextTrigger.getJobKey();
                                     JobDetail job;
                                     try {
                                         job = this.retrieveJob(conn, jobKey);
-                                    } catch (JobPersistenceException var22) {
-                                        JobPersistenceException jpe = var22;
-
+                                    } catch (JobPersistenceException e) {
+                                        JobPersistenceException jpe = e;
                                         try {
                                             this.getLog().error("Error retrieving job, setting trigger state to ERROR.", jpe);
                                             this.getDelegate().updateTriggerState(conn, triggerKey, "ERROR");
-                                        } catch (SQLException var21) {
-                                            this.getLog().error("Unable to set trigger state to ERROR.", var21);
+                                        } catch (SQLException e1) {
+                                            this.getLog().error("Unable to set trigger state to ERROR.", e1);
                                         }
                                         continue;
                                     }
@@ -186,7 +213,6 @@ public class SelfJobStoreTX extends JobStoreCMT {
                 if (acquiredTriggers.size() == 0 && currentLoopCount < 3) {
                     continue;
                 }
-                this.getLog().info("执行自定义acquireNextTriggerEnd,currentLoopCount=" + currentLoopCount);
                 return acquiredTriggers;
             }
         }
