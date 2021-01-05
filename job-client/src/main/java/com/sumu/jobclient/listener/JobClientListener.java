@@ -15,28 +15,22 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class JobClientListener implements SpringApplicationRunListener {
 
-
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
-
 
     private SpringApplication springApplication;
 
     private String[] args;
 
 
-    private ThreadRegister threadRegister;
-
-
+    //实现SpringApplicationRunListener构造器必须要该参数
     public JobClientListener(SpringApplication springApplication, String[] args) {
         this.args = args;
         this.springApplication = springApplication;
-        threadRegister = new ThreadRegister();
+
     }
 
     @Override
     public void started(ConfigurableApplicationContext context) {
-        LOG.info("[Job Client] Register ThreadPool");
-        threadRegister.register();
-        LOG.info("[Job Client] Register ThreadPool finish ");
+
     }
 }

@@ -1,8 +1,7 @@
-package com.sumu.jobserver.beanfactory;
+package com.sumu.jobserver.store;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.sumu.jobserver.context.JobApplicationContext;
-import com.sumu.jobserver.modal.zk.ZkDataModal;
 import org.quartz.*;
 import org.quartz.impl.jdbcjobstore.JobStoreCMT;
 import org.quartz.impl.jdbcjobstore.SimpleSemaphore;

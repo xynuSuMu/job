@@ -2,9 +2,11 @@ package com.sumu.jobstarter.config;
 
 
 import com.sumu.jobclient.JobManager;
+import com.sumu.jobclient.custom.JobHandlerCustomizer;
 import com.sumu.jobclient.handler.AbstractJobHandler;
 import com.sumu.jobclient.properties.AppProperties;
 import com.sumu.jobclient.properties.JobProperties;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -33,8 +35,8 @@ public class JobConfiguration {
             destroyMethod = "destroy"
     )
     @ConditionalOnMissingBean({JobManager.class})
-    public JobManager jobManager(JobProperties jobProperties, AppProperties appProperties) {
-        return new JobManager(jobProperties, appProperties);
+    public JobManager jobManager(JobProperties jobProperties, AppProperties appProperties, ObjectProvider<JobHandlerCustomizer> jobHandlerCustomizers) {
+        return new JobManager(jobProperties, appProperties, jobHandlerCustomizers);
     }
 
 }

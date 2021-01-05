@@ -35,6 +35,7 @@ public class JobDispatcherHandler implements DispatcherHandler {
         String shardTotal = request.getParameter(SHARD_TOTAL);
         LOG.info("[ JobDispatcherHandler ] handlerName:{}", handlerName);
         AbstractJobHandler jobHandler = jobData.getJobHandlers().get(handlerName);
+        jobHandler.post();
         try {
             JobParam jobParam = new JobParam("", shardIndex, shardTotal);
             jobHandler.execute(jobParam);
@@ -43,6 +44,8 @@ public class JobDispatcherHandler implements DispatcherHandler {
             e.printStackTrace();
             LOG.error("[Job] Executor Error,{}", e);
             return RpcResult.fail("fail");
+        } finally {
+            jobHandler.destroy();
         }
 
     }

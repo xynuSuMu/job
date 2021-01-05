@@ -1,4 +1,4 @@
-package com.sumu.jobserver.beanfactory;
+package com.sumu.jobserver.store;
 
 
 import org.quartz.SchedulerException;
@@ -25,6 +25,7 @@ import java.util.Properties;
  */
 @Component
 public class PostSchedulerFactoryBean implements SchedulerFactoryBeanCustomizer {
+
     private SchedulerFactory schedulerFactory;
 
     private Class<? extends SchedulerFactory> schedulerFactoryClass = StdSchedulerFactory.class;
@@ -74,6 +75,7 @@ public class PostSchedulerFactoryBean implements SchedulerFactoryBeanCustomizer 
         field4.setAccessible(true);
         Properties properties = (Properties) field4.get(schedulerFactoryBean);
         CollectionUtils.mergePropertiesIntoMap(properties, mergedProps);
+        //修改 jobStore.class
         mergedProps.setProperty("org.quartz.jobStore.class", SelfJobStoreTX.class.getName());
 
         Field field5 = schedulerFactoryBean.getClass().getDeclaredField("dataSource");

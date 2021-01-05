@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class JobServerApplication {
 
     public static void main(String[] args) {
+        //app.addListeners(new BeanDefinitionPostProcess());
         SpringApplication.run(JobServerApplication.class, args);
     }
 

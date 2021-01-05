@@ -2,6 +2,7 @@ package com.sumu.jobclient;
 
 import com.sumu.jobclient.annotation.JobHandler;
 import com.sumu.jobclient.common.Context;
+import com.sumu.jobclient.custom.JobHandlerCustomizer;
 import com.sumu.jobclient.handler.AbstractJobHandler;
 import com.sumu.jobclient.modal.job.JobData;
 import com.sumu.jobclient.properties.AppProperties;
@@ -11,6 +12,7 @@ import com.sumu.jobclient.zk.JobRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
@@ -33,10 +35,12 @@ public class JobManager implements ApplicationContextAware {
 
     private JobRegister jobRegister;
 
+    private ObjectProvider<JobHandlerCustomizer> jobHandlerCustomizers;
 
-    public JobManager(JobProperties jobProperties, AppProperties appProperties) {
+    public JobManager(JobProperties jobProperties, AppProperties appProperties, ObjectProvider<JobHandlerCustomizer> jobHandlerCustomizers) {
         Context.setJobProperties(jobProperties);
         Context.setAppProperties(appProperties);
+        this.jobHandlerCustomizers = jobHandlerCustomizers;
     }
 
 
@@ -55,6 +59,10 @@ public class JobManager implements ApplicationContextAware {
 
         //jetty start
         jettyServer.start();
+
+        jobHandlerCustomizers.orderedStream().forEach(jobHandlerCustomizer -> {
+            jobHandlerCustomizer.customize(jobData);
+        });
     }
 
     public void destroy() {
