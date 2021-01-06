@@ -1,35 +1,44 @@
-# job - 分布式任务调度系统
+# 分布式任务调度系统 - JOB
 
-技术栈：
+### 文档
 
-* Java8
-* SpringBoot
-* Zookeeper
-* Quartz
-* Jetty
-* Feign
-* Jackson
-* ThreadPoolExecutor
+待补充.....
 
-后台界面：
+### 背景
+
+业界较为出名的XXL-JOB使用自研调度组件，elastic-job基于Quartz在上层基于ZK做了一层主从机器，由主结点进行作业分片，
+从结点具体任务调度。个人之前基于Quartz实现的分布式任务调度系统并未解决Quartz在弹性扩容方面的不足，借鉴于elastic-job
+的实现进行新的设计：调度中心每一台机器都参与Trigger的扫描，根据调度中心的机器总数和当前机器的编号进行取模调度(测试中)/
+根据机器编号获取不同执行范围(根据NEXT_FIRE_TIME进行筛选)的Trigger(未实施)。
+
+### 目标
+
+* 提供可视化后台操作界面，包含JOB定义列表、JOB执行实例列表、开启/暂停任务等(实施中)
+* 提供多种任务调度类型：Java(已实现)、Shell(实施中)、Hadoop(未开始)、Hive(未开始)、Python(未开始)
+* 调度中心HA，Quartz本身支持集群部署、改造优化DB锁竞争(已实现)
+* 执行器HA，基于ZK注册，支持执行器集群部署(已实现)
+* 支持依赖任务以及DAG展示(已实现)
+* 支持多种调度策略：集群:随机、轮寻、Hash、广播、分片(实施中)
+* 异常处理：故障转移、重试、预警、
+* 调度器-执行器的通讯验证(未开始)
+* 执行器提供自定义线程池(已实现)
+* 弹性扩容：机器上线/下线，下次调度时将会重新分配任务(已实现)
+
+### 后台界面
 
 * Job列表
+
 ![image](image/JobListHtml.png)
 
 * Job实例列表
+
 ![image](image/JobDetailHtml.jpg)
 
 * DAG
+
 ![image](image/DAG.png)
 
-功能介绍：
-
-* 执行器HA：ZK注册
-* 调度器HA：基于修Quartz并修改Trigger的抢占策略
-* 调度策略：默认集群、广播、分片；支持手动调度、启动调度
-* 任务DAG图：复杂任务的依赖关系可通过DAG图形清晰展示
-
-### 上手
+### 部署
 
 * 安装JDK、Zookeeper、MySQL环境
 * 启动Zookeeper、MySQL
@@ -59,7 +68,16 @@ public class Task extends AbstractJobHandler {
 * 启动server模块
 * 访问server后台页面，配置Job任务。默认端口8089，http://127.0.0.1:8089/manager/jobList.html
 
+技术栈：
 
+* Java8
+* SpringBoot
+* Zookeeper
+* Quartz
+* Jetty
+* Feign
+* Jackson
+* ThreadPoolExecutor
 
 ### 关于Quartz
 
@@ -83,14 +101,14 @@ this.getDelegate().updateTriggerStateFromOtherState(conn, triggerKey, "ACQUIRED"
 
 #### 资源闲置
 
-HA利用Quartz支持集群方式，但是任务调度采用抢占式，集群机器数量越多，就会越多机器参与资源竞争，必然造成资源浪费。
+Quartz支持集群方式，但是任务调度采用抢占式，集群机器数量越多，就会越多机器参与DB锁的资源竞争，造成资源浪费。
 
 本次调度系统对Spring的SchedulerFactoryBean配置类进行改造，使用自定义的org.quartz.jobStore.class，重写
 acquireNextTrigger方法，根据当前机器编号和总的机器数量，利用Trigger的hashCode%机器数量，等于当前机器编号
-的Trigger则由当前机器执行，当前机器编号和总的机器数量实时从ZK上获取(该方案未经生产环境验证)。
+的Trigger则由当前机器执行，当前机器编号和总的机器数量实时从ZK上获取
 
 
-### 分布式任务调度
+### 模块介绍
 
 Client模块定义JobHandler注解和抽象类AbstractJobHandler，IOC容器启动后会初始化 JobManager，
 JobManager负责：注册应用信息、获取JobHandler、启动Jetty。
@@ -112,7 +130,7 @@ Common模块保存Client和Server通用信息
 ![image](image/JobServer.png)
 
 
-### 线程池管理工具
+### 执行器的自定义线程池
 
 在分布式任务调度系统中，客户端任务在特定场景下使用多线程进行任务处理，如数据同步。
 
