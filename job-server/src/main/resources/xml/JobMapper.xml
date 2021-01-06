@@ -12,7 +12,8 @@
             `job_desc`,
             `job_cron`,
             `enable`,
-            `task_type`
+            `task_type`,
+            `post_definition`
             )
             values (
             #{appId},
@@ -20,7 +21,8 @@
             #{jobDesc},
             #{cron},
             #{enable},
-            #{taskType}
+            #{taskType},
+            #{postDefinitionID}
             )
     </insert>
 
@@ -77,6 +79,12 @@
         from JOB_CUSTOM_JOB_DEFINITION where id = #{id}
     </select>
 
+    <select id="getPostJobDefinitionID" resultType="java.lang.String">
+        select
+        post_definition
+        from JOB_CUSTOM_JOB_DEFINITION where id = #{id}
+    </select>
+
     <select id="jobDefinitionList" parameterType="com.sumu.jobserver.api.vo.query.JobDefinitionQuery"
             resultMap="jobDefinitionMap">
         select
@@ -126,7 +134,7 @@
     </select>
 
     <sql id="definition_column">
-         id,app_id,job_name,job_desc,job_cron,enable,task_type
+         id,app_id,job_name,job_desc,job_cron,enable,task_type,post_definition
     </sql>
 
     <sql id="java_definition_column">
@@ -145,6 +153,7 @@
         <result property="cron" column="job_cron"/>
         <result property="enable" column="enable"/>
         <result property="taskType" column="task_type"/>
+        <result property="postDefinitionID" column="post_definition"/>
     </resultMap>
 
     <resultMap id="javaJobDefinitionMap" type="com.sumu.jobserver.modal.job.JavaJobDO">

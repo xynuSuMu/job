@@ -58,6 +58,7 @@ CREATE TABLE `JOB_CUSTOM_JOB_DEFINITION` (
   `job_cron` varchar(128) NOT NULL DEFAULT '' COMMENT 'Cron表达式',
   `enable` tinyint(1) NOT NULL COMMENT '是否启用',
   `task_type` int(1) DEFAULT '1' COMMENT '1-Java 2-Shell',
+  `post_definition` varchar (50) DEFAULT NULL COMMENT '后置的JobID',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

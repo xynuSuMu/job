@@ -35,6 +35,11 @@ class JobServerApplicationTests {
     }
 
     @Test
+    void getDag() {
+        System.out.println(JSONObject.toJSONString(jobApi.getJobDefinitionDAG(4).getData()));
+    }
+
+    @Test
     void addJobTest() {
 
         int appId = 1;

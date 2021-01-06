@@ -11,12 +11,16 @@ public class JavaJobDO {
 
     private int definitionID;
 
+
+
     private String handlerName;
 
     //策略，1-默认 2-集群 3-分片
     private int strategy;
 
     private int shardNum;
+
+
 
     public int getDefinitionID() {
         return definitionID;

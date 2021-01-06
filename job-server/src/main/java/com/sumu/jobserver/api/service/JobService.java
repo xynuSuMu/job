@@ -1,14 +1,19 @@
 package com.sumu.jobserver.api.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sumu.jobserver.api.vo.JobDefinitionVO;
 import com.sumu.jobserver.api.vo.JobInstanceVO;
+import com.sumu.jobserver.api.vo.dag.*;
 import com.sumu.jobserver.api.vo.param.AddJobVO;
 import com.sumu.jobserver.api.vo.param.JavaJobVO;
 import com.sumu.jobserver.api.vo.query.JobDefinitionQuery;
 import com.sumu.jobserver.api.vo.query.JobInstanceQuery;
+import com.sumu.jobserver.core.schedule.JobDispatcher;
 import com.sumu.jobserver.core.schedule.JobSchedule;
 import com.sumu.jobserver.enume.JavaJobInfo;
 import com.sumu.jobserver.enume.JobInfo;
+import com.sumu.jobserver.exception.JobException;
+import com.sumu.jobserver.exception.JobExceptionInfo;
 import com.sumu.jobserver.mapper.AppMapper;
 import com.sumu.jobserver.mapper.JobMapper;
 import com.sumu.jobserver.modal.app.AppDO;
@@ -23,9 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -46,6 +49,9 @@ public class JobService {
     @Autowired
     private JobSchedule jobSchedule;
 
+    @Autowired
+    private JobDispatcher jobDispatcher;
+
     @Transactional(rollbackFor = Exception.class)
     public void addJob(AddJobVO addJobVO) throws SchedulerException {
         //
@@ -54,6 +60,12 @@ public class JobService {
         String jobName = addJobVO.getJobName();
         int count = jobMapper.countByJobName(jobName);
         Assert.isTrue(count == 0, "当前任务名称已存在");
+        if (addJobVO.getPostDefinitionID() != null && !"".equals(addJobVO.getPostDefinitionID())) {
+            //todo：判断是否是有向无环图
+            Set<String> set = new HashSet<>();
+            String[] ids = addJobVO.getPostDefinitionID().split(",");
+//            dfs(set, ids);
+        }
         JobDefinitionDO jobDefinitionDO = new JobDefinitionDO();
         BeanUtils.copyProperties(addJobVO, jobDefinitionDO);
         jobMapper.insertJobDefinition(jobDefinitionDO);
@@ -75,6 +87,21 @@ public class JobService {
             jobSchedule.addJob(String.valueOf(jobDefinitionDO.getId()),
                     appDO.getAppName(),
                     addJobVO.getCron());
+        }
+    }
+
+    private void dfs(Set<String> set, String[] ids) {
+        for (String id : ids) {
+            if (set.contains(id)) {
+                throw new JobException(JobExceptionInfo.DAG_CIRCLE);
+            }
+            set.add(id);
+            String postJobIds = jobMapper.getPostJobDefinitionID(id);
+            if (postJobIds == null || "".equals(postJobIds)) {
+                continue;
+            } else {
+                dfs(set, postJobIds.split(","));
+            }
         }
     }
 
@@ -101,6 +128,12 @@ public class JobService {
         AppDO appDO = appMapper.getAppById(jobDefinitionDO.getAppId());
         jobMapper.updateJobDefinitionState(id, false);
         jobSchedule.removeIfExist(String.valueOf(jobDefinitionDO.getId()), appDO.getAppName());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void trigger(int id) throws SchedulerException {
+        //
+        jobDispatcher.schedule(String.valueOf(id));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -133,6 +166,7 @@ public class JobService {
         list.stream().forEach(jobDefinitionDO -> {
             JobDefinitionVO jobDefinitionVO = new JobDefinitionVO();
             jobDefinitionVO.setId(jobDefinitionDO.getId());
+            jobDefinitionVO.setPostDefinitionID(jobDefinitionDO.getPostDefinitionID());
             jobDefinitionVO.setAppName(map.get(jobDefinitionDO.getAppId()).getAppName());
             jobDefinitionVO.setCron(jobDefinitionDO.getCron());
             jobDefinitionVO.setTaskType(jobDefinitionDO.getTaskType());
@@ -196,5 +230,160 @@ public class JobService {
             res.add(jobInstanceVO);
         });
         return res;
+    }
+
+    public DagVO getJobDefinitionDAG(int jobDefinitionID) {
+        DagVO dagVO = new DagVO();
+        OptionVO optionVO = new OptionVO();
+        SeriesVO seriesVO = new SeriesVO();
+        List<DataVO> data = new ArrayList<>();
+        List<LinksVO> links = new ArrayList<>();
+        LinkedList<Integer> queue = new LinkedList<>();
+        queue.push(jobDefinitionID);
+        doDAGV1(queue, data, links);
+        seriesVO.setData(data);
+        seriesVO.setLinks(links);
+        optionVO.setSeries(seriesVO);
+        dagVO.setOption(optionVO);
+        return dagVO;
+    }
+
+    public void doDAGV1(LinkedList<Integer> queue, List<DataVO> data, List<LinksVO> links) {
+        Map<Integer, JobDefinitionDO> map = new HashMap<>();
+        Map<Integer, List<Integer>> ref = new LinkedHashMap<>();
+        while (!queue.isEmpty()) {
+            Integer id = queue.pop();
+            if (map.containsKey(id))
+                continue;
+
+            if (!ref.containsKey(id)) {
+                ref.put(id, new ArrayList<>());
+            }
+            JobDefinitionDO jobDefinitionDO =
+                    jobMapper.getJobDefinitionByID(String.valueOf(id));
+            map.put(id, jobDefinitionDO);
+            String postJobIds = jobDefinitionDO.getPostDefinitionID();
+            if (postJobIds != null && !"".equals(postJobIds)) {
+                String[] ids = postJobIds.split(",");
+                for (String refID : ids) {
+                    if (!map.containsKey(refID)) {
+                        queue.push(Integer.valueOf(refID));
+                    }
+                    ref.get(id).add(Integer.valueOf(refID));
+                }
+            }
+        }
+        //ref -> DAG
+//        System.out.println(JSONObject.toJSONString(ref));
+        Set<Map.Entry<Integer, List<Integer>>> set = ref.entrySet();
+        long x = 300;
+        long y = 300;
+        Map<Integer, Integer> visitor = new HashMap<>();
+        int source = 0;
+        for (Map.Entry<Integer, List<Integer>> entry : set) {
+            Integer id = entry.getKey();
+            if (!visitor.containsKey(id)) {
+                DataVO dataVO = new DataVO(
+                        map.get(id).getJobName(),
+                        x,
+                        y);
+                data.add(dataVO);
+            } else {
+                source = visitor.get(id);
+            }
+            List<Integer> refIDs = entry.getValue();
+            if (refIDs.size() > 0) {
+                int temp = 0;
+                for (Integer i : refIDs) {
+                    if (!visitor.containsKey(i)) {
+                        DataVO refDataVO = new DataVO(
+                                map.get(i).getJobName(),
+                                x + 100,
+                                y + (100 * (temp++)));
+                        data.add(refDataVO);
+                        LinksVO linksVO = new LinksVO(source, data.size() - 1);
+                        links.add(linksVO);
+                        visitor.put(i, data.size() - 1);
+                    } else {
+                        LinksVO linksVO = new LinksVO(source, visitor.get(i));
+                        links.add(linksVO);
+                    }
+                }
+            }
+            if (!visitor.containsKey(id)) {
+                x = x + 100;
+                y = y + 100;
+                visitor.put(id, source);
+            }
+        }
+//        System.out.println(JSONObject.toJSONString(data));
+//        System.out.println(JSONObject.toJSONString(links));
+    }
+
+    private void doDAG(LinkedList<Integer> queue, List<DataVO> data, List<LinksVO> links) {
+        Map<Integer, Integer> map = new HashMap<>();
+        int index = 0;
+        long x = 0;
+        long y = 0;
+        while (!queue.isEmpty()) {
+            x = x + 10;
+            y = y + 10;
+            Integer id = queue.pop();
+            if (map.containsKey(id)) {
+                LinksVO linksVO = new LinksVO(index, map.get(id));
+                links.add(linksVO);
+                continue;
+            }
+            JobDefinitionDO jobDefinitionDO =
+                    jobMapper.getJobDefinitionByID(String.valueOf(id));
+            DataVO dataVO = new DataVO(jobDefinitionDO.getJobName(),
+                    x, y);
+            data.add(dataVO);
+            map.put(id, index);
+            int levelSize = queue.size();
+            //任务指向
+            int levelIndex = index + levelSize + 1;
+            String postJobIds = jobDefinitionDO.getPostDefinitionID();
+            if (postJobIds != null && !"".equals(postJobIds)) {
+                String[] ids = postJobIds.split(",");
+                for (String refID : ids) {
+                    if (map.containsKey(refID)) {
+                        LinksVO linksVO = new LinksVO(index, map.get(refID));
+                        links.add(linksVO);
+                        continue;
+                    } else {
+                        LinksVO linksVO = new LinksVO(index, levelIndex++);
+                        links.add(linksVO);
+                        queue.push(Integer.valueOf(refID));
+                    }
+                }
+            }
+            //同层数据
+            for (int i = 0; i < levelSize; ++i) {
+                int levelId = queue.pop();
+                JobDefinitionDO levelJobDefinitionDO =
+                        jobMapper.getJobDefinitionByID(String.valueOf(levelId));
+                DataVO levelIdDataVO = new DataVO(levelJobDefinitionDO.getJobName(),
+                        x, y + 10);
+                data.add(levelIdDataVO);
+                map.put(levelId, index + i + 1);
+                postJobIds = levelJobDefinitionDO.getPostDefinitionID();
+                if (postJobIds != null && !"".equals(postJobIds)) {
+                    String[] ids = postJobIds.split(",");
+                    for (String refID : ids) {
+                        if (map.containsKey(refID)) {
+                            LinksVO linksVO = new LinksVO(index + i + 1, map.get(refID));
+                            links.add(linksVO);
+                            continue;
+                        } else {
+                            LinksVO linksVO = new LinksVO(index + i + 1, levelIndex++);
+                            links.add(linksVO);
+                            queue.push(Integer.valueOf(refID));
+                        }
+                    }
+                }
+            }
+            index = levelIndex;
+        }
     }
 }

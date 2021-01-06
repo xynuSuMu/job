@@ -4,13 +4,16 @@ import com.sumu.common.util.rpc.RpcAddress;
 import com.sumu.common.util.rpc.RpcResult;
 import com.sumu.common.util.rpc.feign.FeignUtil;
 import com.sumu.jobserver.core.schedule.AbstractJobExecutor;
+import com.sumu.jobserver.core.schedule.JobDispatcher;
 import com.sumu.jobserver.enume.JavaJobInfo;
+import com.sumu.jobserver.enume.JobInfo;
 import com.sumu.jobserver.mapper.JobMapper;
 import com.sumu.jobserver.mapper.WorkerMapper;
 import com.sumu.jobserver.modal.job.JavaJobDO;
 import com.sumu.jobserver.modal.job.JobDefinitionDO;
 import com.sumu.jobserver.modal.job.JobInstanceDO;
 import com.sumu.jobserver.modal.worker.WorkerDO;
+import com.sumu.jobserver.util.SpringContextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +38,30 @@ public class JobExecutor extends AbstractJobExecutor {
     @Autowired
     private WorkerMapper workerMapper;
 
+    @Autowired
+    private JobDispatcher jobDispatcher;
+
     @Override
     public void executorByQuartz(JobDefinitionDO jobDefinitionDO) {
         int jobDefinitionId = jobDefinitionDO.getId();
         int appId = jobDefinitionDO.getAppId();
-        //
+        //执行
+        doExecute(appId, jobDefinitionId);
+        //后置任务
+        if (jobDefinitionDO.getPostDefinitionID() != null && !"".equals(jobDefinitionDO.getPostDefinitionID())) {
+            String[] ids = jobDefinitionDO.getPostDefinitionID().split(",");
+            for (String id : ids) {
+                jobDispatcher.schedule(id);
+            }
+        }
+        LOG.info("Job Execute Finish,jobDefinitionId = {}", jobDefinitionId);
+    }
+
+    private void doExecute(int appId, int jobDefinitionId) {
         JavaJobDO javaJobDO = jobMapper.getJavaJobDefinitionByDefId(jobDefinitionId);
         String handlerName = javaJobDO.getHandlerName();
         int strategy = javaJobDO.getStrategy();
-        //获取APPID注册的机器
+        //获取AppID注册的机器
         List<WorkerDO> workers = workerMapper.getRunWorkerByAppID(appId);
         //Job实例
         JobInstanceDO jobInstanceDO = new JobInstanceDO();
@@ -52,7 +70,7 @@ public class JobExecutor extends AbstractJobExecutor {
         jobInstanceDO.setTriggerType(1);//1-自动 0-手动
         jobMapper.insertJobInstance(jobInstanceDO);
         JavaJobInfo.Strategy schedulerStrategy = JavaJobInfo.Strategy.getStrategy(strategy);
-        //todo:调度
+        //调度
         switch (schedulerStrategy) {
             case DEFAULT:
                 defaultStrategy(workers, handlerName, jobInstanceDO);
@@ -67,10 +85,8 @@ public class JobExecutor extends AbstractJobExecutor {
             default:
                 break;
         }
-        //
         jobInstanceDO.setEndTime(new Date());
         jobMapper.updateJobInstance(jobInstanceDO);
-        LOG.info("执行Job,jobDefinitionId = {}", jobDefinitionId);
     }
 
     private void defaultStrategy(List<WorkerDO> workers, String handlerName, JobInstanceDO jobInstanceDO) {
@@ -122,7 +138,7 @@ public class JobExecutor extends AbstractJobExecutor {
         }
         //对每个分片进行机器分配
         int size = workers.size();
-        if (size == 0){
+        if (size == 0) {
             throw new RuntimeException("workers number must more than 0!");
         }
         if (toatal <= size) {

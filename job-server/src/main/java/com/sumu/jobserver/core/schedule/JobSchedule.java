@@ -1,6 +1,7 @@
 package com.sumu.jobserver.core.schedule;
 
-import com.sumu.jobserver.exception.JobExistException;
+import com.sumu.jobserver.exception.JobException;
+import com.sumu.jobserver.exception.JobExceptionInfo;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,6 @@ public class JobSchedule {
     private Scheduler scheduler;
 
     public void addJob(String jobName, String jobGroup, String cronExpr) throws SchedulerException {
-
 
         TriggerKey triggerKey = TriggerKey.triggerKey(jobName, jobGroup);
 
@@ -63,7 +63,7 @@ public class JobSchedule {
     private void sureJobNotExist(TriggerKey triggerKey) throws SchedulerException {
         boolean exists = scheduler.checkExists(triggerKey);
         if (exists) {
-            throw new JobExistException("quartz job already exists! triggerKey = " + triggerKey);
+            throw new JobException(JobExceptionInfo.JOB_EXIST);
         }
     }
 }

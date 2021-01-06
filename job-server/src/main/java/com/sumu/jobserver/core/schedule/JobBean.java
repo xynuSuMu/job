@@ -14,7 +14,6 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
  */
 public class JobBean extends QuartzJobBean {
 
-    private Logger LOG = LoggerFactory.getLogger(JobBean.class);
 
     @Autowired
     private JobDispatcher jobDispatcher;
@@ -23,7 +22,6 @@ public class JobBean extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext ctx) {
         JobKey jobKey = ctx.getTrigger().getJobKey();
         String jobDefinitionId = jobKey.getName();
-        LOG.info("[JobDefinitionId={}] Executor Job ", jobDefinitionId);
         jobDispatcher.schedule(jobDefinitionId);
     }
 

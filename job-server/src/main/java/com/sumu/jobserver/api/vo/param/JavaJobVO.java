@@ -7,6 +7,7 @@ package com.sumu.jobserver.api.vo.param;
  */
 public class JavaJobVO {
 
+    //执行器名称
     private String handlerName;
 
     //策略，1-默认 2-集群 3-分片
@@ -14,6 +15,7 @@ public class JavaJobVO {
 
     //分片数
     private int shardNum;
+
 
     public int getStrategy() {
         return strategy;

@@ -23,6 +23,18 @@ public class AddJobVO {
 
     private Boolean enable;
 
+
+    //后置任务
+    private String postDefinitionID;
+
+    public String getPostDefinitionID() {
+        return postDefinitionID;
+    }
+
+    public void setPostDefinitionID(String postDefinitionID) {
+        this.postDefinitionID = postDefinitionID;
+    }
+
     public int getId() {
         return id;
     }

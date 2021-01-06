@@ -44,11 +44,14 @@
                         "      <td>" + obj.cron + "</td>\n" +
                         "      <td>" + (obj.enable ? '启动' : '暂停') + "</td>\n" +
                         "      <td>" + (obj.taskType == 1 ? 'Java' : '其他') + "</td>\n" +
+                        // "      <td>" + (obj.postDefinitionID) + "</td>\n" +
                         '      <td>' +
                         '     <button type="button" class="btn btn-default" onclick="editJob(' + obj.id + ')">编辑</button>' +
+                        '     <button type="button" class="btn btn-info" onclick="triggerJob(' + obj.id + ')">立即执行</button>' +
                         '         ' + (obj.enable ? '<button type="button" class="btn btn-danger" onclick="pauseJob(' + obj.id + ')">暂停</button>'
                             : '<button type="button" class="btn btn-success" onclick="resumeJob(' + obj.id + ')">启动</button>') +
                         '          <button type="button" class="btn btn-primary"  onclick="jumpInstance(' + obj.id + ')">执行记录</button>' +
+                        '          <button type="button" class="btn btn-primary"  onclick="jumpDag(' + obj.id + ')">任务执行图</button>' +
                         '      </td>' +
                         "    </tr>"
                 }
@@ -71,10 +74,10 @@
     <div align="right" style="margin: 0 60px;">
         <div class="navbar-form navbar-left" role="search" style="width: 100%;">
             <!--<div class="form-group">-->
-                <!--<input type="text" class="form-control" placeholder="应用">-->
+            <!--<input type="text" class="form-control" placeholder="应用">-->
             <!--</div>-->
             <!--<div class="form-group">-->
-                <!--<input type="text" class="form-control" placeholder="类型">-->
+            <!--<input type="text" class="form-control" placeholder="类型">-->
             <!--</div>-->
             <!--<button type="submit" class="btn btn-default">搜索</button>-->
             <button class="btn btn-info" onclick="addJob()">新建任务</button>
@@ -91,6 +94,7 @@
         <th style="text-align: center;">Cron</th>
         <th style="text-align: center;">状态</th>
         <th style="text-align: center;">类型</th>
+        <!--<th style="text-align: center;">后置Job</th>-->
         <th style="text-align: center;">操作</th>
     </tr>
     </thead>
@@ -155,6 +159,11 @@
                     <div style="width: 15%;display: flex;align-items: center;">分片数量</div>
                     <input id="jobShard" type="text" class="form-control" style="margin: 0px 10px" placeholder="">
                 </div>
+                <div class="form-group" style="display: flex">
+                    <div style="width: 15%;display: flex;align-items: center;">后置Job</div>
+                    <input id="postDefinitionID" type="text" class="form-control" style="margin: 0px 10px"
+                           placeholder="">
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -209,10 +218,11 @@
             alert("分片策略不能小于1")
             return;
         }
+        var postDefinitionID = $("#postDefinitionID").val();
         var javaJobVO = {
             "handlerName": handlerName,
             "strategy": jobStrategy,
-            "shardNum": jobShard,
+            "shardNum": jobShard
         };
         var addJobVO = {
             "id": id,
@@ -223,6 +233,7 @@
             "javaJobVO": javaJobVO,
             "cron": jobCron,
             "enable": jobState == 1,
+            "postDefinitionID": postDefinitionID
         };
         if (id == 0) {
             $.ajax({
@@ -303,6 +314,19 @@
         })
     }
 
+    function triggerJob(id) {
+        $.ajax({
+            url: url + "job/trigger/" + id,
+            type: 'put',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            success: function (res) {
+                console.log(res)
+            }
+        })
+    }
+
     function resumeJob(id) {
         $.ajax({
             url: url + "job/resume/" + id,
@@ -318,6 +342,10 @@
 
     function jumpInstance(id) {
         window.open("job-instance.html?definitionID=" + id)
+    }
+
+    function jumpDag(id) {
+        window.open("dag.html?definitionID=" + id)
     }
 </script>
 </html>

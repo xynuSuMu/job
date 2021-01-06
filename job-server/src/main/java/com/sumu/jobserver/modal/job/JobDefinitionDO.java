@@ -14,6 +14,15 @@ public class JobDefinitionDO {
     private String cron;
     private int taskType;
     private Boolean enable;
+    private String postDefinitionID;
+
+    public String getPostDefinitionID() {
+        return postDefinitionID;
+    }
+
+    public void setPostDefinitionID(String postDefinitionID) {
+        this.postDefinitionID = postDefinitionID;
+    }
 
 
     public int getId() {

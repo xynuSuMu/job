@@ -24,6 +24,8 @@ public interface JobMapper {
 
     JobDefinitionDO getJobDefinitionByID(@Param("id") String id);
 
+    String getPostJobDefinitionID(@Param("id") String id);
+
     JavaJobDO getJavaJobDefinitionByDefId(@Param("definitionID") int definitionID);
 
     List<JavaJobDO> getJavaJobDefinitionByDefIds(@Param("definitionIDs") List<Integer> definitionIDs);

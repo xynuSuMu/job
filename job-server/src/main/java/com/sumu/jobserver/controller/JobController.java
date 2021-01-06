@@ -25,4 +25,9 @@ public class JobController {
     public String jobInstanceList() {
         return "job-instance.html";
     }
+
+    @RequestMapping("dag.html")
+    public String jobDag() {
+        return "dag.html";
+    }
 }

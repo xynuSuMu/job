@@ -3,6 +3,7 @@ package com.sumu.jobserver.api;
 import com.sumu.common.core.Result;
 import com.sumu.jobserver.api.service.JobService;
 import com.sumu.jobserver.api.vo.JobInstanceVO;
+import com.sumu.jobserver.api.vo.dag.DagVO;
 import com.sumu.jobserver.api.vo.param.AddJobVO;
 import com.sumu.jobserver.api.vo.JobDefinitionVO;
 import com.sumu.jobserver.api.vo.query.JobDefinitionQuery;
@@ -71,6 +72,17 @@ public class JobApi {
         }
     }
 
+    @PutMapping("trigger/{id}")
+    public Result<String> trigger(@PathVariable int id) {
+        try {
+            jobService.trigger(id);
+            return Result.success("Trigger Success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.fail("Trigger Fail:" + e.getMessage());
+        }
+    }
+
 
     @PostMapping(value = "definition/list")
     @ResponseBody
@@ -81,12 +93,18 @@ public class JobApi {
 
     @GetMapping(value = "definition/detail/{id}")
     @ResponseBody
-    public Result<JobDefinitionVO> jobDefinitionDetail(@PathVariable int id ) {
+    public Result<JobDefinitionVO> jobDefinitionDetail(@PathVariable int id) {
         return Result.success(jobService.jobDefinitionDetail(id));
     }
 
     @PostMapping("instance/list")
     public Result<List<JobInstanceVO>> jobInstanceList(@RequestBody JobInstanceQuery jobInstanceQuery) {
         return Result.success(jobService.jobInstanceList(jobInstanceQuery));
+    }
+
+    @GetMapping("definition/dag/{id}")
+    @ResponseBody
+    public Result<DagVO> getJobDefinitionDAG(@PathVariable int id) {
+        return Result.success(jobService.getJobDefinitionDAG(id));
     }
 }
