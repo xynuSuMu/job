@@ -1,5 +1,7 @@
 # job - 分布式任务调度系统
 
+技术栈：
+
 * Java8
 * SpringBoot
 * Zookeeper
@@ -9,36 +11,23 @@
 * Jackson
 * ThreadPoolExecutor
 
+后台界面：
 
-### 关于Quartz
+* Job列表
+![image](image/JobListHtml.png)
 
+* Job实例列表
+![image](image/JobDetailHtml.jpg)
 
-Quartz底层基于QuartzSchedulerThread作为调度线程，从线程池(SimpleThreadPool)中获取可用的线程，然后从JobStore(ARM/DB)中的获取
-30S(默认30S，为避免频繁扫表，可适当增加该时间)内即将执行的触发器(即将执行的触发器是由另一线程进行插入)，然后通过线程池的线程进行调度执行
-JobRunShell。
+* DAG
+![image](image/DAG.png)
 
+功能介绍：
 
-基于Quartz实现HA，也会出现一些问题，如ABA问题，资源闲置
-
-#### ABA问题
-乐观锁ABA问题：
-Quartz默认使用乐观锁形式进行获取Trigger，乐观锁就会存在ABA的问题，在JobStoreSupport中：
-
-```java
-this.getDelegate().updateTriggerStateFromOtherState(conn, triggerKey, "ACQUIRED", "WAITING");
-```
-
-将 triggerKey 对应的数据(QRTZ_TRIGGERS表)TRIGGER_STATE由WAITINGA变更为ACQUIRED，低概率下会出现如下问题：
-由于波动，或CPU资源被抢占，那么可能会进入停顿，此时另一机器完成另整个过程WAITING->ACQUIRED->EXECUTING->WAITING，
-那么该Job就会出现多次触发。
-
-#### 资源闲置
-
-HA利用Quartz支持集群方式，但是任务调度采用抢占式，集群机器数量越多，就会越多机器参与资源竞争，必然造成资源浪费。
-
-本次调度系统对Spring的SchedulerFactoryBean配置类进行改造，使用自定义的org.quartz.jobStore.class，重写
-acquireNextTrigger方法，根据当前机器编号和总的机器数量，利用Trigger的hashCode%机器数量，等于当前机器编号
-的Trigger则由当前机器执行，当前机器编号和总的机器数量实时从ZK上获取(该方案未经生产环境验证)。
+* 执行器HA：ZK注册
+* 调度器HA：基于修Quartz并修改Trigger的抢占策略
+* 调度策略：默认集群、广播、分片；支持手动调度、启动调度
+* 任务DAG图：复杂任务的依赖关系可通过DAG图形清晰展示
 
 ### 上手
 
@@ -70,11 +59,35 @@ public class Task extends AbstractJobHandler {
 * 启动server模块
 * 访问server后台页面，配置Job任务。默认端口8089，http://127.0.0.1:8089/manager/jobList.html
 
-* Job列表
-![image](image/JobListHtml.jpg)
 
-* Job实例列表
-![image](image/JobDetailHtml.jpg)
+
+### 关于Quartz
+
+Quartz底层基于QuartzSchedulerThread作为调度线程，从线程池(SimpleThreadPool)中获取可用的线程，然后从JobStore(ARM/DB)中的获取
+30S(默认30S，为避免频繁扫表，可适当增加该时间)内即将执行的触发器(即将执行的触发器是由另一线程进行插入)，然后通过线程池的线程进行调度执行
+JobRunShell。
+
+基于Quartz实现HA，也会出现一些问题，如ABA问题，资源闲置
+
+#### ABA问题
+乐观锁ABA问题：
+Quartz默认使用乐观锁形式进行获取Trigger，乐观锁就会存在ABA的问题，在JobStoreSupport中：
+
+```java
+this.getDelegate().updateTriggerStateFromOtherState(conn, triggerKey, "ACQUIRED", "WAITING");
+```
+
+将 triggerKey 对应的数据(QRTZ_TRIGGERS表)TRIGGER_STATE由WAITINGA变更为ACQUIRED，低概率下会出现如下问题：
+由于波动，或CPU资源被抢占，那么可能会进入停顿，此时另一机器完成另整个过程WAITING->ACQUIRED->EXECUTING->WAITING，
+那么该Job就会出现多次触发。
+
+#### 资源闲置
+
+HA利用Quartz支持集群方式，但是任务调度采用抢占式，集群机器数量越多，就会越多机器参与资源竞争，必然造成资源浪费。
+
+本次调度系统对Spring的SchedulerFactoryBean配置类进行改造，使用自定义的org.quartz.jobStore.class，重写
+acquireNextTrigger方法，根据当前机器编号和总的机器数量，利用Trigger的hashCode%机器数量，等于当前机器编号
+的Trigger则由当前机器执行，当前机器编号和总的机器数量实时从ZK上获取(该方案未经生产环境验证)。
 
 
 ### 分布式任务调度
