@@ -240,7 +240,7 @@ public class JobService {
         List<LinksVO> links = new ArrayList<>();
         LinkedList<Integer> queue = new LinkedList<>();
         queue.push(jobDefinitionID);
-        doDAGV1(queue, data, links);
+        doDAG(queue, data, links);
         seriesVO.setData(data);
         seriesVO.setLinks(links);
         optionVO.setSeries(seriesVO);
@@ -248,16 +248,17 @@ public class JobService {
         return dagVO;
     }
 
-    public void doDAGV1(LinkedList<Integer> queue, List<DataVO> data, List<LinksVO> links) {
+    public void doDAG(LinkedList<Integer> queue, List<DataVO> data, List<LinksVO> links) {
         Map<Integer, JobDefinitionDO> map = new HashMap<>();
-        Map<Integer, List<Integer>> ref = new LinkedHashMap<>();
+        //Graph
+        Map<Integer, List<Integer>> graph = new LinkedHashMap<>();
         while (!queue.isEmpty()) {
             Integer id = queue.pop();
             if (map.containsKey(id))
                 continue;
 
-            if (!ref.containsKey(id)) {
-                ref.put(id, new ArrayList<>());
+            if (!graph.containsKey(id)) {
+                graph.put(id, new ArrayList<>());
             }
             JobDefinitionDO jobDefinitionDO =
                     jobMapper.getJobDefinitionByID(String.valueOf(id));
@@ -269,13 +270,12 @@ public class JobService {
                     if (!map.containsKey(refID)) {
                         queue.push(Integer.valueOf(refID));
                     }
-                    ref.get(id).add(Integer.valueOf(refID));
+                    graph.get(id).add(Integer.valueOf(refID));
                 }
             }
         }
-        //ref -> DAG
-//        System.out.println(JSONObject.toJSONString(ref));
-        Set<Map.Entry<Integer, List<Integer>>> set = ref.entrySet();
+        //graph -> DAG
+        Set<Map.Entry<Integer, List<Integer>>> set = graph.entrySet();
         long x = 300;
         long y = 300;
         Map<Integer, Integer> visitor = new HashMap<>();
@@ -298,8 +298,8 @@ public class JobService {
                     if (!visitor.containsKey(i)) {
                         DataVO refDataVO = new DataVO(
                                 map.get(i).getJobName(),
-                                x + 100,
-                                y + (100 * (temp++)));
+                                x + 50,
+                                y + (50 * (temp++)));
                         data.add(refDataVO);
                         LinksVO linksVO = new LinksVO(source, data.size() - 1);
                         links.add(linksVO);
@@ -310,80 +310,12 @@ public class JobService {
                     }
                 }
             }
+            x = x + 50;
             if (!visitor.containsKey(id)) {
-                x = x + 100;
-                y = y + 100;
+
                 visitor.put(id, source);
             }
         }
-//        System.out.println(JSONObject.toJSONString(data));
-//        System.out.println(JSONObject.toJSONString(links));
     }
 
-    private void doDAG(LinkedList<Integer> queue, List<DataVO> data, List<LinksVO> links) {
-        Map<Integer, Integer> map = new HashMap<>();
-        int index = 0;
-        long x = 0;
-        long y = 0;
-        while (!queue.isEmpty()) {
-            x = x + 10;
-            y = y + 10;
-            Integer id = queue.pop();
-            if (map.containsKey(id)) {
-                LinksVO linksVO = new LinksVO(index, map.get(id));
-                links.add(linksVO);
-                continue;
-            }
-            JobDefinitionDO jobDefinitionDO =
-                    jobMapper.getJobDefinitionByID(String.valueOf(id));
-            DataVO dataVO = new DataVO(jobDefinitionDO.getJobName(),
-                    x, y);
-            data.add(dataVO);
-            map.put(id, index);
-            int levelSize = queue.size();
-            //任务指向
-            int levelIndex = index + levelSize + 1;
-            String postJobIds = jobDefinitionDO.getPostDefinitionID();
-            if (postJobIds != null && !"".equals(postJobIds)) {
-                String[] ids = postJobIds.split(",");
-                for (String refID : ids) {
-                    if (map.containsKey(refID)) {
-                        LinksVO linksVO = new LinksVO(index, map.get(refID));
-                        links.add(linksVO);
-                        continue;
-                    } else {
-                        LinksVO linksVO = new LinksVO(index, levelIndex++);
-                        links.add(linksVO);
-                        queue.push(Integer.valueOf(refID));
-                    }
-                }
-            }
-            //同层数据
-            for (int i = 0; i < levelSize; ++i) {
-                int levelId = queue.pop();
-                JobDefinitionDO levelJobDefinitionDO =
-                        jobMapper.getJobDefinitionByID(String.valueOf(levelId));
-                DataVO levelIdDataVO = new DataVO(levelJobDefinitionDO.getJobName(),
-                        x, y + 10);
-                data.add(levelIdDataVO);
-                map.put(levelId, index + i + 1);
-                postJobIds = levelJobDefinitionDO.getPostDefinitionID();
-                if (postJobIds != null && !"".equals(postJobIds)) {
-                    String[] ids = postJobIds.split(",");
-                    for (String refID : ids) {
-                        if (map.containsKey(refID)) {
-                            LinksVO linksVO = new LinksVO(index + i + 1, map.get(refID));
-                            links.add(linksVO);
-                            continue;
-                        } else {
-                            LinksVO linksVO = new LinksVO(index + i + 1, levelIndex++);
-                            links.add(linksVO);
-                            queue.push(Integer.valueOf(refID));
-                        }
-                    }
-                }
-            }
-            index = levelIndex;
-        }
-    }
 }
