@@ -1,3 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.sumu.jobserver.test.JobEngineAutoConfiguration
 # Run Listeners
 org.springframework.boot.SpringApplicationRunListener=\
 com.sumu.jobserver.listener.JobServerListener
