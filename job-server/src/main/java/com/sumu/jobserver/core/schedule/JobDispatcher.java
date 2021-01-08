@@ -1,6 +1,6 @@
 package com.sumu.jobserver.core.schedule;
 
-import com.sumu.jobserver.enume.JobInfo;
+import com.sumu.jobserver.modal.enume.JobInfo;
 import com.sumu.jobserver.mapper.JobMapper;
 import com.sumu.jobserver.modal.job.JobDefinitionDO;
 import com.sumu.jobserver.util.SpringContextUtils;

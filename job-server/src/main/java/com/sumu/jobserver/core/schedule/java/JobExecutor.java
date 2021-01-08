@@ -5,20 +5,17 @@ import com.sumu.common.util.rpc.RpcResult;
 import com.sumu.common.util.rpc.feign.FeignUtil;
 import com.sumu.jobserver.core.schedule.AbstractJobExecutor;
 import com.sumu.jobserver.core.schedule.JobDispatcher;
-import com.sumu.jobserver.enume.JavaJobInfo;
-import com.sumu.jobserver.enume.JobInfo;
+import com.sumu.jobserver.modal.enume.JavaJobInfo;
 import com.sumu.jobserver.mapper.JobMapper;
 import com.sumu.jobserver.mapper.WorkerMapper;
 import com.sumu.jobserver.modal.job.JavaJobDO;
 import com.sumu.jobserver.modal.job.JobDefinitionDO;
 import com.sumu.jobserver.modal.job.JobInstanceDO;
 import com.sumu.jobserver.modal.worker.WorkerDO;
-import com.sumu.jobserver.util.SpringContextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 

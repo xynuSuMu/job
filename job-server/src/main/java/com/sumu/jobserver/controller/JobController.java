@@ -2,9 +2,6 @@ package com.sumu.jobserver.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @Auther: chenlong
@@ -15,9 +12,9 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("manager/")
 public class JobController {
 
+
     @RequestMapping("jobList.html")
     public String jobList() {
-
         return "job.html";
     }
 

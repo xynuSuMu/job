@@ -2,9 +2,8 @@ package com.sumu.jobserver.core.monitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sumu.jobserver.context.JobApplicationContext;
-import com.sumu.jobserver.mapper.AppMapper;
 import com.sumu.jobserver.modal.zk.ZkDataModal;
-import com.sumu.jobserver.properties.JobProperties;
+import com.sumu.jobserver.config.properties.JobProperties;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
@@ -19,8 +18,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import static com.sumu.common.core.ZKConstants.JOB_REGISTER;
 import static com.sumu.common.core.ZKConstants.NODE_REGISTER;

@@ -1,4 +1,4 @@
-package com.sumu.jobserver.enume;
+package com.sumu.jobserver.modal.enume;
 
 import com.sumu.jobserver.core.schedule.AbstractJobExecutor;
 import com.sumu.jobserver.core.schedule.java.JobExecutor;

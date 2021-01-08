@@ -1,4 +1,4 @@
-package com.sumu.jobserver.properties;
+package com.sumu.jobserver.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

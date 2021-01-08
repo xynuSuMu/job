@@ -1,6 +1,5 @@
 package com.sumu.jobserver.api.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.sumu.jobserver.api.vo.JobDefinitionVO;
 import com.sumu.jobserver.api.vo.JobInstanceVO;
 import com.sumu.jobserver.api.vo.dag.*;
@@ -10,8 +9,8 @@ import com.sumu.jobserver.api.vo.query.JobDefinitionQuery;
 import com.sumu.jobserver.api.vo.query.JobInstanceQuery;
 import com.sumu.jobserver.core.schedule.JobDispatcher;
 import com.sumu.jobserver.core.schedule.JobSchedule;
-import com.sumu.jobserver.enume.JavaJobInfo;
-import com.sumu.jobserver.enume.JobInfo;
+import com.sumu.jobserver.modal.enume.JavaJobInfo;
+import com.sumu.jobserver.modal.enume.JobInfo;
 import com.sumu.jobserver.exception.JobException;
 import com.sumu.jobserver.exception.JobExceptionInfo;
 import com.sumu.jobserver.mapper.AppMapper;

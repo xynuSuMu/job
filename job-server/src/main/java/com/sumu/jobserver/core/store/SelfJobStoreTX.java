@@ -1,4 +1,4 @@
-package com.sumu.jobserver.store;
+package com.sumu.jobserver.core.store;
 
 
 import com.sumu.jobserver.context.JobApplicationContext;

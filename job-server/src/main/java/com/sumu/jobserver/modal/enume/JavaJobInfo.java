@@ -1,4 +1,4 @@
-package com.sumu.jobserver.enume;
+package com.sumu.jobserver.modal.enume;
 
 /**
  * @author 陈龙
