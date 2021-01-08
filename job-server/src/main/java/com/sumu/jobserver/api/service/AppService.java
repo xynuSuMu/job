@@ -1,6 +1,7 @@
 package com.sumu.jobserver.api.service;
 
 import com.sumu.jobserver.api.vo.AppVO;
+import com.sumu.jobserver.scheduler.core.service.JobApplicationService;
 import com.sumu.jobserver.scheduler.mapper.AppMapper;
 import com.sumu.jobserver.scheduler.modal.app.AppDO;
 import org.springframework.beans.BeanUtils;
@@ -20,6 +21,9 @@ public class AppService {
 
     @Autowired
     private AppMapper appMapper;
+
+    @Autowired
+    private JobApplicationService jobApplicationService;
 
     public List<AppVO> getAppList() {
 

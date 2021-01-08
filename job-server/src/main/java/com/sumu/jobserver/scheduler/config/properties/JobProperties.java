@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  * @date 2020-12-21 19:43
  */
-@Component
 @ConfigurationProperties("job")
 public class JobProperties {
 

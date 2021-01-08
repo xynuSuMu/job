@@ -1,5 +1,6 @@
 package com.sumu.jobserver.scheduler.context;
 
+import com.sumu.jobserver.scheduler.interceptor.command.context.CommandContext;
 import org.apache.curator.framework.CuratorFramework;
 
 import java.net.InetAddress;
@@ -13,6 +14,8 @@ import java.net.UnknownHostException;
 public class JobApplicationContext {
 
     private static CuratorFramework client;
+
+    private static ThreadLocal<CommandContext> commandContextThreadLocal = new ThreadLocal<>();
 
     private static final String IP;
 
@@ -34,6 +37,19 @@ public class JobApplicationContext {
     public static CuratorFramework getClient() {
 
         return client;
+    }
+
+    public static CommandContext getCommandContext() {
+        return commandContextThreadLocal.get();
+    }
+
+    public static void setCommandContext(CommandContext commandContext) {
+        commandContextThreadLocal.set(commandContext);
+    }
+
+    public static void removeCommandContext(CommandContext commandContext) {
+        commandContext.closeSqlSession();
+        commandContextThreadLocal.remove();
     }
 
     public static void setClient(CuratorFramework client) {

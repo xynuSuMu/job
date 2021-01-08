@@ -1,5 +1,7 @@
 package com.sumu.jobserver.controller;
 
+import com.sumu.jobserver.scheduler.core.service.JobApplicationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -12,9 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("manager/")
 public class JobController {
 
+    @Autowired
+    private JobApplicationService jobApplicationService;
 
     @RequestMapping("jobList.html")
     public String jobList() {
+        jobApplicationService.testInterceptor();
         return "job.html";
     }
 

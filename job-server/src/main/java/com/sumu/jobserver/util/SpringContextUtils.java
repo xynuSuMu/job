@@ -1,4 +1,4 @@
-package com.sumu.jobserver.scheduler.util;
+package com.sumu.jobserver.util;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

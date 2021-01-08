@@ -1,6 +1,6 @@
 package com.sumu.jobserver.scheduler.core.schedule.config;
 
-import com.sumu.jobserver.scheduler.util.SpringContextUtils;
+import com.sumu.jobserver.util.SpringContextUtils;
 import org.quartz.Job;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;

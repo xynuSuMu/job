@@ -3,7 +3,7 @@ package com.sumu.jobserver.scheduler.core.schedule;
 import com.sumu.jobserver.scheduler.modal.enume.JobInfo;
 import com.sumu.jobserver.scheduler.mapper.JobMapper;
 import com.sumu.jobserver.scheduler.modal.job.JobDefinitionDO;
-import com.sumu.jobserver.scheduler.util.SpringContextUtils;
+import com.sumu.jobserver.util.SpringContextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

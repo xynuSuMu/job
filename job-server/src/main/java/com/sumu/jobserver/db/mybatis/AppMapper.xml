@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sumu.jobserver.scheduler.mapper.AppMapper">
+
+    <update id="insertAppCode">
+        insert into JOB_CUSTOM_APP (app_code,zxid,update_time)
+        values (#{appCode},#{zxid},current_timestamp)
+        on duplicate key update
+            update_time = IF((#{zxid} > zxid), current_timestamp, update_time),
+            zxid = IF((#{zxid} > zxid), #{zxid}, zxid)
+            ;
+    </update>
+</mapper>

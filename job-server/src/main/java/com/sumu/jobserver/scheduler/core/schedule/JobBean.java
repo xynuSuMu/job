@@ -9,7 +9,8 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
  * @author 陈龙
  * @version 1.0
  * @date 2020-12-21 15:39
- */
+ * @desc 该Bean目录结构发生改表时，历史Job需要需要更改QRTZ_JOB_DETAILS表JOB_CLASS_NAME字段
+ * */
 public class JobBean extends QuartzJobBean {
 
 
