@@ -1,8 +1,8 @@
 package com.sumu.jobserver.api.service;
 
 import com.sumu.jobserver.api.vo.AppVO;
-import com.sumu.jobserver.mapper.AppMapper;
-import com.sumu.jobserver.modal.app.AppDO;
+import com.sumu.jobserver.scheduler.mapper.AppMapper;
+import com.sumu.jobserver.scheduler.modal.app.AppDO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

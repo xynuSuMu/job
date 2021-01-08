@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sumu.jobserver.mapper.WorkerMapper">
+<mapper namespace="com.sumu.jobserver.scheduler.mapper.WorkerMapper">
 
     <insert id="registerWorker">
         insert into JOB_CUSTOM_WORKER (app_id,ip,port,host_name,zxid,enable)
@@ -36,7 +36,7 @@
          id,app_id,ip,port,host_name
     </sql>
 
-    <resultMap id="workerMap" type="com.sumu.jobserver.modal.worker.WorkerDO">
+    <resultMap id="workerMap" type="com.sumu.jobserver.scheduler.modal.worker.WorkerDO">
         <result column="id" property="id"/>
         <result column="app_id" property="appID"/>
         <result column="ip" property="ip"/>

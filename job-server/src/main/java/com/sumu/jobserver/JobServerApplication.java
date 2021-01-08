@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan("com.sumu.jobserver.mapper")
+@MapperScan("com.sumu.jobserver.scheduler.mapper")
 public class JobServerApplication {
 
     public static void main(String[] args) {
