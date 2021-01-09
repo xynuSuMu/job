@@ -14,12 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("manager/")
 public class JobController {
 
-    @Autowired
-    private JobApplicationService jobApplicationService;
-
     @RequestMapping("jobList.html")
     public String jobList() {
-        jobApplicationService.testInterceptor();
         return "job.html";
     }
 
