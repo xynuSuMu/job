@@ -7,4 +7,6 @@ package com.sumu.jobserver.scheduler.core.service;
  */
 public interface JobApplicationService {
 
+    void registerWorker();
+
 }

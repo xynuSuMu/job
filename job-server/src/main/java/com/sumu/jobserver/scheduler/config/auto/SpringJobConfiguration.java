@@ -71,6 +71,9 @@ public class SpringJobConfiguration extends AbstractSpringJobConfiguration {
             this.commandInterceptors = new ArrayList<>();
             //todo:自定义前置
 
+            //事务拦截器
+            this.commandInterceptors.add(new TransactionInterceptor(this.transactionManager));
+
             //上下文拦截器
             this.commandInterceptors.add(new CommandContextInterceptor(this));
 
@@ -147,4 +150,6 @@ public class SpringJobConfiguration extends AbstractSpringJobConfiguration {
     public JobInstanceService getJobInstanceService() {
         return jobInstanceService;
     }
+
+
 }

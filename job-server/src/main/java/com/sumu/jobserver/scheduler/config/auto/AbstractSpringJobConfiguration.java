@@ -1,6 +1,7 @@
 package com.sumu.jobserver.scheduler.config.auto;
 
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
@@ -15,6 +16,8 @@ public abstract class AbstractSpringJobConfiguration {
 
     protected SqlSessionFactory sqlSessionFactory;
 
+    protected PlatformTransactionManager transactionManager;
+
     public DataSource getDataSource() {
         return dataSource;
     }
@@ -25,5 +28,13 @@ public abstract class AbstractSpringJobConfiguration {
 
     public SqlSessionFactory getSqlSessionFactory() {
         return sqlSessionFactory;
+    }
+
+    public PlatformTransactionManager getTransactionManager() {
+        return transactionManager;
+    }
+
+    public void setTransactionManager(PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
     }
 }
