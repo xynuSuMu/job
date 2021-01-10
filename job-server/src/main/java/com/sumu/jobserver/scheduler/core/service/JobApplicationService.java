@@ -1,5 +1,7 @@
 package com.sumu.jobserver.scheduler.core.service;
 
+import com.sumu.jobserver.scheduler.interceptor.command.cmd.worker.WorkerBuilder;
+
 /**
  * @author 陈龙
  * @version 1.0
@@ -7,6 +9,6 @@ package com.sumu.jobserver.scheduler.core.service;
  */
 public interface JobApplicationService {
 
-    void registerWorker();
+   WorkerBuilder createBuilder();
 
 }

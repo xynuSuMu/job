@@ -30,12 +30,16 @@ public class CommandContext {
 
     protected LinkedList<Object> resultStack = new LinkedList();
 
+    protected Boolean open = false;
+
     public CommandContext(Command<?> command, SpringJobConfiguration springJobConfiguration) {
         this.command = command;
         this.springJobConfiguration = springJobConfiguration;
         this.sqlSessionFactory = springJobConfiguration.getSqlSessionFactory();
-        this.sqlSession = sqlSessionFactory.openSession();
+        //此处开启SqlSession不合理
+//        this.sqlSession = sqlSessionFactory.openSession();
     }
+
 
     public void setException(Throwable exception) {
         this.exception = exception;
@@ -49,7 +53,20 @@ public class CommandContext {
         return this.resultStack.pollLast();
     }
 
+    public Boolean openSqlSession() {
+        return open;
+    }
+
     public SqlSession getSqlSession() {
+        if (sqlSession == null) {
+            synchronized (this) {
+                if (sqlSession == null) {
+                    LOG.info("[JOB] Open SqlSession");
+                    this.sqlSession = sqlSessionFactory.openSession();
+                    this.open = true;
+                }
+            }
+        }
         return sqlSession;
     }
 

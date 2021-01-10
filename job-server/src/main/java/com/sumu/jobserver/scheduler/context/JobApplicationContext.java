@@ -48,7 +48,8 @@ public class JobApplicationContext {
     }
 
     public static void removeCommandContext(CommandContext commandContext) {
-        commandContext.closeSqlSession();
+        if (commandContext.openSqlSession())
+            commandContext.closeSqlSession();
         commandContextThreadLocal.remove();
     }
 

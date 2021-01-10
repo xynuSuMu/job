@@ -3,14 +3,20 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sumu.jobserver.scheduler.mapper.WorkerMapper">
 
-    <insert id="registerWorker">
+    <insert id="registerWorker" >
         insert into JOB_CUSTOM_WORKER (app_id,ip,port,host_name,zxid,enable)
-        values (#{appId},#{ip},#{port},#{hostname},#{zxid},1)
+        values (
+        #{entity.appId},
+        #{entity.ip},
+        #{entity.port},
+        #{entity.hostName},
+        #{entity.zxID}
+        ,1)
         on duplicate key update
-            app_id = IF((#{zxid} > zxid), #{appId}, app_id),
-            host_name = IF((#{zxid} > zxid), #{hostname}, host_name),
-            enable = IF((#{zxid} > zxid), 1, enable),
-             zxid = IF((#{zxid} > zxid), #{zxid}, zxid)
+            app_id = IF((#{entity.zxID} > zxid), #{entity.appId}, app_id),
+            host_name = IF((#{entity.zxID} > zxid), #{entity.hostName}, host_name),
+            enable = IF((#{entity.zxID} > zxid), 1, enable),
+             zxid = IF((#{entity.zxID} > zxid), #{entity.zxID}, zxid)
             ;
     </insert>
 
