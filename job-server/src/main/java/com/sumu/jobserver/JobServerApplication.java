@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@MapperScan("com.sumu.jobserver.scheduler.mapper")
 public class JobServerApplication {
 
     public static void main(String[] args) {

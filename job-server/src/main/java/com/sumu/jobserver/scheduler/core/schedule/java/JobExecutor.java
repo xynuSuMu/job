@@ -5,13 +5,13 @@ import com.sumu.common.util.rpc.RpcResult;
 import com.sumu.common.util.rpc.feign.FeignUtil;
 import com.sumu.jobserver.scheduler.core.schedule.AbstractJobExecutor;
 import com.sumu.jobserver.scheduler.core.schedule.JobDispatcher;
+import com.sumu.jobserver.scheduler.core.service.WorkerService;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.worker.Worker;
 import com.sumu.jobserver.scheduler.modal.enume.JavaJobInfo;
 import com.sumu.jobserver.scheduler.mapper.JobMapper;
-import com.sumu.jobserver.scheduler.mapper.WorkerMapper;
 import com.sumu.jobserver.scheduler.modal.job.JavaJobDO;
 import com.sumu.jobserver.scheduler.modal.job.JobDefinitionDO;
 import com.sumu.jobserver.scheduler.modal.job.JobInstanceDO;
-import com.sumu.jobserver.scheduler.modal.worker.WorkerDO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class JobExecutor extends AbstractJobExecutor {
     private JobMapper jobMapper;
 
     @Autowired
-    private WorkerMapper workerMapper;
+    private WorkerService workerService;
 
     @Autowired
     private JobDispatcher jobDispatcher;
@@ -59,7 +59,12 @@ public class JobExecutor extends AbstractJobExecutor {
         String handlerName = javaJobDO.getHandlerName();
         int strategy = javaJobDO.getStrategy();
         //获取AppID注册的机器
-        List<WorkerDO> workers = workerMapper.getRunWorkerByAppID(appId);
+//        List<WorkerDO> workers = workerMapper.getRunWorkerByAppID(appId);
+        List<Worker> workers = workerService.createQuery()
+                .appId(appId)
+                .enable(true)
+                .list();
+
         //Job实例
         JobInstanceDO jobInstanceDO = new JobInstanceDO();
         jobInstanceDO.setJobDefinitionId(jobDefinitionId);
@@ -86,10 +91,10 @@ public class JobExecutor extends AbstractJobExecutor {
         jobMapper.updateJobInstance(jobInstanceDO);
     }
 
-    private void defaultStrategy(List<WorkerDO> workers, String handlerName, JobInstanceDO jobInstanceDO) {
+    private void defaultStrategy(List<Worker> workers, String handlerName, JobInstanceDO jobInstanceDO) {
         StringBuilder sb = new StringBuilder();
         jobInstanceDO.setTriggerResult(0);
-        for (WorkerDO workerDO : workers) {
+        for (Worker workerDO : workers) {
             RpcAddress rpcAddress = new RpcAddress(workerDO.getIp(), workerDO.getPort());
             sb.append(rpcAddress.getRpcAddress());
             LOG.info("RpcAddress,{},handlerName,{}", rpcAddress.getRpcAddress(), handlerName);
@@ -106,10 +111,10 @@ public class JobExecutor extends AbstractJobExecutor {
         jobInstanceDO.setTriggerWorker(sb.toString());
     }
 
-    private void clusterStrategy(List<WorkerDO> workers, String handlerName, JobInstanceDO jobInstanceDO) {
+    private void clusterStrategy(List<Worker> workers, String handlerName, JobInstanceDO jobInstanceDO) {
         StringBuilder sb = new StringBuilder();
         jobInstanceDO.setTriggerResult(0);
-        for (WorkerDO workerDO : workers) {
+        for (Worker workerDO : workers) {
             RpcAddress rpcAddress = new RpcAddress(workerDO.getIp(), workerDO.getPort());
             sb.append(rpcAddress.getRpcAddress());
             LOG.info("RpcAddress,{},handlerName,{}", rpcAddress.getRpcAddress(), handlerName);
@@ -125,9 +130,9 @@ public class JobExecutor extends AbstractJobExecutor {
     }
 
     //分片策略
-    private void shardStrategy(int toatal, List<WorkerDO> workers, String handlerName, JobInstanceDO jobInstanceDO) {
+    private void shardStrategy(int toatal, List<Worker> workers, String handlerName, JobInstanceDO jobInstanceDO) {
         //
-        Map<WorkerDO, List<Integer>> map = new HashMap<>();
+        Map<Worker, List<Integer>> map = new HashMap<>();
         //分片索引
         int[] shard = new int[toatal];
         for (int i = 0; i < toatal; ++i) {
@@ -158,11 +163,11 @@ public class JobExecutor extends AbstractJobExecutor {
             }
         }
         //
-        Set<Map.Entry<WorkerDO, List<Integer>>> set = map.entrySet();
+        Set<Map.Entry<Worker, List<Integer>>> set = map.entrySet();
         StringBuilder sb = new StringBuilder();
         jobInstanceDO.setTriggerResult(1);
-        for (Map.Entry<WorkerDO, List<Integer>> entry : set) {
-            WorkerDO workerDO = entry.getKey();
+        for (Map.Entry<Worker, List<Integer>> entry : set) {
+            Worker workerDO = entry.getKey();
             //分片索引
             List<Integer> shardIndex = entry.getValue();
             StringBuilder stringBuilder = new StringBuilder();

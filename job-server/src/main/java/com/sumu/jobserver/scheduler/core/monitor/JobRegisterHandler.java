@@ -1,6 +1,8 @@
 package com.sumu.jobserver.scheduler.core.monitor;
 
 import com.sumu.jobserver.scheduler.core.service.JobApplicationService;
+import com.sumu.jobserver.scheduler.core.service.WorkerService;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.app.App;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.worker.Worker;
 import com.sumu.jobserver.scheduler.mapper.AppMapper;
 import com.sumu.jobserver.scheduler.mapper.WorkerMapper;
@@ -18,36 +20,36 @@ import org.springframework.stereotype.Component;
 public class JobRegisterHandler {
 
     @Autowired
-    private AppMapper appMapper;
-
-    @Autowired
-    private WorkerMapper workerMapper;
-
-    @Autowired
     private JobApplicationService jobApplicationService;
 
-    public void register(ZkDataModal zkDataModal, long zxID) {
-        //APP应用注册
-        appMapper.insertAppCode(zkDataModal.getAppName(), zxID);
-        AppDO appDO = appMapper.getByAppName(zkDataModal.getAppName());
+    @Autowired
+    private WorkerService workerService;
+
+    public Worker register(ZkDataModal zkDataModal, long zxID) {
+
+        //应用创建->查询
+        App app = jobApplicationService.createAppBuilder()
+                .appCode(zkDataModal.getAppName())
+                .zxID(zxID)
+                .create();
+
         //机器注册
-//        workerMapper.registerWorker(appDO.getId(),
-//                zkDataModal.getHostName(),
-//                zkDataModal.getIp(),
-//                zkDataModal.getPort(),
-//                zxID);
-        Worker worker = jobApplicationService.createBuilder()
-                .appId(appDO.getId())
+        Worker worker = workerService.createBuilder()
+                .appId(app.getID())
                 .ip(zkDataModal.getIp())
                 .port(zkDataModal.getPort())
                 .hostName(zkDataModal.getHostName())
                 .zxID(zxID)
                 .registerWorker();
-
+        return worker;
     }
 
     public void unregister(ZkDataModal zkDataModal, long zxID) {
-        workerMapper.unRegisterWorker(zkDataModal.getIp(), zkDataModal.getPort(), zxID);
+        workerService.createBuilder()
+                .ip(zkDataModal.getIp())
+                .port(zkDataModal.getPort())
+                .zxID(zxID)
+                .unRegisterWorker();
     }
 
 }

@@ -2,10 +2,14 @@ package com.sumu.jobserver.scheduler.core.service.impl;
 
 import com.sumu.jobserver.scheduler.core.service.JobApplicationService;
 import com.sumu.jobserver.scheduler.interceptor.command.Command;
-import com.sumu.jobserver.scheduler.interceptor.command.cmd.worker.RegisterWorkerCommand;
-import com.sumu.jobserver.scheduler.interceptor.command.cmd.worker.WorkerBuilder;
+import com.sumu.jobserver.scheduler.interceptor.command.cmd.app.AppBuilder;
+import com.sumu.jobserver.scheduler.interceptor.command.cmd.app.AppQuery;
+import com.sumu.jobserver.scheduler.interceptor.command.cmd.app.CreateAppCommand;
+import com.sumu.jobserver.scheduler.interceptor.command.cmd.app.QueryAppCommand;
 import com.sumu.jobserver.scheduler.interceptor.command.context.CommandContext;
-import com.sumu.jobserver.scheduler.interceptor.command.entity.data.worker.Worker;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.app.App;
+
+import java.util.List;
 
 /**
  * @author 陈龙
@@ -14,18 +18,33 @@ import com.sumu.jobserver.scheduler.interceptor.command.entity.data.worker.Worke
  */
 public class JobApplicationServiceImpl extends ServiceImpl implements JobApplicationService {
 
+
     @Override
-    public WorkerBuilder createBuilder() {
-        return this.commandExecutor.execute(new Command<WorkerBuilder>() {
+    public AppBuilder createAppBuilder() {
+        return this.commandExecutor.execute(new Command<AppBuilder>() {
             @Override
-            public WorkerBuilder execute(CommandContext commandContext) {
-                return new WorkerBuilder(JobApplicationServiceImpl.this);
+            public AppBuilder execute(CommandContext commandContext) {
+                return new AppBuilder(JobApplicationServiceImpl.this);
             }
         });
     }
 
-    public Worker registerWorker(WorkerBuilder worker) {
-        Worker res = this.commandExecutor.execute(new RegisterWorkerCommand(worker));
-        return res;
+    @Override
+    public AppQuery createAppQuery() {
+        return this.commandExecutor.execute(new Command<AppQuery>() {
+            @Override
+            public AppQuery execute(CommandContext commandContext) {
+                return new AppQuery(JobApplicationServiceImpl.this);
+            }
+        });
     }
+
+    public App create(AppBuilder appBuilder) {
+        return this.commandExecutor.execute(new CreateAppCommand(appBuilder));
+    }
+
+    public List<App> query(AppQuery appQuery) {
+        return this.commandExecutor.execute(new QueryAppCommand(appQuery));
+    }
+
 }

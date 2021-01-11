@@ -1,5 +1,7 @@
 package com.sumu.jobserver.scheduler.core.service;
 
+import com.sumu.jobserver.scheduler.interceptor.command.cmd.app.AppBuilder;
+import com.sumu.jobserver.scheduler.interceptor.command.cmd.app.AppQuery;
 import com.sumu.jobserver.scheduler.interceptor.command.cmd.worker.WorkerBuilder;
 
 /**
@@ -9,6 +11,7 @@ import com.sumu.jobserver.scheduler.interceptor.command.cmd.worker.WorkerBuilder
  */
 public interface JobApplicationService {
 
-   WorkerBuilder createBuilder();
+    AppBuilder createAppBuilder();
 
+    AppQuery createAppQuery();
 }

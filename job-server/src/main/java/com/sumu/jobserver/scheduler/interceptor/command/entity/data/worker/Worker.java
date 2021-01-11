@@ -18,4 +18,6 @@ public interface Worker {
     int getPort();
 
     long getZxID();
+
+    Boolean getEnable();
 }

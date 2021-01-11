@@ -21,12 +21,21 @@ public class RegisterWorkerCommand implements Command<Worker> {
     @Override
     public Worker execute(CommandContext commandContext) {
         //todo:workMapper应该被管理
-        WorkerMapper workerMapper = commandContext.getSqlSession().getMapper(WorkerMapper.class);
+        WorkerMapper workerMapper = commandContext.getSqlSession()
+                .getMapper(WorkerMapper.class);
 
-//        机器注册
-        workerMapper.registerWorker(workerBuilder.getWorkerEntity());
-//        throw new RuntimeException("1111");
-        return null;
+        if (workerBuilder.getRegister()) {
+            // 机器注册
+            workerMapper.registerWorker(workerBuilder.getWorkerEntity());
+        } else {
+            // 机器下线
+            workerMapper.unRegisterWorker(
+                    workerBuilder.getWorkerEntity().getIp(),
+                    workerBuilder.getWorkerEntity().getPort(),
+                    workerBuilder.getWorkerEntity().getZxID()
+            );
+        }
+        return workerBuilder.getWorkerEntity();
     }
 
 }

@@ -2,6 +2,7 @@ package com.sumu.jobserver.api.service;
 
 import com.sumu.jobserver.api.vo.AppVO;
 import com.sumu.jobserver.scheduler.core.service.JobApplicationService;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.app.App;
 import com.sumu.jobserver.scheduler.mapper.AppMapper;
 import com.sumu.jobserver.scheduler.modal.app.AppDO;
 import org.springframework.beans.BeanUtils;
@@ -20,18 +21,15 @@ import java.util.List;
 public class AppService {
 
     @Autowired
-    private AppMapper appMapper;
-
-    @Autowired
     private JobApplicationService jobApplicationService;
 
     public List<AppVO> getAppList() {
-
         List<AppVO> res = new ArrayList<>();
-        List<AppDO> list = appMapper.getApps();
+        List<App> list = jobApplicationService.createAppQuery().list();
         list.stream().forEach(appDO -> {
             AppVO appVO = new AppVO();
-            BeanUtils.copyProperties(appDO, appVO);
+            appVO.setAppName(appDO.getAppCode());
+            appVO.setId(appDO.getID());
             res.add(appVO);
         });
 

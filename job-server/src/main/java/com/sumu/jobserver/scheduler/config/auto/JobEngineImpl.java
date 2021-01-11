@@ -3,6 +3,7 @@ package com.sumu.jobserver.scheduler.config.auto;
 import com.sumu.jobserver.scheduler.core.service.JobApplicationService;
 import com.sumu.jobserver.scheduler.core.service.JobDefinitionService;
 import com.sumu.jobserver.scheduler.core.service.JobInstanceService;
+import com.sumu.jobserver.scheduler.core.service.WorkerService;
 
 /**
  * @author 陈龙
@@ -16,15 +17,23 @@ public class JobEngineImpl implements JobEngine {
 
     private JobInstanceService jobInstanceService;
 
+    private WorkerService workerService;
+
     public JobEngineImpl(SpringJobConfiguration springJobConfiguration) {
         jobApplicationService = springJobConfiguration.getJobApplicationService();
         jobDefinitionService = springJobConfiguration.getJobDefinitionService();
         jobInstanceService = springJobConfiguration.getJobInstanceService();
+        workerService = springJobConfiguration.getWorkerService();
     }
 
     @Override
     public JobApplicationService getJobApplicationService() {
         return jobApplicationService;
+    }
+
+    @Override
+    public WorkerService getWorkerService() {
+        return workerService;
     }
 
     @Override

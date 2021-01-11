@@ -3,10 +3,8 @@ package com.sumu.jobserver.scheduler.config.auto;
 import com.sumu.jobserver.scheduler.core.service.JobApplicationService;
 import com.sumu.jobserver.scheduler.core.service.JobDefinitionService;
 import com.sumu.jobserver.scheduler.core.service.JobInstanceService;
-import com.sumu.jobserver.scheduler.core.service.impl.JobApplicationServiceImpl;
-import com.sumu.jobserver.scheduler.core.service.impl.JobDefinitionServiceImpl;
-import com.sumu.jobserver.scheduler.core.service.impl.JobInstanceServiceImpl;
-import com.sumu.jobserver.scheduler.core.service.impl.ServiceImpl;
+import com.sumu.jobserver.scheduler.core.service.WorkerService;
+import com.sumu.jobserver.scheduler.core.service.impl.*;
 import com.sumu.jobserver.scheduler.exception.JobException;
 import com.sumu.jobserver.scheduler.interceptor.*;
 import com.sumu.jobserver.scheduler.interceptor.executor.CommandExecutor;
@@ -41,6 +39,8 @@ public class SpringJobConfiguration extends AbstractSpringJobConfiguration {
     protected List<CommandInterceptor> commandInterceptors;
 
     protected JobApplicationService jobApplicationService = new JobApplicationServiceImpl();
+
+    protected WorkerService workerService = new WorkerServiceImpl();
 
     protected JobDefinitionService jobDefinitionService = new JobDefinitionServiceImpl();
 
@@ -100,6 +100,7 @@ public class SpringJobConfiguration extends AbstractSpringJobConfiguration {
 
     private void initService() {
         this.initServiceCommandExecutor(this.jobApplicationService);
+        this.initServiceCommandExecutor(this.workerService);
         this.initServiceCommandExecutor(this.jobDefinitionService);
         this.initServiceCommandExecutor(this.jobInstanceService);
     }
@@ -149,6 +150,10 @@ public class SpringJobConfiguration extends AbstractSpringJobConfiguration {
 
     public JobInstanceService getJobInstanceService() {
         return jobInstanceService;
+    }
+
+    public WorkerService getWorkerService() {
+        return workerService;
     }
 
 

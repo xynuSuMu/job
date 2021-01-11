@@ -3,6 +3,7 @@ package com.sumu.jobserver.scheduler.config.auto;
 import com.sumu.jobserver.scheduler.core.service.JobApplicationService;
 import com.sumu.jobserver.scheduler.core.service.JobDefinitionService;
 import com.sumu.jobserver.scheduler.core.service.JobInstanceService;
+import com.sumu.jobserver.scheduler.core.service.WorkerService;
 
 /**
  * @author 陈龙
@@ -12,6 +13,8 @@ import com.sumu.jobserver.scheduler.core.service.JobInstanceService;
 public interface JobEngine {
 
     JobApplicationService getJobApplicationService();
+
+    WorkerService getWorkerService();
 
     JobDefinitionService getJobDefinitionService();
 

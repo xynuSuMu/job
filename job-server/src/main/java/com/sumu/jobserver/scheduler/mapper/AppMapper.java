@@ -1,6 +1,8 @@
 package com.sumu.jobserver.scheduler.mapper;
 
-import com.sumu.jobserver.scheduler.modal.app.AppDO;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.app.AppEntity;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.app.AppEntityImpl;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -13,17 +15,16 @@ import java.util.List;
  * @date 2020-12-21 20:50
  */
 @Repository
+@Mapper
 public interface AppMapper {
 
+    List<AppEntityImpl> queryApp(@Param("appEntity") AppEntity appEntity);
 
-    @Select("select id, app_code as appName from JOB_CUSTOM_APP")
-    List<AppDO> getApps();
 
-    @Select("select id, app_code as appName from JOB_CUSTOM_APP where id = #{id}")
-    AppDO getAppById(@Param("id") int id);
+    @Select("select id, app_code as appCode,zxid as zxID,update_time as updateTime " +
+            " from JOB_CUSTOM_APP where app_code = #{appCode}")
+    AppEntityImpl getByAppCode(@Param("appCode") String appCode);
 
-    @Select("select id, app_code as appName from JOB_CUSTOM_APP where app_code = #{appName}")
-    AppDO getByAppName(String appName);
 
     void insertAppCode(@Param("appCode") String appCode, @Param("zxid") long zxid);
 

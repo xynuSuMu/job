@@ -5,6 +5,7 @@ import com.sumu.jobserver.api.vo.query.JobInstanceQuery;
 import com.sumu.jobserver.scheduler.modal.job.JavaJobDO;
 import com.sumu.jobserver.scheduler.modal.job.JobDefinitionDO;
 import com.sumu.jobserver.scheduler.modal.job.JobInstanceDO;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -17,6 +18,8 @@ import java.util.List;
  * @date 2020-12-21 20:50
  */
 @Repository
+
+@Mapper
 public interface JobMapper {
 
     @Select("select count(id) from JOB_CUSTOM_JOB_DEFINITION where job_name  = #{jobName}")

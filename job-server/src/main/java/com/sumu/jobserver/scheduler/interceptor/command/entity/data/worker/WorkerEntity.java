@@ -7,7 +7,11 @@ package com.sumu.jobserver.scheduler.interceptor.command.entity.data.worker;
  */
 public interface WorkerEntity extends Worker {
 
+    void setId(int appID);
+
     void setAppID(int appID);
+
+    void setEnable(Boolean enable);
 
     void setHostName(String hostName);
 

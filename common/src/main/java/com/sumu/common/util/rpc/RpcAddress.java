@@ -9,9 +9,9 @@ public class RpcAddress {
 
     private String ip;
 
-    private String port;
+    private int port;
 
-    public RpcAddress(String ip, String port) {
+    public RpcAddress(String ip, int  port) {
         this.ip = ip;
         this.port = port;
     }

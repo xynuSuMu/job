@@ -12,7 +12,9 @@ public class WorkerEntityImpl implements WorkerEntity {
     private String ip;
     private int port;
     private long zxID;
+    private Boolean enable;
 
+    @Override
     public void setId(int id) {
         this.id = id;
     }
@@ -20,6 +22,11 @@ public class WorkerEntityImpl implements WorkerEntity {
     @Override
     public void setAppID(int appID) {
         this.appId = appID;
+    }
+
+    @Override
+    public void setEnable(Boolean enable) {
+        this.enable = enable;
     }
 
     @Override
@@ -70,5 +77,10 @@ public class WorkerEntityImpl implements WorkerEntity {
     @Override
     public long getZxID() {
         return zxID;
+    }
+
+    @Override
+    public Boolean getEnable() {
+        return this.enable;
     }
 }

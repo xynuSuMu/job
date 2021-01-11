@@ -1,6 +1,6 @@
 package com.sumu.jobserver.scheduler.interceptor.command.cmd.worker;
 
-import com.sumu.jobserver.scheduler.core.service.impl.JobApplicationServiceImpl;
+import com.sumu.jobserver.scheduler.core.service.impl.WorkerServiceImpl;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.worker.Worker;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.worker.WorkerEntity;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.worker.WorkerEntityImpl;
@@ -14,10 +14,13 @@ public class WorkerBuilder {
 
     private WorkerEntity workerEntity;
 
-    private JobApplicationServiceImpl jobApplicationService;
+    private WorkerServiceImpl workerService;
 
-    public WorkerBuilder(JobApplicationServiceImpl jobApplicationService) {
-        this.jobApplicationService = jobApplicationService;
+    private Boolean register = true;
+
+
+    public WorkerBuilder(WorkerServiceImpl workerService) {
+        this.workerService = workerService;
         this.workerEntity = new WorkerEntityImpl();
     }
 
@@ -46,11 +49,20 @@ public class WorkerBuilder {
         return this;
     }
 
+    public Boolean getRegister() {
+        return register;
+    }
+
     public WorkerEntity getWorkerEntity() {
         return workerEntity;
     }
 
     public Worker registerWorker() {
-        return this.jobApplicationService.registerWorker(this);
+        return this.workerService.registerWorker(this);
+    }
+
+    public Worker unRegisterWorker() {
+        this.register = false;
+        return this.workerService.unRegisterWorker(this);
     }
 }

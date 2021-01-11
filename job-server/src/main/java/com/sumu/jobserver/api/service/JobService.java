@@ -9,13 +9,13 @@ import com.sumu.jobserver.api.vo.query.JobDefinitionQuery;
 import com.sumu.jobserver.api.vo.query.JobInstanceQuery;
 import com.sumu.jobserver.scheduler.core.schedule.JobDispatcher;
 import com.sumu.jobserver.scheduler.core.schedule.JobSchedule;
+import com.sumu.jobserver.scheduler.core.service.JobApplicationService;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.app.App;
 import com.sumu.jobserver.scheduler.modal.enume.JavaJobInfo;
 import com.sumu.jobserver.scheduler.modal.enume.JobInfo;
 import com.sumu.jobserver.scheduler.exception.JobException;
 import com.sumu.jobserver.scheduler.exception.JobExceptionInfo;
-import com.sumu.jobserver.scheduler.mapper.AppMapper;
 import com.sumu.jobserver.scheduler.mapper.JobMapper;
-import com.sumu.jobserver.scheduler.modal.app.AppDO;
 import com.sumu.jobserver.scheduler.modal.job.JavaJobDO;
 import com.sumu.jobserver.scheduler.modal.job.JobDefinitionDO;
 import com.sumu.jobserver.scheduler.modal.job.JobInstanceDO;
@@ -42,8 +42,9 @@ public class JobService {
     @Autowired
     private JobMapper jobMapper;
 
+
     @Autowired
-    private AppMapper appMapper;
+    private JobApplicationService jobApplicationService;
 
     @Autowired
     private JobSchedule jobSchedule;
@@ -54,7 +55,8 @@ public class JobService {
     @Transactional(rollbackFor = Exception.class)
     public void addJob(AddJobVO addJobVO) throws SchedulerException {
         //
-        AppDO appDO = appMapper.getAppById(addJobVO.getAppId());
+//        AppDO appDO = appMapper.getAppById(addJobVO.getAppId());
+        App appDO = jobApplicationService.createAppQuery().id(addJobVO.getId()).singleResult();
         Assert.isTrue(appDO != null, "当前应用不存在");
         String jobName = addJobVO.getJobName();
         int count = jobMapper.countByJobName(jobName);
@@ -84,7 +86,7 @@ public class JobService {
         //增加到调度中心
         if (addJobVO.getEnable()) {
             jobSchedule.addJob(String.valueOf(jobDefinitionDO.getId()),
-                    appDO.getAppName(),
+                    appDO.getAppCode(),
                     addJobVO.getCron());
         }
     }
@@ -114,8 +116,8 @@ public class JobService {
         Assert.isTrue(jobDefinitionDO != null, "JobDefinitionId不存在");
         //删除
         jobMapper.removeJobDefinition(jobDefinitionDO.getId());
-        AppDO appDO = appMapper.getAppById(jobDefinitionDO.getAppId());
-        jobSchedule.removeIfExist(String.valueOf(jobDefinitionDO.getId()), appDO.getAppName());
+        App appDO = jobApplicationService.createAppQuery().id(addJobVO.getId()).singleResult();
+        jobSchedule.removeIfExist(String.valueOf(jobDefinitionDO.getId()), appDO.getAppCode());
         //新增
         addJob(addJobVO);
     }
@@ -124,9 +126,10 @@ public class JobService {
     public void pause(int id) throws SchedulerException {
         JobDefinitionDO jobDefinitionDO = jobMapper.getJobDefinitionByID(String.valueOf(id));
         Assert.isTrue(jobDefinitionDO != null, "当前任务不存在");
-        AppDO appDO = appMapper.getAppById(jobDefinitionDO.getAppId());
+        App appDO = jobApplicationService.createAppQuery().id(jobDefinitionDO.getAppId())
+                .singleResult();
         jobMapper.updateJobDefinitionState(id, false);
-        jobSchedule.removeIfExist(String.valueOf(jobDefinitionDO.getId()), appDO.getAppName());
+        jobSchedule.removeIfExist(String.valueOf(jobDefinitionDO.getId()), appDO.getAppCode());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -139,11 +142,12 @@ public class JobService {
     public void resume(int id) throws SchedulerException {
         JobDefinitionDO jobDefinitionDO = jobMapper.getJobDefinitionByID(String.valueOf(id));
         Assert.isTrue(jobDefinitionDO != null, "当前任务不存在");
-        AppDO appDO = appMapper.getAppById(jobDefinitionDO.getAppId());
+        App appDO = jobApplicationService.createAppQuery().id(jobDefinitionDO.getAppId())
+                .singleResult();
         jobMapper.updateJobDefinitionState(id, true);
         //增加到调度中心
         jobSchedule.addJob(String.valueOf(jobDefinitionDO.getId()),
-                appDO.getAppName(),
+                appDO.getAppCode(),
                 jobDefinitionDO.getCron());
     }
 
@@ -156,8 +160,9 @@ public class JobService {
             return new ArrayList<>();
 
 //        List<Integer> definitionIds = list.stream().map(jobDefinitionDO -> jobDefinitionDO.getId()).collect(Collectors.toList());
-        //APP Info
-        Map<Integer, AppDO> map = appMapper.getApps().stream().collect(Collectors.toMap(AppDO::getId, Function.identity()));
+        Map<Integer, App> map  = jobApplicationService.createAppQuery().list().stream()
+                .collect(Collectors.toMap(App::getID, Function.identity())); //APP Info
+
         //
 //        Map<Integer, JavaJobDO> javaJobDOS = jobMapper.getJavaJobDefinitionByDefIds(definitionIds).stream()
 //                .collect((Collectors.toMap(JavaJobDO::getDefinitionID, Function.identity())));
@@ -166,7 +171,7 @@ public class JobService {
             JobDefinitionVO jobDefinitionVO = new JobDefinitionVO();
             jobDefinitionVO.setId(jobDefinitionDO.getId());
             jobDefinitionVO.setPostDefinitionID(jobDefinitionDO.getPostDefinitionID());
-            jobDefinitionVO.setAppName(map.get(jobDefinitionDO.getAppId()).getAppName());
+            jobDefinitionVO.setAppName(map.get(jobDefinitionDO.getAppId()).getAppCode());
             jobDefinitionVO.setCron(jobDefinitionDO.getCron());
             jobDefinitionVO.setTaskType(jobDefinitionDO.getTaskType());
             jobDefinitionVO.setEnable(jobDefinitionDO.getEnable());
@@ -186,7 +191,11 @@ public class JobService {
         JobDefinitionDO jobDefinitionDO = jobMapper.getJobDefinitionByID(String.valueOf(id));
 
         //APP Info
-        Map<Integer, AppDO> map = appMapper.getApps().stream().collect(Collectors.toMap(AppDO::getId, Function.identity()));
+//        Map<Integer, AppDO> map = appMapper
+//                .getApps().stream()
+//                .collect(Collectors.toMap(AppDO::getId, Function.identity()));
+        Map<Integer, App> map  = jobApplicationService.createAppQuery().list().stream()
+                .collect(Collectors.toMap(App::getID, Function.identity()));
         //
         JavaJobDO javaJobDO = jobMapper.getJavaJobDefinitionByDefId(id);
 
@@ -194,8 +203,8 @@ public class JobService {
         JobDefinitionVO jobDefinitionVO = new JobDefinitionVO();
         jobDefinitionVO.setId(jobDefinitionDO.getId());
         if (map.containsKey(jobDefinitionDO.getAppId())) {
-            jobDefinitionVO.setAppName(map.get(jobDefinitionDO.getAppId()).getAppName());
-            jobDefinitionVO.setAppId(map.get(jobDefinitionDO.getAppId()).getId());
+            jobDefinitionVO.setAppName(map.get(jobDefinitionDO.getAppId()).getAppCode());
+            jobDefinitionVO.setAppId(map.get(jobDefinitionDO.getAppId()).getID());
         }
         jobDefinitionVO.setCron(jobDefinitionDO.getCron());
         jobDefinitionVO.setTaskType(jobDefinitionDO.getTaskType());

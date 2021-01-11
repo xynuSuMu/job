@@ -4,6 +4,7 @@ import com.sumu.jobserver.scheduler.config.properties.JobProperties;
 import com.sumu.jobserver.scheduler.core.service.JobApplicationService;
 import com.sumu.jobserver.scheduler.core.service.JobDefinitionService;
 import com.sumu.jobserver.scheduler.core.service.JobInstanceService;
+import com.sumu.jobserver.scheduler.core.service.WorkerService;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -46,6 +47,12 @@ public class SpringJobEngineAutoConfiguration {
     @ConditionalOnMissingBean
     public JobApplicationService jobApplicationService(JobEngine jobEngine) {
         return jobEngine.getJobApplicationService();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public WorkerService workerService(JobEngine jobEngine) {
+        return jobEngine.getWorkerService();
     }
 
     @Bean
