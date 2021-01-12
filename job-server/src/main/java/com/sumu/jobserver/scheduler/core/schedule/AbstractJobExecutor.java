@@ -1,5 +1,8 @@
 package com.sumu.jobserver.scheduler.core.schedule;
 
+import com.sumu.jobserver.scheduler.core.service.JobDefinitionService;
+import com.sumu.jobserver.scheduler.core.service.impl.JobDefinitionServiceImpl;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.JobDefinition;
 import com.sumu.jobserver.scheduler.mapper.JobMapper;
 import com.sumu.jobserver.scheduler.modal.job.JobDefinitionDO;
 import com.sumu.jobserver.util.SpringContextUtils;
@@ -15,21 +18,25 @@ public abstract class AbstractJobExecutor {
 
     private Logger LOG = LoggerFactory.getLogger(AbstractJobExecutor.class);
 
-    private JobDefinitionDO prepareJobDefinition(String jobDefinitionId) {
-        JobMapper jobMapper = SpringContextUtils.getBean(JobMapper.class);
-        JobDefinitionDO jobDefinitionDO = jobMapper.getJobDefinitionByID(jobDefinitionId);
-        return jobDefinitionDO;
+    private JobDefinition prepareJobDefinition(String jobDefinitionId) {
+        JobDefinitionService jobDefinitionService =
+                SpringContextUtils.getBean(JobDefinitionServiceImpl.class);
+        JobDefinition jobDefinition =
+                jobDefinitionService.createQuery()
+                        .id(Integer.valueOf(jobDefinitionId))
+                        .singleResult();
+        return jobDefinition;
     }
 
     public void executor(String jobDefinitionId) {
-        JobDefinitionDO jobDefinitionDO = this.prepareJobDefinition(jobDefinitionId);
+        JobDefinition jobDefinitionDO = this.prepareJobDefinition(jobDefinitionId);
         executorByQuartz(jobDefinitionDO);
         finish(jobDefinitionDO);
     }
 
-    public abstract void executorByQuartz(JobDefinitionDO jobDefinitionDO);
+    public abstract void executorByQuartz(JobDefinition jobDefinitionDO);
 
-    public void finish(JobDefinitionDO jobDefinitionDO) {
+    public void finish(JobDefinition jobDefinitionDO) {
         LOG.info("[ Job Schedule Finish ] jobName={},cron={}", jobDefinitionDO.getJobName(), jobDefinitionDO.getCron());
     }
 

@@ -1,7 +1,7 @@
 package com.sumu.jobserver.scheduler.core.schedule.shell;
 
 import com.sumu.jobserver.scheduler.core.schedule.AbstractJobExecutor;
-import com.sumu.jobserver.scheduler.modal.job.JobDefinitionDO;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.JobDefinition;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class ShellExecutor extends AbstractJobExecutor {
 
     @Override
-    public void executorByQuartz(JobDefinitionDO jobDefinitionDO) {
+    public void executorByQuartz(JobDefinition jobDefinitionDO) {
 
     }
 }

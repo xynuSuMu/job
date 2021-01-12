@@ -8,8 +8,6 @@ package com.sumu.jobserver.api.vo.query;
 public class JobDefinitionQuery {
 
     private String appID;
-    private String handlerName;
-
     private int pageIndex;
     private int pageSize;
 
@@ -22,13 +20,6 @@ public class JobDefinitionQuery {
         this.appID = appID;
     }
 
-    public String getHandlerName() {
-        return handlerName;
-    }
-
-    public void setHandlerName(String handlerName) {
-        this.handlerName = handlerName;
-    }
 
     public int getPageIndex() {
         return pageIndex;

@@ -1,13 +1,18 @@
 package com.sumu.jobserver.scheduler.mapper;
 
-import com.sumu.jobserver.api.vo.query.JobDefinitionQuery;
+
 import com.sumu.jobserver.api.vo.query.JobInstanceQuery;
-import com.sumu.jobserver.scheduler.modal.job.JavaJobDO;
-import com.sumu.jobserver.scheduler.modal.job.JobDefinitionDO;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.common.Page;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.JobDefinitionEntity;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.JobDefinitionEntityImpl;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.java.JavaJobDefinition;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.java.JavaJobDefinitionEntity;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.instance.JobInstance;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.instance.JobInstanceEntity;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.instance.JobInstanceEntityImpl;
 import com.sumu.jobserver.scheduler.modal.job.JobInstanceDO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,34 +23,33 @@ import java.util.List;
  * @date 2020-12-21 20:50
  */
 @Repository
-
 @Mapper
 public interface JobMapper {
 
-    @Select("select count(id) from JOB_CUSTOM_JOB_DEFINITION where job_name  = #{jobName}")
-    int countByJobName(@Param("jobName") String jobName);
+    Integer insertJobDefinition(JobDefinitionEntity jobDefinition);
 
-    JobDefinitionDO getJobDefinitionByID(@Param("id") String id);
+    Integer updateJobDefinition(@Param("jobDefinition") JobDefinitionEntity jobDefinition);
 
-    String getPostJobDefinitionID(@Param("id") String id);
+    int insertJavaJobDefinition(JavaJobDefinitionEntity javaJobDefinitionEntity);
 
-    JavaJobDO getJavaJobDefinitionByDefId(@Param("definitionID") int definitionID);
+    Integer count(@Param("jobDefinition") JobDefinitionEntity jobDefinition);
 
-    List<JavaJobDO> getJavaJobDefinitionByDefIds(@Param("definitionIDs") List<Integer> definitionIDs);
+    List<JobDefinitionEntityImpl> getJobDefinitions(
+            @Param("jobDefinition") JobDefinitionEntity jobDefinition,
+            @Param("page") Page page);
 
-    List<JobDefinitionDO> jobDefinitionList(@Param("jobDefinitionQuery") JobDefinitionQuery jobDefinitionQuery);
+    JavaJobDefinition getJavaJobDefinition(@Param("javaJobDefinition") JavaJobDefinition javaJobDefinition);
 
-    List<JobInstanceDO> jobInstanceList(@Param("jobInstanceQuery") JobInstanceQuery jobInstanceQuery);
-
-    int insertJobDefinition(JobDefinitionDO jobDefinitionDO);
-
-    int insertJavaJobDefinition(JavaJobDO javaJobDO);
-
-    int updateJobDefinitionState(@Param("id") int id, @Param("state") boolean state);
 
     int removeJobDefinition(@Param("id") int id);
 
-    int insertJobInstance(JobInstanceDO jobInstanceDO);
+    int insertJobInstance(@Param("jobInstanceEntity") JobInstanceEntity jobInstanceEntity);
 
-    int updateJobInstance(JobInstanceDO jobInstanceDO);
+    int updateJobInstance(@Param("jobInstanceEntity") JobInstanceEntity jobInstanceEntity);
+
+
+    List<JobInstanceEntityImpl> jobInstanceList(@Param("jobInstanceEntity") JobInstanceEntity jobInstanceEntity,
+                                                @Param("page") Page page
+    );
+
 }

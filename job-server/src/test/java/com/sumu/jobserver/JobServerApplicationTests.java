@@ -28,6 +28,7 @@ class JobServerApplicationTests {
     @Autowired
     private JobApi jobApi;
 
+
     @Test
     void appTest() {
         LOG.info("[ TEST ] app list ,{}", JSONObject.toJSONString(appApi.getAppList()));

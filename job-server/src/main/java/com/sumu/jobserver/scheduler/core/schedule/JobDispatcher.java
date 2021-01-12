@@ -1,5 +1,7 @@
 package com.sumu.jobserver.scheduler.core.schedule;
 
+import com.sumu.jobserver.scheduler.core.service.JobDefinitionService;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.JobDefinition;
 import com.sumu.jobserver.scheduler.modal.enume.JobInfo;
 import com.sumu.jobserver.scheduler.mapper.JobMapper;
 import com.sumu.jobserver.scheduler.modal.job.JobDefinitionDO;
@@ -32,12 +34,17 @@ public class JobDispatcher {
             new LinkedBlockingQueue<>(100000),
             new ThreadPoolExecutor.CallerRunsPolicy());
 
+
     @Autowired
-    private JobMapper jobMapper;
+    private JobDefinitionService jobDefinitionService;
+
 
     public void schedule(String jobDefinitionId) {
         LOG.info("[JobDefinitionId={}] Executor Job ", jobDefinitionId);
-        JobDefinitionDO jobDefinitionDO = jobMapper.getJobDefinitionByID(jobDefinitionId);
+        JobDefinition jobDefinitionDO =
+                jobDefinitionService.createQuery()
+                        .id(Integer.valueOf(jobDefinitionId))
+                        .singleResult();
         Class<? extends AbstractJobExecutor> clazz = JobInfo.Type.getClazzByCode(jobDefinitionDO.getTaskType());
         AbstractJobExecutor abstractJobExecutor = SpringContextUtils.getBean(clazz);
         triggerPool.submit(() -> {

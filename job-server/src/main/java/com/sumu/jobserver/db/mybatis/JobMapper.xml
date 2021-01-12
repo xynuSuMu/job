@@ -3,7 +3,8 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sumu.jobserver.scheduler.mapper.JobMapper">
 
-    <insert id="insertJobDefinition" parameterType="com.sumu.jobserver.scheduler.modal.job.JobDefinitionDO"
+    <insert id="insertJobDefinition"
+            parameterType="com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.JobDefinitionEntity"
             useGeneratedKeys="true"
             keyProperty="id" keyColumn="id">
             insert into JOB_CUSTOM_JOB_DEFINITION(
@@ -26,7 +27,38 @@
             )
     </insert>
 
-    <insert id="insertJavaJobDefinition" parameterType="com.sumu.jobserver.scheduler.modal.job.JavaJobDO"
+    <update id="updateJobDefinition">
+        update JOB_CUSTOM_JOB_DEFINITION
+        <set>
+            <if test="jobDefinition.appId>0">
+                app_id = #{jobDefinition.appId},
+            </if>
+            <if test="jobDefinition.jobName!=null and jobDefinition.jobName!='' ">
+                job_name = #{jobDefinition.jobName},
+            </if>
+            <if test="jobDefinition.jobDesc!=null and jobDefinition.jobDesc!='' ">
+                job_desc = #{jobDefinition.jobDesc},
+            </if>
+            <if test="jobDefinition.cron!=null and jobDefinition.cron!='' ">
+                job_cron = #{jobDefinition.cron},
+            </if>
+            <if test="jobDefinition.enable!=null">
+                enable = #{jobDefinition.enable},
+            </if>
+            <if test="jobDefinition.taskType>0">
+                task_type = #{jobDefinition.taskType},
+            </if>
+            <if test="jobDefinition.postDefinitionID > 0">
+                post_definition = #{jobDefinition.postDefinitionID},
+            </if>
+        </set>
+        <where>
+            id = #{jobDefinition.id}
+        </where>
+    </update>
+
+    <insert id="insertJavaJobDefinition"
+            parameterType="com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.java.JavaJobDefinitionEntity"
             useGeneratedKeys="true"
             keyProperty="id" keyColumn="id">
             insert into JOB_CUSTOM_JOB_DEFINITION_JAVA(
@@ -43,109 +75,140 @@
             )
     </insert>
 
-    <insert id="insertJobInstance" parameterType="com.sumu.jobserver.scheduler.modal.job.JobInstanceDO" useGeneratedKeys="true"
+    <insert id="insertJobInstance"
+            parameterType="com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.instance.JobInstanceEntity"
+            useGeneratedKeys="true"
             keyProperty="id" keyColumn="id">
-            insert into JOB_CUSTOM_JOB_INSTANCE(
+           insert into JOB_CUSTOM_JOB_INSTANCE(
             `job_definition_id`,
             `start_time`,
             `trigger_type`
             )
             values (
-                #{jobDefinitionId},
-                #{startTime},
-                #{triggerType}
+                #{jobInstanceEntity.jobDefinitionId},
+                #{jobInstanceEntity.startTime},
+                #{jobInstanceEntity.triggerType}
             )
     </insert>
 
-    <update id="updateJobDefinitionState">
-        UPDATE JOB_CUSTOM_JOB_DEFINITION set enable = #{state}
-        where id = #{id}
+    <update id="updateJobInstance">
+        update JOB_CUSTOM_JOB_INSTANCE
+        <set>
+            <if test="jobInstanceEntity.triggerWorker!=null and jobInstanceEntity.triggerWorker!=''">
+                `trigger_worker` = #{jobInstanceEntity.triggerWorker},
+            </if>
+            <if test="jobInstanceEntity.triggerResult==0 or jobInstanceEntity.triggerResult==1">
+                `trigger_result` = #{jobInstanceEntity.triggerResult},
+            </if>
+            <if test="jobInstanceEntity.endTime!=null">
+                `end_time` = #{jobInstanceEntity.endTime},
+            </if>
+        </set>
+        where id = #{jobInstanceEntity.id}
     </update>
+
+
+    <select id="count" resultType="java.lang.Integer">
+        select count(id) from JOB_CUSTOM_JOB_DEFINITION
+        <if test="jobDefinition!=null">
+            where 1= 1
+            <if test="jobDefinition.id > 0">
+                and id = #{jobDefinition.id}
+            </if>
+            <if test="jobDefinition.appId > 0">
+                and app_id = #{jobDefinition.appId}
+            </if>
+            <if test="jobDefinition.taskType > 0">
+                and task_type = #{jobDefinition.taskType}
+            </if>
+            <if test="jobDefinition.jobName != null and jobDefinition.jobName !='' ">
+                and job_name = #{jobDefinition.jobName}
+            </if>
+            <if test="jobDefinition.jobDesc != null and jobDefinition.jobDesc !='' ">
+                and job_desc = #{jobDefinition.jobDesc}
+            </if>
+            <if test="jobDefinition.cron != null and jobDefinition.cron !='' ">
+                and job_cron = #{jobDefinition.cron}
+            </if>
+            <if test="jobDefinition.enable != null ">
+                and enable = #{jobDefinition.enable}
+            </if>
+            <if test="jobDefinition.postDefinitionID != null  and jobDefinition.postDefinitionID != ''">
+                and post_definition = #{jobDefinition.postDefinitionID}
+            </if>
+        </if>
+    </select>
+
+    <select id="getJobDefinitions" resultMap="jobDefinitionMap">
+        select
+        <include refid="definition_field"/>
+        from JOB_CUSTOM_JOB_DEFINITION
+        <if test="jobDefinition!=null">
+            where 1= 1
+            <if test="jobDefinition.id > 0">
+                and id = #{jobDefinition.id}
+            </if>
+            <if test="jobDefinition.appId > 0">
+                and app_id = #{jobDefinition.appId}
+            </if>
+            <if test="jobDefinition.taskType > 0">
+                and task_type = #{jobDefinition.taskType}
+            </if>
+            <if test="jobDefinition.jobName != null and jobDefinition.jobName !='' ">
+                and job_name = #{jobDefinition.jobName}
+            </if>
+            <if test="jobDefinition.jobDesc != null and jobDefinition.jobDesc !='' ">
+                and job_desc = #{jobDefinition.jobDesc}
+            </if>
+            <if test="jobDefinition.cron != null and jobDefinition.cron !='' ">
+                and job_cron = #{jobDefinition.cron}
+            </if>
+            <if test="jobDefinition.enable != null ">
+                and enable = #{jobDefinition.enable}
+            </if>
+            <if test="jobDefinition.postDefinitionID != null  and jobDefinition.postDefinitionID != ''">
+                and post_definition = #{jobDefinition.postDefinitionID}
+            </if>
+        </if>
+        <if test="page!=null">
+            limit #{page.pageIndex},#{page.pageSize}
+        </if>
+    </select>
+
+    <select id="getJavaJobDefinition" resultMap="javaJobDefinitionMap">
+        select
+        <include refid="java_definition_field"/>
+        from JOB_CUSTOM_JOB_DEFINITION_JAVA
+        <if test="javaJobDefinition!=null">
+            where 1=1
+            <if test="javaJobDefinition.id>0">
+                and id = #{javaJobDefinition.id}
+            </if>
+            <if test="javaJobDefinition.definitionID>0">
+                and definition_id = #{javaJobDefinition.definitionID}
+            </if>
+            <if test="javaJobDefinition.strategy>0">
+                and strategy = #{javaJobDefinition.strategy}
+            </if>
+        </if>
+    </select>
+
+
     <update id="removeJobDefinition">
         DELETE from JOB_CUSTOM_JOB_DEFINITION where id = #{id}
     </update>
 
-    <update id="updateJobInstance" parameterType="com.sumu.jobserver.scheduler.modal.job.JobInstanceDO">
-        update JOB_CUSTOM_JOB_INSTANCE set
-         `trigger_worker` = #{triggerWorker},
-         `trigger_result` = #{triggerResult},
-          `end_time` = #{endTime}
-         where id = #{id}
-    </update>
 
-    <select id="getJobDefinitionByID" resultMap="jobDefinitionMap">
-        select
-        <include refid="definition_column"/>
-        from JOB_CUSTOM_JOB_DEFINITION where id = #{id}
-    </select>
-
-    <select id="getPostJobDefinitionID" resultType="java.lang.String">
-        select
-        post_definition
-        from JOB_CUSTOM_JOB_DEFINITION where id = #{id}
-    </select>
-
-    <select id="jobDefinitionList" parameterType="com.sumu.jobserver.api.vo.query.JobDefinitionQuery"
-            resultMap="jobDefinitionMap">
-        select
-        <include refid="definition_column"/>
-        from
-        JOB_CUSTOM_JOB_DEFINITION
-        where
-        1=1
-        <if test="jobDefinitionQuery.appID!=null">
-            and app_id = #{jobDefinitionQuery.appID}
-        </if>
-        <if test="jobDefinitionQuery.handlerName!=null">
-            and handler_name = #{jobDefinitionQuery.handlerName}
-        </if>
-        limit #{jobDefinitionQuery.pageIndex},#{jobDefinitionQuery.pageSize}
-    </select>
-
-    <select id="jobInstanceList" parameterType="com.sumu.jobserver.api.vo.query.JobInstanceQuery"
-            resultMap="jobInstanceMap">
-        select
-        <include refid="instance_column"/>
-        from
-        JOB_CUSTOM_JOB_INSTANCE
-        where
-
-        job_definition_id = #{jobInstanceQuery.jonDefinitionID}
-        order by id desc
-        limit #{jobInstanceQuery.pageIndex},#{jobInstanceQuery.pageSize}
-    </select>
-
-    <select id="getJavaJobDefinitionByDefId" resultMap="javaJobDefinitionMap">
-        select
-        <include refid="java_definition_column"/>
-        from JOB_CUSTOM_JOB_DEFINITION_JAVA
-        where definition_id = #{definitionID}
-    </select>
-
-    <select id="getJavaJobDefinitionByDefIds" resultMap="javaJobDefinitionMap">
-        select
-        <include refid="java_definition_column"/>
-        from JOB_CUSTOM_JOB_DEFINITION_JAVA
-        where definition_id in (
-        <foreach collection="definitionIDs" item="item" separator=",">
-            #{item}
-        </foreach>
-        )
-    </select>
-
-    <sql id="definition_column">
-         id,app_id,job_name,job_desc,job_cron,enable,task_type,post_definition
+    <sql id="definition_field">
+          id,app_id,job_name,job_desc,job_cron,enable,task_type,post_definition
     </sql>
 
-    <sql id="java_definition_column">
+    <sql id="java_definition_field">
          id,definition_id,handler_name,strategy,shard_num
     </sql>
 
-    <sql id="instance_column">
-        id,job_definition_id,start_time,end_time,trigger_type,trigger_worker,trigger_result
-    </sql>
-
-    <resultMap id="jobDefinitionMap" type="com.sumu.jobserver.scheduler.modal.job.JobDefinitionDO">
+    <resultMap id="jobDefinitionMap"
+               type="com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.JobDefinitionEntityImpl">
         <result property="id" column="id"/>
         <result property="appId" column="app_id"/>
         <result property="jobName" column="job_name"/>
@@ -156,7 +219,8 @@
         <result property="postDefinitionID" column="post_definition"/>
     </resultMap>
 
-    <resultMap id="javaJobDefinitionMap" type="com.sumu.jobserver.scheduler.modal.job.JavaJobDO">
+    <resultMap id="javaJobDefinitionMap"
+               type="com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.java.JavaJobDefinitionEntityImpl">
         <result property="id" column="id"/>
         <result property="definitionID" column="definition_id"/>
         <result property="handlerName" column="handler_name"/>
@@ -164,7 +228,31 @@
         <result property="shardNum" column="shard_num"/>
     </resultMap>
 
-    <resultMap id="jobInstanceMap" type="com.sumu.jobserver.scheduler.modal.job.JobInstanceDO">
+    <select id="jobInstanceList" resultMap="jobInstanceMap">
+        select
+        <include refid="instance_column_field"/>
+        from JOB_CUSTOM_JOB_INSTANCE
+        <if test="jobInstanceEntity!=null">
+            where 1= 1
+            <if test="jobInstanceEntity.id > 0">
+                and id = #{jobInstanceEntity.id}
+            </if>
+            <if test="jobInstanceEntity.jobDefinitionId > 0">
+                and job_definition_id = #{jobInstanceEntity.jobDefinitionId}
+            </if>
+        </if>
+        <if test="page!=null">
+            limit #{page.pageIndex},#{page.pageSize}
+        </if>
+
+    </select>
+
+    <sql id="instance_column_field">
+        id,job_definition_id,start_time,end_time,trigger_type,trigger_worker,trigger_result
+    </sql>
+
+    <resultMap id="jobInstanceMap"
+               type="com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.instance.JobInstanceEntityImpl">
         <result property="id" column="id"/>
         <result property="jobDefinitionId" column="job_definition_id"/>
         <result property="startTime" column="start_time"/>
@@ -173,4 +261,5 @@
         <result property="triggerWorker" column="trigger_worker"/>
         <result property="triggerResult" column="trigger_result"/>
     </resultMap>
+
 </mapper>

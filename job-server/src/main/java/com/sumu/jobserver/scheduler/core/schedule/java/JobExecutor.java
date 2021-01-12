@@ -5,12 +5,16 @@ import com.sumu.common.util.rpc.RpcResult;
 import com.sumu.common.util.rpc.feign.FeignUtil;
 import com.sumu.jobserver.scheduler.core.schedule.AbstractJobExecutor;
 import com.sumu.jobserver.scheduler.core.schedule.JobDispatcher;
+import com.sumu.jobserver.scheduler.core.service.JobDefinitionService;
+import com.sumu.jobserver.scheduler.core.service.JobInstanceService;
 import com.sumu.jobserver.scheduler.core.service.WorkerService;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.JobDefinition;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.java.JavaJobDefinition;
+import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.instance.JobInstance;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.worker.Worker;
 import com.sumu.jobserver.scheduler.modal.enume.JavaJobInfo;
 import com.sumu.jobserver.scheduler.mapper.JobMapper;
 import com.sumu.jobserver.scheduler.modal.job.JavaJobDO;
-import com.sumu.jobserver.scheduler.modal.job.JobDefinitionDO;
 import com.sumu.jobserver.scheduler.modal.job.JobInstanceDO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,16 +34,19 @@ public class JobExecutor extends AbstractJobExecutor {
     private Logger LOG = LoggerFactory.getLogger(JobExecutor.class);
 
     @Autowired
-    private JobMapper jobMapper;
+    private WorkerService workerService;
 
     @Autowired
-    private WorkerService workerService;
+    private JobDefinitionService jobDefinitionService;
+
+    @Autowired
+    private JobInstanceService jobInstanceService;
 
     @Autowired
     private JobDispatcher jobDispatcher;
 
     @Override
-    public void executorByQuartz(JobDefinitionDO jobDefinitionDO) {
+    public void executorByQuartz(JobDefinition jobDefinitionDO) {
         int jobDefinitionId = jobDefinitionDO.getId();
         int appId = jobDefinitionDO.getAppId();
         //执行
@@ -55,7 +62,9 @@ public class JobExecutor extends AbstractJobExecutor {
     }
 
     private void doExecute(int appId, int jobDefinitionId) {
-        JavaJobDO javaJobDO = jobMapper.getJavaJobDefinitionByDefId(jobDefinitionId);
+        JavaJobDefinition javaJobDO = jobDefinitionService.createJavaQuery()
+                .definitionId(jobDefinitionId)
+                .singleResult();
         String handlerName = javaJobDO.getHandlerName();
         int strategy = javaJobDO.getStrategy();
         //获取AppID注册的机器
@@ -66,11 +75,16 @@ public class JobExecutor extends AbstractJobExecutor {
                 .list();
 
         //Job实例
-        JobInstanceDO jobInstanceDO = new JobInstanceDO();
-        jobInstanceDO.setJobDefinitionId(jobDefinitionId);
-        jobInstanceDO.setStartTime(new Date());
-        jobInstanceDO.setTriggerType(1);//1-自动 0-手动
-        jobMapper.insertJobInstance(jobInstanceDO);
+//        JobInstanceDO jobInstanceDO = new JobInstanceDO();
+//        jobInstanceDO.setJobDefinitionId(jobDefinitionId);
+//        jobInstanceDO.setStartTime(new Date());
+//        jobInstanceDO.setTriggerType(1);//1-自动 0-手动
+//        jobMapper.insertJobInstance(jobInstanceDO);
+        JobInstance jobInstanceDO = jobInstanceService.createBuilder()
+                .jobDefinitionId(jobDefinitionId)
+                .startTime(new Date())
+                .triggerType(1)
+                .create();
         JavaJobInfo.Strategy schedulerStrategy = JavaJobInfo.Strategy.getStrategy(strategy);
         //调度
         switch (schedulerStrategy) {
@@ -87,13 +101,22 @@ public class JobExecutor extends AbstractJobExecutor {
             default:
                 break;
         }
-        jobInstanceDO.setEndTime(new Date());
-        jobMapper.updateJobInstance(jobInstanceDO);
+
     }
 
-    private void defaultStrategy(List<Worker> workers, String handlerName, JobInstanceDO jobInstanceDO) {
+    private void updateInstance(int instanceId, int result, String worker) {
+        Date endTime = new Date();
+        jobInstanceService.createBuilder()
+                .id(instanceId)
+                .endTime(endTime)
+                .triggerResult(result)
+                .triggerWorker(worker)
+                .create();
+    }
+
+    private void defaultStrategy(List<Worker> workers, String handlerName, JobInstance jobInstanceDO) {
         StringBuilder sb = new StringBuilder();
-        jobInstanceDO.setTriggerResult(0);
+        int result = 0;
         for (Worker workerDO : workers) {
             RpcAddress rpcAddress = new RpcAddress(workerDO.getIp(), workerDO.getPort());
             sb.append(rpcAddress.getRpcAddress());
@@ -105,15 +128,15 @@ public class JobExecutor extends AbstractJobExecutor {
                 LOG.error("Error , {}", rpcResult.getMsg());
                 continue;
             }
-            jobInstanceDO.setTriggerResult(rpcResult.isSuccess() ? 1 : 0);
+            result = rpcResult.isSuccess() ? 1 : 0;
             break;
         }
-        jobInstanceDO.setTriggerWorker(sb.toString());
+        updateInstance(jobInstanceDO.getId(), result, sb.toString());
     }
 
-    private void clusterStrategy(List<Worker> workers, String handlerName, JobInstanceDO jobInstanceDO) {
+    private void clusterStrategy(List<Worker> workers, String handlerName, JobInstance jobInstanceDO) {
         StringBuilder sb = new StringBuilder();
-        jobInstanceDO.setTriggerResult(0);
+        int result = 0;
         for (Worker workerDO : workers) {
             RpcAddress rpcAddress = new RpcAddress(workerDO.getIp(), workerDO.getPort());
             sb.append(rpcAddress.getRpcAddress());
@@ -124,13 +147,14 @@ public class JobExecutor extends AbstractJobExecutor {
             if (!rpcResult.isSuccess()) {
                 LOG.error("Error , {}", rpcResult.getMsg());
             }
-            jobInstanceDO.setTriggerResult(rpcResult.isSuccess() ? 1 : 0);
+            result = rpcResult.isSuccess() ? 1 : 0;
         }
-        jobInstanceDO.setTriggerWorker(sb.toString());
+
+        updateInstance(jobInstanceDO.getId(), result, sb.toString());
     }
 
     //分片策略
-    private void shardStrategy(int toatal, List<Worker> workers, String handlerName, JobInstanceDO jobInstanceDO) {
+    private void shardStrategy(int toatal, List<Worker> workers, String handlerName, JobInstance jobInstanceDO) {
         //
         Map<Worker, List<Integer>> map = new HashMap<>();
         //分片索引
@@ -165,7 +189,7 @@ public class JobExecutor extends AbstractJobExecutor {
         //
         Set<Map.Entry<Worker, List<Integer>>> set = map.entrySet();
         StringBuilder sb = new StringBuilder();
-        jobInstanceDO.setTriggerResult(1);
+        int result = 0;
         for (Map.Entry<Worker, List<Integer>> entry : set) {
             Worker workerDO = entry.getKey();
             //分片索引
@@ -188,10 +212,11 @@ public class JobExecutor extends AbstractJobExecutor {
                         rpcAddress.getRpcAddress(),
                         stringBuilder.toString(),
                         rpcResult.getMsg());
-                jobInstanceDO.setTriggerResult(0);
+                result = 0;
             }
         }
-        jobInstanceDO.setTriggerWorker(sb.toString());
+
+        updateInstance(jobInstanceDO.getId(), result, sb.toString());
     }
 
 }
