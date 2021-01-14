@@ -1,15 +1,16 @@
 package com.sumu.jobserver.api.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sumu.jobserver.api.vo.AppVO;
 import com.sumu.jobserver.scheduler.core.service.JobApplicationService;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.app.App;
 import com.sumu.jobserver.scheduler.mapper.AppMapper;
-import com.sumu.jobserver.scheduler.modal.app.AppDO;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,7 +26,8 @@ public class AppService {
 
     public List<AppVO> getAppList() {
         List<AppVO> res = new ArrayList<>();
-        List<App> list = jobApplicationService.createAppQuery().list();
+        List<App> list = jobApplicationService
+                .createAppQuery().list();
         list.stream().forEach(appDO -> {
             AppVO appVO = new AppVO();
             appVO.setAppName(appDO.getAppCode());
@@ -35,6 +37,20 @@ public class AppService {
 
         return res;
     }
+
+    @Transactional
+    public void insertTransactionTest() {
+        jobApplicationService.createAppBuilder()
+                .appCode("12")
+                .zxID(99)
+                .updateTime(new Date())
+                .create();
+//        System.out.println(JSONObject.toJSONString(jobApplicationService.createAppQuery()
+//                .id(1)
+//                .singleResult()));
+        throw new RuntimeException("123");
+    }
+
 
 }
 

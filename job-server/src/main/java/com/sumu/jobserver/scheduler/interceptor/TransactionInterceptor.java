@@ -19,7 +19,6 @@ public class TransactionInterceptor extends AbstractCommandInterceptor {
 
     private PlatformTransactionManager transactionManager;
 
-
     public TransactionInterceptor(PlatformTransactionManager platformTransactionManager) {
         this.transactionManager = platformTransactionManager;
     }

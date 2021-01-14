@@ -13,9 +13,6 @@ import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definiti
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.instance.JobInstance;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.worker.Worker;
 import com.sumu.jobserver.scheduler.modal.enume.JavaJobInfo;
-import com.sumu.jobserver.scheduler.mapper.JobMapper;
-import com.sumu.jobserver.scheduler.modal.job.JavaJobDO;
-import com.sumu.jobserver.scheduler.modal.job.JobInstanceDO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

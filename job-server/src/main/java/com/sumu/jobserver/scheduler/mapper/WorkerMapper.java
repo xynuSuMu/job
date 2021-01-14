@@ -2,7 +2,6 @@ package com.sumu.jobserver.scheduler.mapper;
 
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.worker.WorkerEntity;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.worker.WorkerEntityImpl;
-import com.sumu.jobserver.scheduler.modal.worker.WorkerDO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

@@ -12,6 +12,7 @@ import java.util.List;
  * @author 陈龙
  * @version 1.0
  * @date 2020-12-22 19:07
+ * @Description APP信息接口
  */
 @RestController()
 @RequestMapping("app/")

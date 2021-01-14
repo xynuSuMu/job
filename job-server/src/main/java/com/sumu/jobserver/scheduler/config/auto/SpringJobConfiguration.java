@@ -16,6 +16,7 @@ import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,6 +38,8 @@ public class SpringJobConfiguration extends AbstractSpringJobConfiguration {
     private CommandExecutor commandExecutor;
 
     protected List<CommandInterceptor> commandInterceptors;
+
+    //Service
 
     protected JobApplicationService jobApplicationService = new JobApplicationServiceImpl();
 
@@ -116,7 +119,9 @@ public class SpringJobConfiguration extends AbstractSpringJobConfiguration {
         try {
             inputStream = MyBatisUtils.getInputStream();
             Reader reader = new InputStreamReader(inputStream);
-            Environment environment = new Environment("default", new JdbcTransactionFactory(), this.dataSource);
+            Environment environment = new Environment("default",
+                    new ManagedTransactionFactory(),
+                    this.dataSource);
             Properties properties = new Properties();
             Configuration configuration = initMybatisConfiguration(environment, reader, properties);
             this.sqlSessionFactory = new DefaultSqlSessionFactory(configuration);

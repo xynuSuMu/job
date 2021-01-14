@@ -36,8 +36,6 @@ public class CommandContext {
         this.command = command;
         this.springJobConfiguration = springJobConfiguration;
         this.sqlSessionFactory = springJobConfiguration.getSqlSessionFactory();
-        //此处开启SqlSession不合理
-//        this.sqlSession = sqlSessionFactory.openSession();
     }
 
 
@@ -53,7 +51,7 @@ public class CommandContext {
         return this.resultStack.pollLast();
     }
 
-    public Boolean openSqlSession() {
+    protected Boolean openSqlSession() {
         return open;
     }
 
@@ -70,7 +68,28 @@ public class CommandContext {
         return sqlSession;
     }
 
-    public void closeSqlSession() {
+    public void close() {
+        try {
+            if (openSqlSession()) {
+                if (exception == null) {
+//                    this.sqlSession.commit();
+                } else {
+//                    this.sqlSession.rollback();
+                    //Spring
+                    this.springJobConfiguration.getTransactionManager()
+                            .getTransaction(null)
+                            .setRollbackOnly();
+
+                }
+            }
+        } finally {
+            if (openSqlSession())
+                closeSqlSession();
+        }
+
+    }
+
+    private void closeSqlSession() {
         LOG.info("[JOB] close SqlSession");
         this.sqlSession.close();
     }

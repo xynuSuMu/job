@@ -8,7 +8,6 @@ import com.sumu.jobserver.api.vo.param.AddJobVO;
 import com.sumu.jobserver.api.vo.JobDefinitionVO;
 import com.sumu.jobserver.api.vo.query.JobDefinitionQuery;
 import com.sumu.jobserver.api.vo.query.JobInstanceQuery;
-import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +17,7 @@ import java.util.List;
  * @author 陈龙
  * @version 1.0
  * @date 2020-12-21 15:54
+ * @Description Job任务信息
  */
 @RestController
 @RequestMapping("job/")

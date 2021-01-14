@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * @Auther: chenlong
  * @Date: 2021/1/2 18:59
- * @Description:
+ * @Description:后台界面
  */
 @Controller
 @RequestMapping("manager/")

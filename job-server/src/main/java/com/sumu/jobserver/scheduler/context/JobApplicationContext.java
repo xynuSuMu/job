@@ -5,6 +5,7 @@ import org.apache.curator.framework.CuratorFramework;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Stack;
 
 /**
  * @author 陈龙
@@ -15,7 +16,7 @@ public class JobApplicationContext {
 
     private static CuratorFramework client;
 
-    private static ThreadLocal<CommandContext> commandContextThreadLocal = new ThreadLocal<>();
+    private static ThreadLocal<Stack<CommandContext>> commandContextThreadLocal = new ThreadLocal();
 
     private static final String IP;
 
@@ -35,25 +36,33 @@ public class JobApplicationContext {
     }
 
     public static CuratorFramework getClient() {
-
         return client;
-    }
-
-    public static CommandContext getCommandContext() {
-        return commandContextThreadLocal.get();
-    }
-
-    public static void setCommandContext(CommandContext commandContext) {
-        commandContextThreadLocal.set(commandContext);
-    }
-
-    public static void removeCommandContext(CommandContext commandContext) {
-        if (commandContext.openSqlSession())
-            commandContext.closeSqlSession();
-        commandContextThreadLocal.remove();
     }
 
     public static void setClient(CuratorFramework client) {
         JobApplicationContext.client = client;
     }
+
+    public static CommandContext getCommandContext() {
+        Stack<CommandContext> stack = getStack();
+        return stack.isEmpty() ? null : stack.peek();
+    }
+
+    public static void setCommandContext(CommandContext commandContext) {
+        getStack().push(commandContext);
+    }
+
+    public static void removeCommandContext() {
+        getStack().pop();
+    }
+
+    private static Stack<CommandContext> getStack() {
+        Stack<CommandContext> stack = commandContextThreadLocal.get();
+        if (stack == null) {
+            stack = new Stack<>();
+            commandContextThreadLocal.set(stack);
+        }
+        return stack;
+    }
+
 }

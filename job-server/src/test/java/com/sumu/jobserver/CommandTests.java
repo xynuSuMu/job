@@ -1,6 +1,7 @@
 package com.sumu.jobserver;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumu.jobserver.api.service.AppService;
 import com.sumu.jobserver.scheduler.core.service.JobDefinitionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,5 +35,13 @@ public class CommandTests {
 //                        "DAG任务测试-2-V2"
 //                ).count()
 //        );
+    }
+
+    @Autowired
+    AppService appService;
+
+    @Test
+    void rollBack() {
+        appService.insertTransactionTest();
     }
 }

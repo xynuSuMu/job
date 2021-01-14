@@ -29,14 +29,13 @@ public class CommandContextInterceptor extends AbstractCommandInterceptor {
             Object object = this.next.execute(command);
             return (T) object;
         } catch (Exception e) {
-            e.printStackTrace();
-            if (commandContext.openSqlSession())
-                commandContext.getSqlSession().rollback();
             commandContext.setException(e);
         } finally {
-            if (commandContext.openSqlSession())
-                commandContext.getSqlSession().commit();
-            JobApplicationContext.removeCommandContext(commandContext);
+            try {
+                commandContext.close();
+            } finally {
+                JobApplicationContext.removeCommandContext();
+            }
         }
         return null;
     }

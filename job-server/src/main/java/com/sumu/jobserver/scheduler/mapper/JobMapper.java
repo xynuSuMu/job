@@ -1,16 +1,14 @@
 package com.sumu.jobserver.scheduler.mapper;
 
 
-import com.sumu.jobserver.api.vo.query.JobInstanceQuery;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.common.Page;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.JobDefinitionEntity;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.JobDefinitionEntityImpl;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.java.JavaJobDefinition;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.definition.java.JavaJobDefinitionEntity;
-import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.instance.JobInstance;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.instance.JobInstanceEntity;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.instance.JobInstanceEntityImpl;
-import com.sumu.jobserver.scheduler.modal.job.JobInstanceDO;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

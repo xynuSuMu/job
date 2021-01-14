@@ -48,6 +48,7 @@ public class AppBuilder {
     }
 
     public App create() {
-        return this.jobApplicationService.create(this);
+        App app = this.jobApplicationService.create(this);
+        return app;
     }
 }
