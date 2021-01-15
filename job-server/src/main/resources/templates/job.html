@@ -6,10 +6,14 @@
     <link href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
     <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="http://127.0.0.1:8089/paging.js"></script>
 
     <script type="text/javascript">
         var id = 0;
         var url = "/"
+        var pageIndex = 1;
+        var pageSize = 10;
+        var total = 0;
         $.ajax({
             url: url + "app/getAppList",
             type: 'get',
@@ -24,44 +28,31 @@
                 }
             }
         })
-        $.ajax({
-            url: url + "job/definition/list",
-            type: 'post',
-            dataType: 'json',
-            data: JSON.stringify({"pageIndex": 1, "pageSize": 10}),
-            cache: false,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            success: function (res) {
-                var data = res.data;
-                var html = "";
-                for (key in data) {
-                    var obj = data[key];
-                    html += "<tr>\n" +
-                        "      <td>" + obj.appName + "</td>\n" +
-                        "      <td>" + obj.jobName + "</td>\n" +
-                        "      <td>" + obj.cron + "</td>\n" +
-                        "      <td>" + (obj.enable ? '启动' : '暂停') + "</td>\n" +
-                        "      <td>" + (obj.taskType == 1 ? 'Java' : '其他') + "</td>\n" +
-                        // "      <td>" + (obj.postDefinitionID) + "</td>\n" +
-                        '      <td>' +
-                        '     <button type="button" class="btn btn-default" onclick="editJob(' + obj.id + ')">编辑</button>' +
-                        '     <button type="button" class="btn btn-info" onclick="triggerJob(' + obj.id + ')">立即执行</button>' +
-                        '         ' + (obj.enable ? '<button type="button" class="btn btn-danger" onclick="pauseJob(' + obj.id + ')">暂停</button>'
-                            : '<button type="button" class="btn btn-success" onclick="resumeJob(' + obj.id + ')">启动</button>') +
-                        '          <button type="button" class="btn btn-primary"  onclick="jumpInstance(' + obj.id + ')">执行记录</button>' +
-                        '          <button type="button" class="btn btn-primary"  onclick="jumpDag(' + obj.id + ')">任务执行图</button>' +
-                        '      </td>' +
-                        "    </tr>"
+
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            refresh();
+            var a = {color: 'black', sex: 'black', border: '1px solid #ddd'};
+            var b = {background: '#31b0d5'};
+            $(".pagination").Paging({
+                classStyle: a,//a标签样式的对象,也可以不定义使用默认值
+                backClass: b,//选中的页数的背景，也可以不定义使用默认值
+                isFirst: true,   //首页按钮是否显示
+                isPre: true,     //下一页按钮是否显示
+                showRecordNum: 10, // 一页列表数量
+                totalNum: total,   // 总列表数量
+                showNum: function (data1, data2) {
+                    // alert(data1 + "," + data2);
+                    console.log(data1 + "-" + pageIndex)
+                    if (pageIndex != data1) {
+                        pageIndex = data1;
+                        pageSize = data2;
+                        refresh();
+                    }
                 }
-                $("#tableContent").html(html);
-            },
-            error: function (e) {
-
-            }
+            });
         });
-
     </script>
 </head>
 <body>
@@ -102,6 +93,10 @@
 
     </tbody>
 </table>
+
+<nav aria-label="Page navigation" style="text-align: center">
+    <ul class="pagination"></ul>
+</nav>
 
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -346,6 +341,47 @@
 
     function jumpDag(id) {
         window.open("dag.html?definitionID=" + id)
+    }
+    function refresh() {
+        $.ajax({
+            url: url + "job/definition/list",
+            type: 'post',
+            dataType: 'json',
+            async: false,
+            data: JSON.stringify({"pageIndex": pageIndex, "pageSize": pageSize}),
+            cache: false,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            success: function (res) {
+                var data = res.data.result;
+                total = res.data.total;
+                var html = "";
+                for (key in data) {
+                    var obj = data[key];
+                    html += "<tr>\n" +
+                        "      <td>" + obj.appName + "</td>\n" +
+                        "      <td>" + obj.jobName + "</td>\n" +
+                        "      <td>" + obj.cron + "</td>\n" +
+                        "      <td>" + (obj.enable ? '启动' : '暂停') + "</td>\n" +
+                        "      <td>" + (obj.taskType == 1 ? 'Java' : '其他') + "</td>\n" +
+                        // "      <td>" + (obj.postDefinitionID) + "</td>\n" +
+                        '      <td>' +
+                        '     <button type="button" class="btn btn-default" onclick="editJob(' + obj.id + ')">编辑</button>' +
+                        '     <button type="button" class="btn btn-info" onclick="triggerJob(' + obj.id + ')">立即执行</button>' +
+                        '         ' + (obj.enable ? '<button type="button" class="btn btn-danger" onclick="pauseJob(' + obj.id + ')">暂停</button>'
+                            : '<button type="button" class="btn btn-success" onclick="resumeJob(' + obj.id + ')">启动</button>') +
+                        '          <button type="button" class="btn btn-primary"  onclick="jumpInstance(' + obj.id + ')">执行记录</button>' +
+                        '          <button type="button" class="btn btn-primary"  onclick="jumpDag(' + obj.id + ')">任务执行图</button>' +
+                        '      </td>' +
+                        "    </tr>"
+                }
+                $("#tableContent").html(html);
+            },
+            error: function (e) {
+
+            }
+        });
     }
 </script>
 </html>

@@ -3,6 +3,7 @@ package com.sumu.jobserver.api;
 import com.sumu.common.core.Result;
 import com.sumu.jobserver.api.service.JobService;
 import com.sumu.jobserver.api.vo.JobInstanceVO;
+import com.sumu.jobserver.api.vo.Page;
 import com.sumu.jobserver.api.vo.dag.DagVO;
 import com.sumu.jobserver.api.vo.param.AddJobVO;
 import com.sumu.jobserver.api.vo.JobDefinitionVO;
@@ -86,7 +87,7 @@ public class JobApi {
 
     @PostMapping(value = "definition/list")
     @ResponseBody
-    public Result<List<JobDefinitionVO>> jobDefinitionList(@RequestBody JobDefinitionQuery jobDefinitionQuery) {
+    public Result<Page<List<JobDefinitionVO>>> jobDefinitionList(@RequestBody JobDefinitionQuery jobDefinitionQuery) {
         return Result.success(jobService.jobDefinitionList(jobDefinitionQuery));
     }
 
@@ -98,7 +99,7 @@ public class JobApi {
     }
 
     @PostMapping("instance/list")
-    public Result<List<JobInstanceVO>> jobInstanceList(@RequestBody JobInstanceQuery jobInstanceQuery) {
+    public Result<Page<List<JobInstanceVO>>> jobInstanceList(@RequestBody JobInstanceQuery jobInstanceQuery) {
         return Result.success(jobService.jobInstanceList(jobInstanceQuery));
     }
 

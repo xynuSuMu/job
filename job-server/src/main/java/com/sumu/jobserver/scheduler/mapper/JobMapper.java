@@ -50,4 +50,7 @@ public interface JobMapper {
                                                 @Param("page") Page page
     );
 
+    Integer countInstance(@Param("jobInstanceEntity") JobInstanceEntity jobInstanceEntity);
+
+
 }

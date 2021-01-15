@@ -2,6 +2,7 @@ package com.sumu.jobserver.api.service;
 
 import com.sumu.jobserver.api.vo.JobDefinitionVO;
 import com.sumu.jobserver.api.vo.JobInstanceVO;
+import com.sumu.jobserver.api.vo.Page;
 import com.sumu.jobserver.api.vo.dag.*;
 import com.sumu.jobserver.api.vo.param.AddJobVO;
 import com.sumu.jobserver.api.vo.param.JavaJobVO;
@@ -185,20 +186,22 @@ public class JobService {
                 jobDefinitionDO.getCron());
     }
 
-    public List<JobDefinitionVO> jobDefinitionList(JobDefinitionQuery jobDefinitionQuery) {
-
+    public Page<List<JobDefinitionVO>> jobDefinitionList(JobDefinitionQuery jobDefinitionQuery) {
+        int total = jobDefinitionService.createQuery()
+                .count();
+        if (total == 0) {
+            return new Page<>();
+        }
+        Page<List<JobDefinitionVO>> res = new Page<>();
+        res.setTotal(total);
+        res.setCurrent(jobDefinitionQuery.getPageIndex());
         List<JobDefinition> list = jobDefinitionService.createQuery()
                 .index(jobDefinitionQuery.getPageIndex())
                 .pageSize(jobDefinitionQuery.getPageSize())
                 .list();
-
-        if (list == null || list.size() == 0)
-            return new ArrayList<>();
-
         Map<Integer, App> map = jobApplicationService.createAppQuery().list().stream()
                 .collect(Collectors.toMap(App::getID, Function.identity())); //APP Info
-
-        List<JobDefinitionVO> res = new ArrayList<>();
+        List<JobDefinitionVO> list1 = new ArrayList<>();
         list.stream().forEach(jobDefinitionDO -> {
             JobDefinitionVO jobDefinitionVO = new JobDefinitionVO();
             jobDefinitionVO.setId(jobDefinitionDO.getId());
@@ -208,8 +211,9 @@ public class JobService {
             jobDefinitionVO.setTaskType(jobDefinitionDO.getTaskType());
             jobDefinitionVO.setEnable(jobDefinitionDO.getEnable());
             jobDefinitionVO.setJobName(jobDefinitionDO.getJobName());
-            res.add(jobDefinitionVO);
+            list1.add(jobDefinitionVO);
         });
+        res.setResult(list1);
         return res;
     }
 
@@ -246,9 +250,14 @@ public class JobService {
         return jobDefinitionVO;
     }
 
-    public List<JobInstanceVO> jobInstanceList(JobInstanceQuery jobInstanceQuery) {
-//        List<JobInstanceDO> list = jobMapper.jobInstanceList(jobInstanceQuery);
-
+    public Page<List<JobInstanceVO>> jobInstanceList(JobInstanceQuery jobInstanceQuery) {
+        Page<List<JobInstanceVO>> page = new Page<>();
+        int count = jobInstanceService.createQuery()
+                .jobDefinitionId(jobInstanceQuery.getJonDefinitionID())
+                .count();
+        if (count == 0)
+            return page;
+        page.setTotal(count);
         List<JobInstance> list = jobInstanceService.createQuery()
                 .jobDefinitionId(jobInstanceQuery.getJonDefinitionID())
                 .index(jobInstanceQuery.getPageIndex())
@@ -267,7 +276,8 @@ public class JobService {
             jobInstanceVO.setTriggerType(jobInstanceDO.getTriggerType());
             res.add(jobInstanceVO);
         });
-        return res;
+        page.setResult(res);
+        return page;
     }
 
     public DagVO getJobDefinitionDAG(int jobDefinitionID) {

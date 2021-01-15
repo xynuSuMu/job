@@ -77,8 +77,8 @@ class JobServerApplicationTests {
         jobDefinitionQuery.setPageIndex(1);
         jobDefinitionQuery.setPageSize(10);
 
-        List<JobDefinitionVO> jobDefinitionVOS = jobApi.jobDefinitionList(jobDefinitionQuery).getData();
-        LOG.info("result:{}", JSONObject.toJSONString(jobDefinitionVOS));
+//        List<JobDefinitionVO> jobDefinitionVOS = jobApi.jobDefinitionList(jobDefinitionQuery).getData();
+//        LOG.info("result:{}", JSONObject.toJSONString(jobDefinitionVOS));
     }
 
 
@@ -88,9 +88,9 @@ class JobServerApplicationTests {
         jobInstanceQuery.setJonDefinitionID(1);
         jobInstanceQuery.setPageIndex(1);
         jobInstanceQuery.setPageSize(10);
-
-        List<JobInstanceVO> jobDefinitionVOS = jobApi.jobInstanceList(jobInstanceQuery).getData();
-        LOG.info("result:{}", JSONObject.toJSONString(jobDefinitionVOS));
+//
+//        List<JobInstanceVO> jobDefinitionVOS = jobApi.jobInstanceList(jobInstanceQuery).getData();
+//        LOG.info("result:{}", JSONObject.toJSONString(jobDefinitionVOS));
     }
 
 

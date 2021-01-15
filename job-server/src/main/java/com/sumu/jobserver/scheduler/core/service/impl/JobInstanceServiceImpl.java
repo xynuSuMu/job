@@ -2,10 +2,7 @@ package com.sumu.jobserver.scheduler.core.service.impl;
 
 import com.sumu.jobserver.scheduler.core.service.JobInstanceService;
 import com.sumu.jobserver.scheduler.interceptor.command.Command;
-import com.sumu.jobserver.scheduler.interceptor.command.cmd.job.instance.CreateJobInstanceCommand;
-import com.sumu.jobserver.scheduler.interceptor.command.cmd.job.instance.JobInstanceBuilder;
-import com.sumu.jobserver.scheduler.interceptor.command.cmd.job.instance.JobInstanceQuery;
-import com.sumu.jobserver.scheduler.interceptor.command.cmd.job.instance.JobInstanceQueryCommand;
+import com.sumu.jobserver.scheduler.interceptor.command.cmd.job.instance.*;
 import com.sumu.jobserver.scheduler.interceptor.command.context.CommandContext;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.job.instance.JobInstance;
 
@@ -41,6 +38,10 @@ public class JobInstanceServiceImpl extends ServiceImpl implements JobInstanceSe
 
     public List<JobInstance> list(JobInstanceQuery jobInstanceQuery) {
         return this.commandExecutor.execute(new JobInstanceQueryCommand(jobInstanceQuery));
+    }
+
+    public int count(JobInstanceQuery jobInstanceQuery) {
+        return this.commandExecutor.execute(new JobInstanceCountCommand(jobInstanceQuery));
     }
 
     public JobInstance create(JobInstanceBuilder jobInstanceBuilder) {

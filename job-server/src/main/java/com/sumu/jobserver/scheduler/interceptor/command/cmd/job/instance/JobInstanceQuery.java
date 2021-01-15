@@ -90,4 +90,9 @@ public class JobInstanceQuery {
     public List<JobInstance> list() {
         return jobInstanceService.list(this);
     }
+
+    public int count() {
+        return jobInstanceService.count(this);
+    }
+
 }

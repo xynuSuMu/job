@@ -228,6 +228,21 @@
         <result property="shardNum" column="shard_num"/>
     </resultMap>
 
+    <select id="countInstance" resultType="java.lang.Integer">
+        select
+        count(id)
+        from JOB_CUSTOM_JOB_INSTANCE
+        <if test="jobInstanceEntity!=null">
+            where 1= 1
+            <if test="jobInstanceEntity.id > 0">
+                and id = #{jobInstanceEntity.id}
+            </if>
+            <if test="jobInstanceEntity.jobDefinitionId > 0">
+                and job_definition_id = #{jobInstanceEntity.jobDefinitionId}
+            </if>
+        </if>
+    </select>
+
     <select id="jobInstanceList" resultMap="jobInstanceMap">
         select
         <include refid="instance_column_field"/>
