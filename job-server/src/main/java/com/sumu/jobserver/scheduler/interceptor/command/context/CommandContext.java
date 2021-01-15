@@ -59,7 +59,7 @@ public class CommandContext {
         if (sqlSession == null) {
             synchronized (this) {
                 if (sqlSession == null) {
-                    LOG.info("[JOB] Open SqlSession");
+                    LOG.debug("[JOB] Open SqlSession");
                     this.sqlSession = sqlSessionFactory.openSession();
                     this.open = true;
                 }
@@ -70,17 +70,11 @@ public class CommandContext {
 
     public void close() {
         try {
-            if (openSqlSession()) {
-                if (exception == null) {
-//                    this.sqlSession.commit();
-                } else {
-//                    this.sqlSession.rollback();
-                    //Spring
-                    this.springJobConfiguration.getTransactionManager()
-                            .getTransaction(null)
-                            .setRollbackOnly();
+            if (openSqlSession() && exception != null) {
+                this.springJobConfiguration.getTransactionManager()
+                        .getTransaction(null)
+                        .setRollbackOnly();
 
-                }
             }
         } finally {
             if (openSqlSession())
@@ -90,7 +84,7 @@ public class CommandContext {
     }
 
     private void closeSqlSession() {
-        LOG.info("[JOB] close SqlSession");
+        LOG.debug("[JOB] close SqlSession");
         this.sqlSession.close();
     }
 }

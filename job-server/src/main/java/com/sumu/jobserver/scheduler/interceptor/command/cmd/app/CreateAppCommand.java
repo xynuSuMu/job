@@ -5,10 +5,6 @@ import com.sumu.jobserver.scheduler.interceptor.command.context.CommandContext;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.app.App;
 import com.sumu.jobserver.scheduler.interceptor.command.entity.data.app.AppEntity;
 import com.sumu.jobserver.scheduler.mapper.AppMapper;
-import org.apache.ibatis.session.SqlSession;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author 陈龙
@@ -28,11 +24,6 @@ public class CreateAppCommand implements Command<App> {
         AppEntity appEntity = appBuilder.getAppEntity();
         AppMapper appMapper = commandContext.getSqlSession().getMapper(AppMapper.class);
         appMapper.insertAppCode(appEntity.getAppCode(), appEntity.getZxID());
-//        SqlSession sqlSession = commandContext.getSqlSession();
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("appCode", appEntity.getAppCode());
-//        map.put("zxid", appEntity.getZxID());
-//        sqlSession.insert("insertAppCode", map);
         App app = appMapper.getByAppCode(appEntity.getAppCode());
         return app;
     }

@@ -32,7 +32,7 @@
 
 		<dependency>
 			<groupId>com.sumu</groupId>
-			<artifactId>job-starter</artifactId>
+			<artifactId>job-execute-starter</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>

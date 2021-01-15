@@ -1,6 +1,7 @@
 package com.sumu.jobserver.scheduler.config.auto;
 
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -23,7 +24,12 @@ public abstract class AbstractSpringJobConfiguration {
     }
 
     public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
+        if (dataSource instanceof TransactionAwareDataSourceProxy) {
+            this.dataSource = dataSource;
+        } else {
+            DataSource proxiedDataSource = new TransactionAwareDataSourceProxy(dataSource);
+            this.dataSource = proxiedDataSource;
+        }
     }
 
     public SqlSessionFactory getSqlSessionFactory() {

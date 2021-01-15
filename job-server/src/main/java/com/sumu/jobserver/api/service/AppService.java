@@ -41,13 +41,10 @@ public class AppService {
     @Transactional
     public void insertTransactionTest() {
         jobApplicationService.createAppBuilder()
-                .appCode("12")
+                .appCode("1234")
                 .zxID(99)
                 .updateTime(new Date())
                 .create();
-//        System.out.println(JSONObject.toJSONString(jobApplicationService.createAppQuery()
-//                .id(1)
-//                .singleResult()));
         throw new RuntimeException("123");
     }
 
