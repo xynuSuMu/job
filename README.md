@@ -82,11 +82,20 @@ public class Task extends AbstractJobHandler {
 
 ### 关于Quartz
 
-Quartz底层基于QuartzSchedulerThread作为调度线程，从线程池(SimpleThreadPool)中获取可用的线程，然后从JobStore(ARM/DB)中的获取
-30S(默认30S，为避免频繁扫表，可适当增加该时间)内即将执行的触发器(即将执行的触发器是由另一线程进行插入)，然后通过线程池的线程进行调度执行
-JobRunShell。
+Quartz是任务调度领域的一个开源项目，它提供了很多实用的特性，比如持久化、集群和分布式任务、多线程管理等，像elastic-job以及
+早期的XXL-Job都是基于Quartz实现的分布式任务调度系统。
 
-基于Quartz实现HA，也会出现一些问题，如ABA问题，资源闲置
+Quartz的工作原理：org.quartz.core的目录下的QuartzScheduler类是Quartz的启动入口，其构造函数内部会创建QuartzSchedulerThread
+对象，该对象继承Thread类作为Quartz的调度线程，调度线程线程池(SimpleThreadPool)中获取可用的线程，然后从JobStore(ARM/DB)中的获取
+30S(默认30S，为避免频繁扫表，可适当增加该时间)内即将执行的触发器(即将执行的触发器是由另一线程进行插入)，然后通过线程池的线程进行调度，
+由JobRunShell负责执行。
+
+在集成Quartz时，通常我们可以利用Spring对于Quartz的包装来实现，比如SpringBoot项目中存在的QuartzAutoConfiguration类，该类在
+spring.factories中被声明为EnableAutoConfiguration，所以SpringBoot项目启动后会创建SchedulerFactoryBean，该Bean实现了InitializingBean
+所以在初始化Bean的时候，会执行afterPropertiesSet方法，也正是在该方法内部调用了SchedulerFactory的getScheduler方法，进而启动
+Quartz。
+
+在基于Spring和Quartz实现的分布式任务调度系统，不可避免会因为出Quartz的不足出现一些问题，如默认配置下ABA问题，机器负载不均衡的问题。
 
 #### ABA问题
 乐观锁ABA问题：
@@ -100,13 +109,14 @@ this.getDelegate().updateTriggerStateFromOtherState(conn, triggerKey, "ACQUIRED"
 由于波动，或CPU资源被抢占，那么可能会进入停顿，此时另一机器完成另整个过程WAITING->ACQUIRED->EXECUTING->WAITING，
 那么该Job就会出现多次触发。
 
-#### 资源闲置
+#### 负载不均衡
 
 Quartz支持集群方式，但是任务调度采用抢占式，集群机器数量越多，就会越多机器参与DB锁的资源竞争，造成资源浪费。
 
 本次调度系统对Spring的SchedulerFactoryBean配置类进行改造，使用自定义的org.quartz.jobStore.class，重写
 acquireNextTrigger方法，根据当前机器编号和总的机器数量，利用Trigger的hashCode%机器数量，等于当前机器编号
-的Trigger则由当前机器执行，当前机器编号和总的机器数量实时从ZK上获取
+的Trigger则由当前机器执行，当前机器编号和总的机器数量实时从ZK上获取。此外针对需要保证调度低延迟的任务可单独
+提供机器进行调度。
 
 
 ### 模块介绍
