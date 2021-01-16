@@ -5,8 +5,9 @@ import com.sumu.jobscheduler.scheduler.exception.JobExceptionInfo;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
 
+import javax.sql.DataSource;
 import java.util.Date;
 
 import static org.quartz.TriggerBuilder.newTrigger;
@@ -22,8 +23,25 @@ public class JobSchedule {
 
     private Scheduler scheduler;
 
-    public JobSchedule(Scheduler scheduler) {
+    private DataSource dataSource;
+
+    private QuartzProperties quartzProperties;
+
+    private final String tablePrefix;
+
+    private final String TABLE = "TRIGGERS";
+
+    private String UPDATE_TRIGGER = "UPDATE {0} set JOB_APP = {1} where TRIGGER_NAME = {2} and TRIGGER_GROUP = {3}";
+
+
+    public JobSchedule(DataSource dataSource, QuartzProperties quartzProperties, Scheduler scheduler) {
+        this.quartzProperties = quartzProperties;
+        this.dataSource = dataSource;
         this.scheduler = scheduler;
+        this.tablePrefix = quartzProperties
+                .getProperties()
+                .getOrDefault("org.quartz.jobStore.tablePrefix", "QRTZ_");
+
     }
 
     public void addJob(String jobName, String jobGroup, String cronExpr) throws SchedulerException {
@@ -40,7 +58,8 @@ public class JobSchedule {
                 .withSchedule(cronScheduleBuilder)
                 .build();
 
-        JobDetail jobDetail = JobBuilder.newJob(JobBean.class)
+        JobDetail jobDetail = JobBuilder
+                .newJob(JobBean.class)
                 .withIdentity(jobName, jobGroup).build();
 
         Date date = scheduler.scheduleJob(jobDetail, cronTrigger);

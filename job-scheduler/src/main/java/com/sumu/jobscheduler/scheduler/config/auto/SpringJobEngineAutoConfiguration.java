@@ -14,6 +14,7 @@ import com.sumu.jobscheduler.scheduler.core.store.PostSchedulerFactoryBean;
 import org.quartz.Scheduler;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,8 +55,11 @@ public class SpringJobEngineAutoConfiguration {
     //
     @Bean
     @ConditionalOnMissingBean
-    public JobSchedule jobSchedule(Scheduler scheduler) {
-        return new JobSchedule(scheduler);
+    public JobSchedule jobSchedule(
+            DataSource dataSource,
+            QuartzProperties quartzProperties,
+            Scheduler scheduler) {
+        return new JobSchedule(dataSource,quartzProperties, scheduler);
     }
 
     @Bean

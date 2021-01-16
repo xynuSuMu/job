@@ -7,9 +7,7 @@ import com.sumu.jobscheduler.scheduler.context.JobApplicationContext;
 import com.sumu.jobscheduler.scheduler.modal.zk.WorkerDataModal;
 import com.sumu.jobscheduler.util.SpringContextUtils;
 import org.quartz.*;
-import org.quartz.impl.jdbcjobstore.JobStoreCMT;
-import org.quartz.impl.jdbcjobstore.SimpleSemaphore;
-import org.quartz.impl.jdbcjobstore.StdJDBCDelegate;
+import org.quartz.impl.jdbcjobstore.*;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.OperableTrigger;
 import org.quartz.spi.SchedulerSignaler;
@@ -42,6 +40,10 @@ public class SelfJobStoreTX extends JobStoreCMT {
     public static final String TX_DATA_SOURCE_PREFIX = "springTxDataSource.";
 
     public static final String NON_TX_DATA_SOURCE_PREFIX = "springNonTxDataSource.";
+
+    private SelfJDBCDelegate delegate;
+
+    protected Class<SelfJDBCDelegate> delegateClass = SelfJDBCDelegate.class;
 
     @Nullable
     private DataSource dataSource;
@@ -101,20 +103,42 @@ public class SelfJobStoreTX extends JobStoreCMT {
         DataSourceUtils.releaseConnection(con, this.dataSource);
     }
 
+
     @Override
     public List<OperableTrigger> acquireNextTriggers(long noLaterThan, int maxCount, long timeWindow) throws JobPersistenceException {
         //todo：分布式锁
         return super.acquireNextTriggers(noLaterThan, maxCount, timeWindow);
     }
 
+    protected SelfJDBCDelegate getDelegate() throws NoSuchDelegateException {
+        synchronized (this) {
+            if (null == delegate) {
+                try {
+                    JobProperties jobProperties = SpringContextUtils.getBean(JobProperties.class);
+                    String appJob = jobProperties.getSpecialApp();
+                    delegate = delegateClass.newInstance();
+                    delegate.selfInitialize(getLog(), tablePrefix, instanceName, instanceId,
+                            getClassLoadHelper(), canUseProperties(), getDriverDelegateInitString(),
+                            appJob);
+                } catch (InstantiationException e) {
+                    throw new NoSuchDelegateException("Couldn't create delegate: "
+                            + e.getMessage(), e);
+                } catch (IllegalAccessException e) {
+                    throw new NoSuchDelegateException("Couldn't create delegate: "
+                            + e.getMessage(), e);
+                }
+            }
+            return delegate;
+        }
+    }
+
+
     @Override
     protected List<OperableTrigger> acquireNextTrigger(Connection conn,
                                                        long noLaterThan,
                                                        int maxCount,
                                                        long timeWindow) throws JobPersistenceException {
-
-        JobProperties jobProperties = SpringContextUtils.getBean(JobProperties.class);
-        String appJob = jobProperties.getSpecialApp();
+        String appJob = getDelegate().getApp();
         List<String> list = null;
         try {
             if (appJob == null || "".equals(appJob))
@@ -162,12 +186,16 @@ public class SelfJobStoreTX extends JobStoreCMT {
             while (true) {
                 ++currentLoopCount;
                 try {
-                    //TODO:重写获取noLaterThan + timeWindow范围内的Trigger
-//                    List<TriggerKey> keys = this.getDelegate().selectTriggerToAcquire(conn,
+                    //重写获取noLaterThan + timeWindow范围内的Trigger
+                    List<TriggerKey> keys = this.getDelegate().selectTriggerToAcquire(conn,
+                            noLaterThan + timeWindow,
+                            this.getMisfireTime(),
+                            maxCount);
+//                    List<TriggerKey> keys = selectTriggerToAcquire(conn,
 //                            noLaterThan + timeWindow,
 //                            this.getMisfireTime(),
-//                            maxCount);
-                    List<TriggerKey> keys = selectTriggerToAcquire(conn, noLaterThan + timeWindow, this.getMisfireTime(), maxCount, appJob);
+//                            maxCount,
+//                            appJob);
                     if (keys != null && keys.size() != 0) {
                         long batchEnd = noLaterThan;
                         Iterator i$ = keys.iterator();
@@ -236,55 +264,6 @@ public class SelfJobStoreTX extends JobStoreCMT {
                 return acquiredTriggers;
             }
         }
-    }
-
-    private String SELECT_NEXT_TRIGGER_TO_ACQUIRE = "SELECT "
-            + COL_TRIGGER_NAME + ", " + COL_TRIGGER_GROUP + ", "
-            + COL_NEXT_FIRE_TIME + ", " + COL_PRIORITY + " FROM "
-            + "{0}" + TABLE_TRIGGERS + " WHERE "
-            + "{1}" + " AND "
-            + COL_SCHEDULER_NAME + " = " + "{2}"
-            + " AND " + COL_TRIGGER_STATE + " = ? AND " + COL_NEXT_FIRE_TIME + " <= ? "
-            + "AND (" + COL_MISFIRE_INSTRUCTION + " = -1 OR (" + COL_MISFIRE_INSTRUCTION + " != -1 AND " + COL_NEXT_FIRE_TIME + " >= ?)) "
-            + "ORDER BY " + COL_NEXT_FIRE_TIME + " ASC, " + COL_PRIORITY + " DESC";
-
-    public List<TriggerKey> selectTriggerToAcquire(Connection conn, long noLaterThan, long noEarlierThan, int maxCount, String app)
-            throws SQLException {
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<TriggerKey> nextTriggers = new LinkedList<TriggerKey>();
-        String query = MessageFormat.format(SELECT_NEXT_TRIGGER_TO_ACQUIRE,
-                this.tablePrefix,
-                (app == null || "".equals(app)) ? "JOB_APP is null" : "JOB_APP = '" + app + "'",
-                "'" + this.instanceName + "'");
-
-        try {
-            ps = conn.prepareStatement(query);
-
-            if (maxCount < 1)
-                maxCount = 1;
-            ps.setMaxRows(maxCount);
-
-            ps.setFetchSize(maxCount);
-
-            ps.setString(1, STATE_WAITING);
-            ps.setBigDecimal(2, new BigDecimal(String.valueOf(noLaterThan)));
-            ps.setBigDecimal(3, new BigDecimal(String.valueOf(noEarlierThan)));
-            rs = ps.executeQuery();
-
-            while (rs.next() && nextTriggers.size() < maxCount) {
-                nextTriggers.add(triggerKey(
-                        rs.getString(COL_TRIGGER_NAME),
-                        rs.getString(COL_TRIGGER_GROUP)));
-            }
-            return nextTriggers;
-        } finally {
-            if (null != rs)
-                rs.close();
-            if (null != ps)
-                ps.close();
-        }
-
     }
 
 }

@@ -18,6 +18,8 @@ public class JobApplicationContext {
 
     private static ThreadLocal<Stack<CommandContext>> commandContextThreadLocal = new ThreadLocal();
 
+    private static ThreadLocal<Boolean> special = new ThreadLocal<>();
+
     private static final String IP;
 
     static {
@@ -65,4 +67,11 @@ public class JobApplicationContext {
         return stack;
     }
 
+    public static Boolean getSpecial() {
+        return special.get();
+    }
+
+    public static void setSpecial(Boolean val) {
+        special.set(val);
+    }
 }
