@@ -27,6 +27,16 @@ public class AddJobVO {
     //后置任务
     private String postDefinitionID;
 
+    private Boolean specialWorker;
+
+    public Boolean getSpecialWorker() {
+        return specialWorker;
+    }
+
+    public void setSpecialWorker(Boolean specialWorker) {
+        this.specialWorker = specialWorker;
+    }
+
     public String getPostDefinitionID() {
         return postDefinitionID;
     }

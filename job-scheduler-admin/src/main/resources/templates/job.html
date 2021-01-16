@@ -159,6 +159,15 @@
                     <input id="postDefinitionID" type="text" class="form-control" style="margin: 0px 10px"
                            placeholder="">
                 </div>
+                <div class="form-group" style="display: flex">
+                    <div style="width: 15%;display: flex;align-items: center;">专属机器执行</div>
+                    <label class="radio-inline">
+                        <input type="radio" name="specialWorker" id="optionWorker" value="1"> 是
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="specialWorker" id="optionWorker1" value="0" checked> 否
+                    </label>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -197,6 +206,8 @@
             alert("Cron 不能为空")
             return;
         }
+        var specialWorker = $("input[name='specialWorker']:checked").val();
+
         var jobState = $("input[name='jobState']:checked").val();
         var handlerName = $("#handlerName").val();
         if (taskType == 1 && !handlerName) {
@@ -228,7 +239,8 @@
             "javaJobVO": javaJobVO,
             "cron": jobCron,
             "enable": jobState == 1,
-            "postDefinitionID": postDefinitionID
+            "postDefinitionID": postDefinitionID,
+            "specialWorker": specialWorker == 1
         };
         if (id == 0) {
             $.ajax({
@@ -342,6 +354,7 @@
     function jumpDag(id) {
         window.open("dag.html?definitionID=" + id)
     }
+
     function refresh() {
         $.ajax({
             url: url + "job/definition/list",

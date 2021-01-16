@@ -1,5 +1,6 @@
 package com.sumu.jobserver.api.service;
 
+import com.sumu.jobscheduler.scheduler.context.JobApplicationContext;
 import com.sumu.jobserver.api.vo.JobDefinitionVO;
 import com.sumu.jobserver.api.vo.JobInstanceVO;
 import com.sumu.jobserver.api.vo.Page;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
@@ -47,7 +49,6 @@ public class JobService {
     @Autowired
     private JobDefinitionService jobDefinitionService;
 
-
     @Autowired
     private JobInstanceService jobInstanceService;
 
@@ -58,10 +59,10 @@ public class JobService {
     private JobDispatcher jobDispatcher;
 
     @Transactional(rollbackFor = Exception.class)
-    public void addJob(AddJobVO addJobVO) throws SchedulerException {
+    public void addJob(AddJobVO addJobVO) throws SchedulerException, SQLException {
         //
         App appDO = jobApplicationService.createAppQuery()
-                .id(addJobVO.getId())
+                .id(addJobVO.getAppId())
                 .singleResult();
         Assert.isTrue(appDO != null, "当前应用不存在");
         String jobName = addJobVO.getJobName();
@@ -96,12 +97,12 @@ public class JobService {
                     .strategy(javaJobVO.getStrategy())
                     .shardNum(javaJobVO.getShardNum())
                     .deploy();
-            System.out.println(javaJobDefinition.getId());
         } else {
 
         }
         //增加到调度中心
         if (addJobVO.getEnable()) {
+            JobApplicationContext.setSpecial(addJobVO.getSpecialWorker());
             jobSchedule.addJob(String.valueOf(jobDefinition.getId()),
                     appDO.getAppCode(),
                     addJobVO.getCron());
@@ -128,7 +129,7 @@ public class JobService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void editJob(AddJobVO addJobVO) throws SchedulerException {
+    public void editJob(AddJobVO addJobVO) throws SchedulerException, SQLException {
         //
         Assert.isTrue(addJobVO.getId() != 0, "JobDefinitionId不合法");
         //

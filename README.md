@@ -8,8 +8,8 @@
 
 最为出名的XXL-JOB使用自研调度组件，elastic-job基于Quartz在上层基于ZK做了一层主从机器，由主结点进行作业分片，
 从结点具体任务调度。个人之前基于Quartz实现的分布式任务调度系统并未解决Quartz在弹性扩容方面的不足，借鉴于elastic-job
-的实现进行新的设计：调度中心每一台机器都参与Trigger的扫描，根据调度中心的机器总数和当前机器的编号进行取模调度(测试中)/
-根据机器编号获取不同执行范围(根据NEXT_FIRE_TIME进行筛选)的Trigger(未实施)。
+的实现进行新的设计：调度中心每一台机器都参与Trigger的扫描，根据调度中心的机器总数和当前机器的编号进行取模调度、支持核心业务
+的任务由单独机器部署
 
 ### 目标
 
@@ -17,6 +17,7 @@
 * 提供多种任务调度类型：Java(已实现)、Shell(实施中)、Hadoop(未开始)、Hive(未开始)、Python(未开始)
 * 调度中心HA，Quartz本身支持集群部署、改造优化DB锁竞争(已实现)
 * 执行器HA，基于ZK注册，支持执行器集群部署(已实现)
+* 核心业务独立调度：改造Quartz表，特殊任务或核心任务可直接指定部分机器单独调度。
 * 支持依赖任务以及DAG展示(已实现)
 * 支持多种调度策略：集群:随机、轮寻、Hash、广播、分片(实施中)
 * 异常处理：故障转移、重试、预警、
@@ -43,8 +44,8 @@
 
 * 安装JDK、Zookeeper、MySQL环境
 * 启动Zookeeper、MySQL
-* 初始化SQL，执行server模块resource目录下init.sql
-* 修改demo模块、server模块application.properties文件
+* 初始化SQL，执行admin模块resource目录下init.sql
+* 修改demo模块、admin模块application.properties文件
 ```properties
 #当前应用名称
 app.name = job
@@ -66,8 +67,8 @@ public class Task extends AbstractJobHandler {
 }
 ```
 * 启动demo模块
-* 启动server模块
-* 访问server后台页面，配置Job任务。默认端口8089，http://127.0.0.1:8089/manager/jobList.html
+* 启动admin模块
+* 访问admin后台页面，配置Job任务。默认端口8089，http://127.0.0.1:8089/manager/jobList.html
 
 技术栈：
 
