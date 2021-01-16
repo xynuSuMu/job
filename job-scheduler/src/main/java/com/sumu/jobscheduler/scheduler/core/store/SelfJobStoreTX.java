@@ -258,8 +258,6 @@ public class SelfJobStoreTX extends JobStoreCMT {
                 (app == null || "".equals(app)) ? "JOB_APP is null" : "JOB_APP = '" + app + "'",
                 "'" + this.instanceName + "'");
 
-        System.out.println("查询语句：" + query);
-
         try {
             ps = conn.prepareStatement(query);
 
@@ -279,8 +277,6 @@ public class SelfJobStoreTX extends JobStoreCMT {
                         rs.getString(COL_TRIGGER_NAME),
                         rs.getString(COL_TRIGGER_GROUP)));
             }
-            System.out.println("查询语句：" + query);
-            System.out.println("查询数量：" + nextTriggers.size());
             return nextTriggers;
         } finally {
             if (null != rs)
