@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sumu.jobscheduler.scheduler.mapper.AppMapper">
+
+    <insert id="insertAppCode">
+        insert into JOB_CUSTOM_APP (app_code,zxid,update_time)
+        values (#{appCode},#{zxid},current_timestamp)
+        on duplicate key update
+            update_time = IF((#{zxid} > zxid), current_timestamp, update_time),
+            zxid = IF((#{zxid} > zxid), #{zxid}, zxid)
+            ;
+    </insert>
+
+    <select id="queryApp" resultMap="appMapper">
+        select
+        <include refid="app_field"/>
+        from JOB_CUSTOM_APP
+        <if test="appEntity!=null">
+            where 1= 1
+            <if test="appEntity.id > 0">
+                and id = #{appEntity.id}
+            </if>
+            <if test="appEntity.appCode !=null and appEntity.appCode !=''">
+                and app_code = #{appEntity.appCode}
+            </if>
+            <if test="appEntity.zxID > 0 ">
+                and zxid = #{appEntity.zxID}
+            </if>
+            <if test="appEntity.updateTime != null ">
+                and update_time = #{appEntity.updateTime}
+            </if>
+        </if>
+    </select>
+
+    <sql id="app_field">
+        id,app_code,zxid,update_time
+     </sql>
+
+    <resultMap id="appMapper" type="com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.app.AppEntityImpl">
+        <result property="id" column="id"/>
+        <result property="appCode" column="app_code"/>
+        <result property="zxID" column="zxid"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+</mapper>

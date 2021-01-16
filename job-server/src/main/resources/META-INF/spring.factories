@@ -1,5 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.sumu.jobserver.scheduler.config.auto.SpringJobEngineAutoConfiguration
-# Run Listeners
-org.springframework.boot.SpringApplicationRunListener=\
-com.sumu.jobserver.scheduler.listener.JobServerListener
