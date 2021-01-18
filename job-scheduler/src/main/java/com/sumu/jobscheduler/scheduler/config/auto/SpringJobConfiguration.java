@@ -1,5 +1,7 @@
 package com.sumu.jobscheduler.scheduler.config.auto;
 
+import com.sumu.jobscheduler.scheduler.config.properties.JobProperties;
+import com.sumu.jobscheduler.scheduler.context.JobApplicationContext;
 import com.sumu.jobscheduler.scheduler.core.service.JobApplicationService;
 import com.sumu.jobscheduler.scheduler.core.service.JobDefinitionService;
 import com.sumu.jobscheduler.scheduler.core.service.JobInstanceService;
@@ -37,6 +39,8 @@ public class SpringJobConfiguration extends AbstractSpringJobConfiguration {
 
     private CommandExecutor commandExecutor;
 
+    private JobProperties jobProperties;
+
     protected List<CommandInterceptor> commandInterceptors;
 
     //Service
@@ -49,8 +53,8 @@ public class SpringJobConfiguration extends AbstractSpringJobConfiguration {
 
     protected JobInstanceService jobInstanceService = new JobInstanceServiceImpl();
 
-    public SpringJobConfiguration() {
-
+    public SpringJobConfiguration(JobProperties jobProperties) {
+        this.jobProperties = jobProperties;
     }
 
     public JobEngine jobEngine() {
@@ -59,12 +63,17 @@ public class SpringJobConfiguration extends AbstractSpringJobConfiguration {
     }
 
     public void init() {
+        initJobApplicationContext();
         initSqlSessionFactory();
         initCommandExecutors();
         initService();
     }
 
-    public void initCommandExecutors() {
+    private void initJobApplicationContext() {
+        JobApplicationContext.setJobProperties(jobProperties);
+    }
+
+    private void initCommandExecutors() {
         initCommandInterceptor();
         initCommandExecutor();
     }

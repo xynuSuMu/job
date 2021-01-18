@@ -13,6 +13,7 @@
         var url = "/"
         var pageIndex = 1;
         var pageSize = 10;
+        var searchAppId;
         var total = 0;
         $.ajax({
             url: url + "app/getAppList",
@@ -25,10 +26,10 @@
                 for (key in data) {
                     var obj = data[key];
                     $("#appSelect").append("<option value=" + obj.id + ">" + obj.appName + "</option>");
+                    $("#searchAppSelect").append("<option value=" + obj.id + ">" + obj.appName + "</option>");
                 }
             }
         })
-
     </script>
     <script type="text/javascript">
         $(function () {
@@ -64,15 +65,17 @@
     </div>
     <div align="right" style="margin: 0 60px;">
         <div class="navbar-form navbar-left" role="search" style="width: 100%;">
-            <!--<div class="form-group">-->
-            <!--<input type="text" class="form-control" placeholder="应用">-->
-            <!--</div>-->
-            <!--<div class="form-group">-->
-            <!--<input type="text" class="form-control" placeholder="类型">-->
-            <!--</div>-->
-            <!--<button type="submit" class="btn btn-default">搜索</button>-->
+            <div class="form-group" style="margin: 0 15px">
+                <label>应用</label>
+            </div>
+            <div class="form-group" style="margin: 0 15px">
+                <select id="searchAppSelect"
+                        style="display: block;width: 100px;height: 34px;padding: 6px 12px;font-size: 14px;line-height: 1.42857143;color: #555;background-color: #fff;background-image: none;border: 1px solid #ccc;border-radius: 4px;">
+                    <option></option>
+                </select>
+            </div>
+            <button class="btn btn-success" onclick="search()">搜索</button>
             <button class="btn btn-info" onclick="addJob()">新建任务</button>
-
         </div>
     </div>
 
@@ -370,13 +373,24 @@
         })
     }
 
+    function search() {
+        pageIndex = 1;
+        pageSize = 10;
+        searchAppId = $("#searchAppSelect").val();
+        refresh();
+    }
+
     function refresh() {
         $.ajax({
             url: url + "job/definition/list",
             type: 'post',
             dataType: 'json',
             async: false,
-            data: JSON.stringify({"pageIndex": pageIndex, "pageSize": pageSize}),
+            data: JSON.stringify({
+                "pageIndex": pageIndex,
+                "pageSize": pageSize,
+                "appID": searchAppId
+            }),
             cache: false,
             headers: {
                 'Content-Type': 'application/json'

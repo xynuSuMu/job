@@ -25,6 +25,7 @@ import com.sumu.jobscheduler.scheduler.exception.JobExceptionInfo;
 import org.quartz.SchedulerException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -57,6 +58,10 @@ public class JobService {
 
     @Autowired
     private JobDispatcher jobDispatcher;
+
+
+    @Value("${job.specialApp}")
+    private String specialApp;
 
     @Transactional(rollbackFor = Exception.class)
     public void addJob(AddJobVO addJobVO) throws SchedulerException, SQLException {
@@ -203,7 +208,17 @@ public class JobService {
     }
 
     public Page<List<JobDefinitionVO>> jobDefinitionList(JobDefinitionQuery jobDefinitionQuery) {
+        if (specialApp != null && !"".equals(specialApp)) {
+            List<App> list = jobApplicationService
+                    .createAppQuery()
+                    .appCode(specialApp)
+                    .list();
+            if (list == null || list.size() == 0)
+                return new Page<>();
+            jobDefinitionQuery.setAppID(list.get(0).getID());
+        }
         int total = jobDefinitionService.createQuery()
+                .appId(jobDefinitionQuery.getAppID())
                 .count();
         if (total == 0) {
             return new Page<>();
@@ -212,6 +227,7 @@ public class JobService {
         res.setTotal(total);
         res.setCurrent(jobDefinitionQuery.getPageIndex());
         List<JobDefinition> list = jobDefinitionService.createQuery()
+                .appId(jobDefinitionQuery.getAppID())
                 .index(jobDefinitionQuery.getPageIndex())
                 .pageSize(jobDefinitionQuery.getPageSize())
                 .list();

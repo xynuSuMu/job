@@ -37,9 +37,10 @@ public class SpringJobEngineAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SpringJobConfiguration springJobConfiguration(
+            JobProperties jobProperties,
             DataSource dataSource,
             PlatformTransactionManager transactionManager) {
-        SpringJobConfiguration springJobConfiguration = new SpringJobConfiguration();
+        SpringJobConfiguration springJobConfiguration = new SpringJobConfiguration(jobProperties);
         springJobConfiguration.setDataSource(dataSource);
         springJobConfiguration.setTransactionManager(transactionManager);
         return springJobConfiguration;

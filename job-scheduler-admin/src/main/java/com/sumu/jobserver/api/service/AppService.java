@@ -6,6 +6,7 @@ import com.sumu.jobscheduler.scheduler.core.service.JobApplicationService;
 import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.app.App;
 import com.sumu.jobscheduler.scheduler.mapper.AppMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,13 +22,19 @@ import java.util.List;
 @Service
 public class AppService {
 
+    @Value("${job.specialApp}")
+    private String specialApp;
+
     @Autowired
     private JobApplicationService jobApplicationService;
 
     public List<AppVO> getAppList() {
         List<AppVO> res = new ArrayList<>();
         List<App> list = jobApplicationService
-                .createAppQuery().list();
+                .createAppQuery()
+                .appCode(specialApp)
+                .list();
+
         list.stream().forEach(appDO -> {
             AppVO appVO = new AppVO();
             appVO.setAppName(appDO.getAppCode());

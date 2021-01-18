@@ -7,16 +7,16 @@ package com.sumu.jobserver.api.vo.query;
  */
 public class JobDefinitionQuery {
 
-    private String appID;
+    private int appID;
     private int pageIndex;
     private int pageSize;
 
 
-    public String getAppID() {
+    public int getAppID() {
         return appID;
     }
 
-    public void setAppID(String appID) {
+    public void setAppID(int appID) {
         this.appID = appID;
     }
 

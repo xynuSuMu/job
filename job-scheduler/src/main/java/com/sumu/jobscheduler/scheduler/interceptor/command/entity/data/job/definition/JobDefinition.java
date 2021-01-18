@@ -19,7 +19,6 @@ public interface JobDefinition {
 
     int getTaskType();
 
-
     Boolean getEnable();
 
     String getPostDefinitionID();

@@ -1,5 +1,6 @@
 package com.sumu.jobscheduler.scheduler.context;
 
+import com.sumu.jobscheduler.scheduler.config.properties.JobProperties;
 import com.sumu.jobscheduler.scheduler.interceptor.command.context.CommandContext;
 import org.apache.curator.framework.CuratorFramework;
 
@@ -19,6 +20,8 @@ public class JobApplicationContext {
     private static ThreadLocal<Stack<CommandContext>> commandContextThreadLocal = new ThreadLocal();
 
     private static ThreadLocal<Boolean> special = new ThreadLocal<>();
+
+    private static JobProperties jobProperties;
 
     private static final String IP;
 
@@ -73,5 +76,14 @@ public class JobApplicationContext {
 
     public static void setSpecial(Boolean val) {
         special.set(val);
+    }
+
+
+    public static JobProperties getJobProperties() {
+        return jobProperties;
+    }
+
+    public static void setJobProperties(JobProperties jobProperties) {
+        JobApplicationContext.jobProperties = jobProperties;
     }
 }
