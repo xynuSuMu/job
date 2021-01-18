@@ -9,6 +9,7 @@ import com.sumu.jobserver.api.vo.param.AddJobVO;
 import com.sumu.jobserver.api.vo.JobDefinitionVO;
 import com.sumu.jobserver.api.vo.query.JobDefinitionQuery;
 import com.sumu.jobserver.api.vo.query.JobInstanceQuery;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -64,7 +65,13 @@ public class JobApi {
 
     @PutMapping("delete/{id}")
     public Result<Boolean> delete(@PathVariable int id) {
-        return Result.success(true);
+        try {
+            jobService.delete(id);
+            return Result.success(true);
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+        return Result.success(false);
     }
 
     @PutMapping("resume/{id}")

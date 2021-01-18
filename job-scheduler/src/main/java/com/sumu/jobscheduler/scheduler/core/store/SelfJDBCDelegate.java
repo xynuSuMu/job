@@ -63,7 +63,7 @@ public class SelfJDBCDelegate extends StdJDBCDelegate {
                 this.tablePrefix,
                 (app == null || "".equals(app)) ? "JOB_APP is null" : "JOB_APP = '" + app + "'",
                 getSchedulerNameLiteral());
-        LOG.info("QUEERY,{}", query);
+        LOG.debug("Self Query,{}", query);
         try {
             ps = conn.prepareStatement(query);
 
@@ -83,7 +83,7 @@ public class SelfJDBCDelegate extends StdJDBCDelegate {
                         rs.getString(COL_TRIGGER_NAME),
                         rs.getString(COL_TRIGGER_GROUP)));
             }
-            LOG.info("查询数量,{}", nextTriggers.size());
+            LOG.debug("查询数量,{}", nextTriggers.size());
             return nextTriggers;
         } finally {
             if (null != rs)
@@ -137,7 +137,7 @@ public class SelfJDBCDelegate extends StdJDBCDelegate {
             ps.setInt(13, trigger.getMisfireInstruction());
             setBytes(ps, 14, baos);
             ps.setInt(15, trigger.getPriority());
-            if (JobApplicationContext.getSpecial()!=null && JobApplicationContext.getSpecial())
+            if (JobApplicationContext.getSpecial() != null && JobApplicationContext.getSpecial())
                 ps.setString(16, trigger.getKey().getGroup());
             else
                 ps.setNull(16, Types.VARCHAR);

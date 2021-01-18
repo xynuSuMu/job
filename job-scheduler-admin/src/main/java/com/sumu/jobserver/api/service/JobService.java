@@ -169,6 +169,21 @@ public class JobService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public Boolean delete(int id) throws SchedulerException {
+        JobDefinition jobDefinitionDO =
+                jobDefinitionService.createQuery().id(id).singleResult();
+        Assert.isTrue(jobDefinitionDO != null, "当前任务不存在");
+        //删除
+        jobDefinitionService.createBuilder().id(id).delete();
+        App appDO = jobApplicationService.createAppQuery().id(jobDefinitionDO.getAppId())
+                .singleResult();
+        Assert.isTrue(appDO != null, "当前任务应用不存在");
+        jobSchedule.removeIfExist(String.valueOf(jobDefinitionDO.getId()), appDO.getAppCode());
+        return true;
+    }
+
+
+    @Transactional(rollbackFor = Exception.class)
     public void resume(int id) throws SchedulerException {
         JobDefinition jobDefinitionDO =
                 jobDefinitionService.createQuery()

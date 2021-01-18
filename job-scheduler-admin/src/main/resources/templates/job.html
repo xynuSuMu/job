@@ -6,7 +6,7 @@
     <link href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
     <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="http://127.0.0.1:8089/paging.js"></script>
+    <script type="text/javascript" src="/paging.js"></script>
 
     <script type="text/javascript">
         var id = 0;
@@ -316,7 +316,8 @@
                 'Content-Type': 'application/json'
             },
             success: function (res) {
-                console.log(res)
+                console.log(res);
+                refresh();
             }
         })
     }
@@ -343,6 +344,7 @@
             },
             success: function (res) {
                 console.log(res)
+                refresh();
             }
         })
     }
@@ -353,6 +355,19 @@
 
     function jumpDag(id) {
         window.open("dag.html?definitionID=" + id)
+    }
+
+    function deleteJob(id) {
+        $.ajax({
+            url: url + "job/delete/" + id,
+            type: 'put',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            success: function (res) {
+                refresh();
+            }
+        })
     }
 
     function refresh() {
@@ -382,10 +397,11 @@
                         '      <td>' +
                         '     <button type="button" class="btn btn-default" onclick="editJob(' + obj.id + ')">编辑</button>' +
                         '     <button type="button" class="btn btn-info" onclick="triggerJob(' + obj.id + ')">立即执行</button>' +
-                        '         ' + (obj.enable ? '<button type="button" class="btn btn-danger" onclick="pauseJob(' + obj.id + ')">暂停</button>'
+                        '         ' + (obj.enable ? '<button type="button" class="btn btn-warning" onclick="pauseJob(' + obj.id + ')">暂停</button>'
                             : '<button type="button" class="btn btn-success" onclick="resumeJob(' + obj.id + ')">启动</button>') +
-                        '          <button type="button" class="btn btn-primary"  onclick="jumpInstance(' + obj.id + ')">执行记录</button>' +
+                        '          <button type="button" class="btn btn-info"  onclick="jumpInstance(' + obj.id + ')">执行记录</button>' +
                         '          <button type="button" class="btn btn-primary"  onclick="jumpDag(' + obj.id + ')">任务执行图</button>' +
+                        '          <button type="button" class="btn btn-danger"  onclick="deleteJob(' + obj.id + ')">删除</button>' +
                         '      </td>' +
                         "    </tr>"
                 }
