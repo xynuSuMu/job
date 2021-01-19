@@ -52,11 +52,11 @@ public class JobExecutor extends AbstractJobExecutor {
     }
 
     @Override
-    public void executorByQuartz(JobDefinition jobDefinitionDO) {
+    public void executorByQuartz(JobDefinition jobDefinitionDO, JobInstance jobInstance) {
         int jobDefinitionId = jobDefinitionDO.getId();
         int appId = jobDefinitionDO.getAppId();
         //执行
-        doExecute(appId, jobDefinitionId);
+        doExecute(appId, jobDefinitionId, jobInstance);
         //后置任务
         if (jobDefinitionDO.getPostDefinitionID() != null && !"".equals(jobDefinitionDO.getPostDefinitionID())) {
             String[] ids = jobDefinitionDO.getPostDefinitionID().split(",");
@@ -67,7 +67,7 @@ public class JobExecutor extends AbstractJobExecutor {
         LOG.info("Job Execute Finish,jobDefinitionId = {}", jobDefinitionId);
     }
 
-    private void doExecute(int appId, int jobDefinitionId) {
+    private void doExecute(int appId, int jobDefinitionId, JobInstance jobInstanceDO) {
         JavaJobDefinition javaJobDO = jobDefinitionService.createJavaQuery()
                 .definitionId(jobDefinitionId)
                 .singleResult();
@@ -79,12 +79,6 @@ public class JobExecutor extends AbstractJobExecutor {
                 .enable(true)
                 .list();
 
-        //Job实例
-        JobInstance jobInstanceDO = jobInstanceService.createBuilder()
-                .jobDefinitionId(jobDefinitionId)
-                .startTime(new Date())
-                .triggerType(1)
-                .create();
         JavaJobInfo.Strategy schedulerStrategy = JavaJobInfo.Strategy.getStrategy(strategy);
         //调度
         switch (schedulerStrategy) {
@@ -102,16 +96,6 @@ public class JobExecutor extends AbstractJobExecutor {
                 break;
         }
 
-    }
-
-    private void updateInstance(int instanceId, int result, String worker) {
-        Date endTime = new Date();
-        jobInstanceService.createBuilder()
-                .id(instanceId)
-                .endTime(endTime)
-                .triggerResult(result)
-                .triggerWorker(worker)
-                .create();
     }
 
     private void defaultStrategy(List<Worker> workers, String handlerName, JobInstance jobInstanceDO) {

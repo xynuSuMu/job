@@ -9,6 +9,7 @@ import com.sumu.jobscheduler.scheduler.core.service.JobDefinitionService;
 import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.definition.JobDefinition;
 import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.definition.shell.Remote;
 import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.definition.shell.ShellJobDefinition;
+import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.instance.JobInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -33,10 +34,16 @@ public class ShellExecutor extends AbstractJobExecutor {
         this.jobDefinitionService = jobDefinitionService;
     }
 
-    public void executorByQuartz(JobDefinition jobDefinitionDO) {
+    public void executorByQuartz(JobDefinition jobDefinitionDO, JobInstance jobInstance) {
         ShellJobDefinition shellJobDefinition = jobDefinitionService.createShellQuery()
                 .definitionId(jobDefinitionDO.getId())
                 .selectShellJob();
+        doExecutor(shellJobDefinition, jobInstance);
+    }
+
+    private void doExecutor(ShellJobDefinition shellJobDefinition, JobInstance jobInstanceDO) {
+
+        StringBuilder stringBuilder = new StringBuilder();
         try {
             ChannelExec channel;
             InputStream input;
@@ -49,7 +56,8 @@ public class ShellExecutor extends AbstractJobExecutor {
                 BufferedReader inputReader = new BufferedReader(new InputStreamReader(input));
                 String inputLine;
                 while ((inputLine = inputReader.readLine()) != null) {
-                    System.out.println(inputLine);
+//                    System.out.println(inputLine);
+                    stringBuilder.append(inputLine + "\n");
                 }
             } finally {
                 if (input != null) {
@@ -65,10 +73,7 @@ public class ShellExecutor extends AbstractJobExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void doExecutor() {
-
+        updateInstance(jobInstanceDO.getId(), 1, stringBuilder.toString());
     }
 
 

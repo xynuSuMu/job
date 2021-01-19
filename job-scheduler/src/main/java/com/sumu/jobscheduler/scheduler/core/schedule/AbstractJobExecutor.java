@@ -1,11 +1,16 @@
 package com.sumu.jobscheduler.scheduler.core.schedule;
 
 import com.sumu.jobscheduler.scheduler.core.service.JobDefinitionService;
+import com.sumu.jobscheduler.scheduler.core.service.JobInstanceService;
 import com.sumu.jobscheduler.scheduler.core.service.impl.JobDefinitionServiceImpl;
+import com.sumu.jobscheduler.scheduler.core.service.impl.JobInstanceServiceImpl;
 import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.definition.JobDefinition;
+import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.instance.JobInstance;
 import com.sumu.jobscheduler.util.SpringContextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Date;
 
 /**
  * @author 陈龙
@@ -26,13 +31,38 @@ public abstract class AbstractJobExecutor {
         return jobDefinition;
     }
 
+    private JobInstance prepareJobInstance(Integer jobDefinitionId) {
+        JobInstanceService jobInstanceService =
+                SpringContextUtils.getBean(JobInstanceServiceImpl.class);
+        //Job实例
+        JobInstance jobInstanceDO = jobInstanceService.createBuilder()
+                .jobDefinitionId(jobDefinitionId)
+                .startTime(new Date())
+                .triggerType(1)
+                .create();
+        return jobInstanceDO;
+    }
+
     public void executor(String jobDefinitionId) {
         JobDefinition jobDefinitionDO = this.prepareJobDefinition(jobDefinitionId);
-        executorByQuartz(jobDefinitionDO);
+        JobInstance jobInstance = prepareJobInstance(Integer.valueOf(jobDefinitionId));
+        executorByQuartz(jobDefinitionDO, jobInstance);
         finish(jobDefinitionDO);
     }
 
-    public abstract void executorByQuartz(JobDefinition jobDefinitionDO);
+    public abstract void executorByQuartz(JobDefinition jobDefinitionDO, JobInstance jobInstance);
+
+    protected void updateInstance(int instanceId, int result, String worker) {
+        JobInstanceService jobInstanceService =
+                SpringContextUtils.getBean(JobInstanceServiceImpl.class);
+        Date endTime = new Date();
+        jobInstanceService.createBuilder()
+                .id(instanceId)
+                .endTime(endTime)
+                .triggerResult(result)
+                .triggerWorker(worker)
+                .create();
+    }
 
     public void finish(JobDefinition jobDefinitionDO) {
         LOG.info("[ Job Schedule Finish ] jobName={},cron={}", jobDefinitionDO.getJobName(), jobDefinitionDO.getCron());
