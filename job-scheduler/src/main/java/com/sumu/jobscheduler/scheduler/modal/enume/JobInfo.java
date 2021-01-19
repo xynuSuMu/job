@@ -13,7 +13,7 @@ public interface JobInfo {
 
     enum Type {
         JAVA(1, "Java", JobExecutor.class),
-        SHELL(1, "SHELL脚本", ShellExecutor.class),
+        SHELL(2, "SHELL脚本", ShellExecutor.class),
         ;
         private int code;
         private String desc;

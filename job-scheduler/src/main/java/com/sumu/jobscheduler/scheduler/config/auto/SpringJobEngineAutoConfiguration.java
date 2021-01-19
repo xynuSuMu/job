@@ -6,6 +6,7 @@ import com.sumu.jobscheduler.scheduler.core.monitor.ZkMonitor;
 import com.sumu.jobscheduler.scheduler.core.schedule.JobDispatcher;
 import com.sumu.jobscheduler.scheduler.core.schedule.JobSchedule;
 import com.sumu.jobscheduler.scheduler.core.schedule.java.JobExecutor;
+import com.sumu.jobscheduler.scheduler.core.schedule.shell.ShellExecutor;
 import com.sumu.jobscheduler.scheduler.core.service.JobApplicationService;
 import com.sumu.jobscheduler.scheduler.core.service.JobDefinitionService;
 import com.sumu.jobscheduler.scheduler.core.service.JobInstanceService;
@@ -53,14 +54,14 @@ public class SpringJobEngineAutoConfiguration {
         return new PostSchedulerFactoryBean();
     }
 
-    //
+    //调度器
     @Bean
     @ConditionalOnMissingBean
     public JobSchedule jobSchedule(
             DataSource dataSource,
             QuartzProperties quartzProperties,
             Scheduler scheduler) {
-        return new JobSchedule(dataSource,quartzProperties, scheduler);
+        return new JobSchedule(dataSource, quartzProperties, scheduler);
     }
 
     @Bean
@@ -70,6 +71,7 @@ public class SpringJobEngineAutoConfiguration {
         return jobFactoryBean;
     }
 
+    //Service
     @Bean
     @ConditionalOnMissingBean
     public JobApplicationService jobApplicationService(JobEngine jobEngine) {
@@ -94,7 +96,7 @@ public class SpringJobEngineAutoConfiguration {
         return jobEngine.getJobInstanceService();
     }
 
-
+    //监控、分发
     @Bean
     @ConditionalOnMissingBean
     public JobDispatcher jobDispatcher(JobDefinitionService jobDefinitionService) {
@@ -116,6 +118,7 @@ public class SpringJobEngineAutoConfiguration {
         return new ZkMonitor(jobProperties, registerHandler);
     }
 
+    //执行器
     @Bean
     @ConditionalOnMissingBean
     public JobExecutor jobExecutor(WorkerService workerService,
@@ -123,5 +126,11 @@ public class SpringJobEngineAutoConfiguration {
                                    JobInstanceService jobInstanceService,
                                    JobDispatcher jobDispatcher) {
         return new JobExecutor(workerService, jobDefinitionService, jobInstanceService, jobDispatcher);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ShellExecutor shellExecutor(JobDefinitionService jobDefinitionService) {
+        return new ShellExecutor(jobDefinitionService);
     }
 }

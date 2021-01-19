@@ -42,6 +42,7 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!--quartz-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-quartz</artifactId>
@@ -59,6 +60,14 @@
             <artifactId>curator-recipes</artifactId>
             <version>2.12.0</version>
         </dependency>
+
+        <!--jsch-->
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.55</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.sumu</groupId>

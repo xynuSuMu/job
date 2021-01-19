@@ -33,6 +33,7 @@
     </script>
     <script type="text/javascript">
         $(function () {
+
             refresh();
             var a = {color: 'black', sex: 'black', border: '1px solid #ddd'};
             var b = {background: '#31b0d5'};
@@ -123,15 +124,10 @@
                     <input id="jobDesc" type="text" class="form-control" style="margin: 0px 10px" placeholder="">
                 </div>
                 <div class="form-group" style="display: flex">
-                    <div style="width: 15%;display: flex;align-items: center;">任务类型</div>
-                    <select id="jobType" class="form-control" style="margin: 0px 10px">
-                        <option value="1">Java任务</option>
-                    </select>
-                </div>
-                <div class="form-group" style="display: flex">
                     <div style="width: 15%;display: flex;align-items: center;">Cron表达式</div>
                     <input id="jobCron" type="text" class="form-control" style="margin: 0px 10px" placeholder="">
                 </div>
+
                 <div class="form-group" style="display: flex">
                     <div style="width: 15%;display: flex;align-items: center;">状态</div>
                     <label class="radio-inline">
@@ -142,26 +138,75 @@
                     </label>
                 </div>
                 <div class="form-group" style="display: flex">
-                    <div style="width: 15%;display: flex;align-items: center;">Handler名称</div>
-                    <input id="handlerName" type="text" class="form-control" style="margin: 0px 10px" placeholder="">
-                </div>
-                <div class="form-group" style="display: flex">
-                    <div style="width: 15%;display: flex;align-items: center;">执行策略</div>
-                    <select id="jobStrategy" class="form-control" style="margin: 0px 10px">
-                        <option value="1">默认(集群)</option>
-                        <option value="2">广播</option>
-                        <option value="3">分片</option>
+                    <div style="width: 15%;display: flex;align-items: center;">任务类型</div>
+                    <select id="jobType" class="form-control" style="margin: 0px 10px">
+                        <option value="0"></option>
+                        <option value="1">Java任务</option>
+                        <option value="2">Linux脚本任务</option>
                     </select>
                 </div>
-                <div class="form-group" style="display: flex">
-                    <div style="width: 15%;display: flex;align-items: center;">分片数量</div>
-                    <input id="jobShard" type="text" class="form-control" style="margin: 0px 10px" placeholder="">
-                </div>
+                <block id="shellJob" style="display: none">
+                    <div class="form-group" style="display: flex">
+                        <div style="width: 15%;display: flex;align-items: center;">账号</div>
+                        <input id="user" type="text" class="form-control" style="margin: 0px 10px"
+                               placeholder="">
+                    </div>
+                    <div class="form-group" style="display: flex">
+                        <div style="width: 15%;display: flex;align-items: center;">host</div>
+                        <input id="host" type="text" class="form-control" style="margin: 0px 10px"
+                               placeholder="">
+                    </div>
+                    <div class="form-group" style="display: flex">
+                        <div style="width: 15%;display: flex;align-items: center;">端口</div>
+                        <input id="port" type="text" value="22" class="form-control" style="margin: 0px 10px"
+                               placeholder="">
+                    </div>
+                    <div class="form-group" style="display: flex">
+                        <div style="width: 15%;display: flex;align-items: center;">密码</div>
+                        <input id="pwd" type="password" class="form-control" style="margin: 0px 10px"
+                               placeholder="">
+                    </div>
+                    <div class="form-group" style="display: flex">
+                        <div style="width: 15%;display: flex;align-items: center;">脚本目录</div>
+                        <input id="directory"  class="form-control" style="margin: 0px 10px"
+                               placeholder="">
+                    </div>
+                    <div class="form-group" style="display: flex">
+                        <div style="width: 15%;display: flex;align-items: center;">脚本名称</div>
+                        <input id="file"  class="form-control" style="margin: 0px 10px"
+                               placeholder="">
+                    </div>
+                    <div class="form-group" style="display: flex">
+                        <div style="width: 15%;display: flex;align-items: center;">脚本参数</div>
+                        <input id="param"  class="form-control" style="margin: 0px 10px"
+                               placeholder="">
+                    </div>
+                </block>
+                <block id="javaJob" style="display: none">
+                    <div class="form-group" style="display: flex">
+                        <div style="width: 15%;display: flex;align-items: center;">Handler名称</div>
+                        <input id="handlerName" type="text" class="form-control" style="margin: 0px 10px"
+                               placeholder="">
+                    </div>
+                    <div class="form-group" style="display: flex">
+                        <div style="width: 15%;display: flex;align-items: center;">执行策略</div>
+                        <select id="jobStrategy" class="form-control" style="margin: 0px 10px">
+                            <option value="1">默认(集群)</option>
+                            <option value="2">广播</option>
+                            <option value="3">分片</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex">
+                        <div style="width: 15%;display: flex;align-items: center;">分片数量</div>
+                        <input id="jobShard" type="text" class="form-control" style="margin: 0px 10px" placeholder="">
+                    </div>
+                </block>
                 <div class="form-group" style="display: flex">
                     <div style="width: 15%;display: flex;align-items: center;">后置Job</div>
                     <input id="postDefinitionID" type="text" class="form-control" style="margin: 0px 10px"
                            placeholder="">
                 </div>
+
                 <div class="form-group" style="display: flex">
                     <div style="width: 15%;display: flex;align-items: center;">专属机器执行</div>
                     <label class="radio-inline">
@@ -182,6 +227,22 @@
 
 </body>
 <script type="text/javascript">
+
+    $("#jobType").change(function () {
+        //要触发的事件
+        var taskType = $("#jobType").val();
+        if (taskType == 0) {
+            $("#javaJob").hide();
+            $("#shellJob").hide();
+        } else if (taskType == 1) {
+            $("#javaJob").show();
+            $("#shellJob").hide();
+        } else if (taskType == 2) {
+            $("#shellJob").show();
+            $("#javaJob").hide();
+        }
+    });
+
     function addJob() {
         id = 0;
         $('#myModal').modal('show');
@@ -200,7 +261,7 @@
         }
         var jobDesc = $("#jobDesc").val();
         var taskType = $("#jobType").val();
-        if (!taskType) {
+        if (!taskType || taskType == 0) {
             alert("任务类型 不能为空")
             return;
         }
@@ -211,28 +272,74 @@
         }
         var specialWorker = $("input[name='specialWorker']:checked").val();
 
-        var jobState = $("input[name='jobState']:checked").val();
-        var handlerName = $("#handlerName").val();
-        if (taskType == 1 && !handlerName) {
-            alert("HandlerName 不能为空")
-            return;
-        }
-        var jobStrategy = $("#jobStrategy").val();
-        if (taskType == 1 && !jobStrategy) {
-            alert("执行策略 不能为空")
-            return;
-        }
-        var jobShard = $("#jobShard").val();
-        if (jobStrategy == 3 && (!jobShard || jobShard < 1)) {
-            alert("分片策略不能小于1")
-            return;
-        }
         var postDefinitionID = $("#postDefinitionID").val();
-        var javaJobVO = {
-            "handlerName": handlerName,
-            "strategy": jobStrategy,
-            "shardNum": jobShard
-        };
+
+        var jobState = $("input[name='jobState']:checked").val();
+        var javaJobVO = null;
+        var shellJobVO = null;
+        if (taskType == 1) {
+            var handlerName = $("#handlerName").val();
+            if (taskType == 1 && !handlerName) {
+                alert("HandlerName 不能为空")
+                return;
+            }
+            var jobStrategy = $("#jobStrategy").val();
+            if (taskType == 1 && !jobStrategy) {
+                alert("执行策略 不能为空")
+                return;
+            }
+            var jobShard = $("#jobShard").val();
+            if (jobStrategy == 3 && (!jobShard || jobShard < 1)) {
+                alert("分片策略不能小于1")
+                return;
+            }
+            javaJobVO = {
+                "handlerName": handlerName,
+                "strategy": jobStrategy,
+                "shardNum": jobShard
+            };
+        } else if (taskType == 2) {
+            var user = $("#user").val();
+            if (!user) {
+                alert("账号不能为空")
+                return;
+            }
+            var host = $("#host").val();
+            if (!host) {
+                alert("host不能为空")
+                return;
+            }
+            var port = $("#port").val();
+            if (!port) {
+                alert("端口号不能为空")
+                return;
+            }
+            var pwd = $("#pwd").val();
+            if (!pwd) {
+                alert("密码不能为空")
+                return;
+            }
+            var directory = $("#directory").val();
+            if (!directory) {
+                alert("目录不能为空")
+                return;
+            }
+            var file = $("#file").val();
+            if (!file) {
+                alert("sh文件名不能为空")
+                return;
+            }
+            var param = $("#param").val();
+            shellJobVO = {
+                "user": user,
+                "host": host,
+                "port": port,
+                "password": pwd,
+                "directory": directory,
+                "file": file,
+                "param": param
+            };
+        }
         var addJobVO = {
             "id": id,
             "appId": appId,
@@ -240,6 +347,7 @@
             "jobDesc": jobDesc,
             "taskType": taskType,
             "javaJobVO": javaJobVO,
+            "shellJobVO": shellJobVO,
             "cron": jobCron,
             "enable": jobState == 1,
             "postDefinitionID": postDefinitionID,

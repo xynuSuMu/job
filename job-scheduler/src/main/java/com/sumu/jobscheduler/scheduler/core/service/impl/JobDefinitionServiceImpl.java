@@ -7,9 +7,14 @@ import com.sumu.jobscheduler.scheduler.interceptor.command.cmd.job.definition.ja
 import com.sumu.jobscheduler.scheduler.interceptor.command.cmd.job.definition.java.JavaJobBuilder;
 import com.sumu.jobscheduler.scheduler.interceptor.command.cmd.job.definition.java.JavaJobDefinitionQueryCommand;
 import com.sumu.jobscheduler.scheduler.interceptor.command.cmd.job.definition.java.JavaJobQuery;
+import com.sumu.jobscheduler.scheduler.interceptor.command.cmd.job.definition.shell.CreateShellJobDefinitionCommand;
+import com.sumu.jobscheduler.scheduler.interceptor.command.cmd.job.definition.shell.ShellJobBuilder;
+import com.sumu.jobscheduler.scheduler.interceptor.command.cmd.job.definition.shell.ShellJobDefinitionQueryCommand;
+import com.sumu.jobscheduler.scheduler.interceptor.command.cmd.job.definition.shell.ShellJobQuery;
 import com.sumu.jobscheduler.scheduler.interceptor.command.context.CommandContext;
 import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.definition.JobDefinition;
 import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.definition.java.JavaJobDefinition;
+import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.definition.shell.ShellJobDefinition;
 
 import java.util.List;
 
@@ -60,6 +65,26 @@ public class JobDefinitionServiceImpl extends ServiceImpl implements JobDefiniti
         });
     }
 
+    @Override
+    public ShellJobBuilder createShellBuilder() {
+        return this.commandExecutor.execute(new Command<ShellJobBuilder>() {
+            @Override
+            public ShellJobBuilder execute(CommandContext commandContext) {
+                return new ShellJobBuilder(JobDefinitionServiceImpl.this);
+            }
+        });
+    }
+
+    @Override
+    public ShellJobQuery createShellQuery() {
+        return this.commandExecutor.execute(new Command<ShellJobQuery>() {
+            @Override
+            public ShellJobQuery execute(CommandContext commandContext) {
+                return new ShellJobQuery(JobDefinitionServiceImpl.this);
+            }
+        });
+    }
+
     public JobDefinition create(JobDefinitionBuilder jobDefinitionBuilder) {
         return this.commandExecutor.execute(new CreateJobDefinitionCommand(jobDefinitionBuilder));
     }
@@ -82,5 +107,13 @@ public class JobDefinitionServiceImpl extends ServiceImpl implements JobDefiniti
 
     public Boolean deleteJobDefinition(JobDefinitionBuilder jobDefinitionBuilder) {
         return this.commandExecutor.execute(new DeleteJobDefinitionCommand(jobDefinitionBuilder));
+    }
+
+    public Boolean createShellJob(ShellJobBuilder jobBuilder) {
+        return this.commandExecutor.execute(new CreateShellJobDefinitionCommand(jobBuilder));
+    }
+
+    public ShellJobDefinition selectShellJob(ShellJobQuery shellJobQuery) {
+        return this.commandExecutor.execute(new ShellJobDefinitionQueryCommand(shellJobQuery));
     }
 }

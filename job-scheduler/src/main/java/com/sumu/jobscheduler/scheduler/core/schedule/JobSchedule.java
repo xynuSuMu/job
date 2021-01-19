@@ -73,7 +73,6 @@ public class JobSchedule {
         boolean exists = scheduler.checkExists(triggerKey);
 
         if (!exists) {
-//            throw new JobExistException("quartz job not exists! triggerKey = " + triggerKey);
             LOG.info("{} not exist", triggerKey);
         } else {
             scheduler.unscheduleJob(triggerKey);

@@ -7,23 +7,67 @@ package com.sumu.jobserver.api.vo.param;
  */
 public class ShellJobVO {
 
-    private String ip;
+    private String user;
+    private String host;
+    private int port;
+    private String password;
+    private String directory;
+    private String file;
+    private String param;
 
-    private String path;
-
-    public String getIp() {
-        return ip;
+    public String getUser() {
+        return user;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setUser(String user) {
+        this.user = user;
     }
 
-    public String getPath() {
-        return path;
+    public String getHost() {
+        return host;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getDirectory() {
+        return directory;
+    }
+
+    public void setDirectory(String directory) {
+        this.directory = directory;
+    }
+
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
+    }
+
+    public String getParam() {
+        return param;
+    }
+
+    public void setParam(String param) {
+        this.param = param;
     }
 }

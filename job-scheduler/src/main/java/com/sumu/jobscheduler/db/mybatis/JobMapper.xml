@@ -75,6 +75,33 @@
             )
     </insert>
 
+
+    <insert id="insertShellJobDefinition"
+            parameterType="com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.definition.shell.ShellJobDefinitionEntity"
+            useGeneratedKeys="true"
+            keyProperty="id" keyColumn="id">
+            insert into JOB_CUSTOM_JOB_DEFINITION_SHELL(
+            `definition_id`,
+            `user`,
+            `host`,
+            `port`,
+            `pwd`,
+            `directory`,
+            `file`,
+            `param`
+            )
+            values (
+            #{definitionID},
+            #{user},
+            #{host},
+            #{port},
+            #{password},
+            #{directory},
+            #{file},
+            #{param}
+            )
+    </insert>
+
     <insert id="insertJobInstance"
             parameterType="com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.instance.JobInstanceEntity"
             useGeneratedKeys="true"
@@ -193,6 +220,21 @@
         </if>
     </select>
 
+    <select id="getShellJobDefinition" resultMap="shellJobDefinitionMap">
+        select
+        <include refid="shell_definition_field"/>
+        from JOB_CUSTOM_JOB_DEFINITION_SHELL
+        <if test="shellJobDefinition!=null">
+            where 1=1
+            <if test="shellJobDefinition.id>0">
+                and id = #{shellJobDefinition.id}
+            </if>
+            <if test="shellJobDefinition.definitionID>0">
+                and definition_id = #{shellJobDefinition.definitionID}
+            </if>
+        </if>
+    </select>
+
 
     <update id="removeJobDefinition">
         DELETE from JOB_CUSTOM_JOB_DEFINITION where id = #{id}
@@ -205,6 +247,10 @@
 
     <sql id="java_definition_field">
          id,definition_id,handler_name,strategy,shard_num
+    </sql>
+
+    <sql id="shell_definition_field">
+         id,definition_id,`user`,`host`,`port`,`pwd`,`directory`,`file`,`param`
     </sql>
 
     <resultMap id="jobDefinitionMap"
@@ -226,6 +272,18 @@
         <result property="handlerName" column="handler_name"/>
         <result property="strategy" column="strategy"/>
         <result property="shardNum" column="shard_num"/>
+    </resultMap>
+    <resultMap id="shellJobDefinitionMap"
+               type="com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.definition.shell.ShellJobDefinitionEntityImpl">
+        <result property="id" column="id"/>
+        <result property="definitionID" column="definition_id"/>
+        <result property="user" column="user"/>
+        <result property="host" column="host"/>
+        <result property="port" column="port"/>
+        <result property="password" column="pwd"/>
+        <result property="directory" column="directory"/>
+        <result property="file" column="file"/>
+        <result property="param" column="param"/>
     </resultMap>
 
     <select id="countInstance" resultType="java.lang.Integer">

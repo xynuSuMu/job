@@ -7,6 +7,7 @@ import com.sumu.jobserver.api.vo.Page;
 import com.sumu.jobserver.api.vo.dag.*;
 import com.sumu.jobserver.api.vo.param.AddJobVO;
 import com.sumu.jobserver.api.vo.param.JavaJobVO;
+import com.sumu.jobserver.api.vo.param.ShellJobVO;
 import com.sumu.jobserver.api.vo.query.JobDefinitionQuery;
 import com.sumu.jobserver.api.vo.query.JobInstanceQuery;
 import com.sumu.jobscheduler.scheduler.core.schedule.JobDispatcher;
@@ -102,8 +103,21 @@ public class JobService {
                     .strategy(javaJobVO.getStrategy())
                     .shardNum(javaJobVO.getShardNum())
                     .deploy();
-        } else {
-
+        } else if (addJobVO.getTaskType() == JobInfo.Type.SHELL.getCode()) {
+            ShellJobVO shellJobVO = addJobVO.getShellJobVO();
+            Boolean isSuccess = jobDefinitionService.createShellBuilder()
+                    .definitionID(jobDefinition.getId())
+                    .user(shellJobVO.getUser())
+                    .host(shellJobVO.getHost())
+                    .port(shellJobVO.getPort())
+                    .pwd(shellJobVO.getPassword())
+                    .directory(shellJobVO.getDirectory())
+                    .file(shellJobVO.getFile())
+                    .param(shellJobVO.getParam())
+                    .create();
+            if (!isSuccess) {
+                throw new JobException(JobExceptionInfo.SHELL_JOB_INSERT_FAIL);
+            }
         }
         //增加到调度中心
         if (addJobVO.getEnable()) {

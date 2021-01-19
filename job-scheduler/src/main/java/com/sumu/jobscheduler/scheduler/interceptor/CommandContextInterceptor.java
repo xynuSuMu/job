@@ -29,6 +29,7 @@ public class CommandContextInterceptor extends AbstractCommandInterceptor {
             Object object = this.next.execute(command);
             return (T) object;
         } catch (Exception e) {
+            e.printStackTrace();
             commandContext.setException(e);
         } finally {
             try {
