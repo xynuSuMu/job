@@ -1,6 +1,7 @@
 package com.sumu.jobscheduler.scheduler.interceptor;
 
 import com.sumu.jobscheduler.scheduler.interceptor.command.Command;
+import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -31,6 +32,7 @@ public class TransactionInterceptor extends AbstractCommandInterceptor {
         //设置事务传播
         transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
         //
+        transactionTemplate.setIsolationLevel(TransactionIsolationLevel.REPEATABLE_READ.getLevel());
         T result = transactionTemplate.execute(new TransactionCallback<T>() {
             public T doInTransaction(TransactionStatus status) {
                 return TransactionInterceptor.this.next.execute(command);
