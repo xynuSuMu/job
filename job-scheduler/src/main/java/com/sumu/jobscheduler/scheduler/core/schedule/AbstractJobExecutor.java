@@ -41,6 +41,7 @@ public abstract class AbstractJobExecutor {
                 .startTime(new Date())
                 .triggerType(1)
                 .create();
+        //
         return jobInstanceDO;
     }
 

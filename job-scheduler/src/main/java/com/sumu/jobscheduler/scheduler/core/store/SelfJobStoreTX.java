@@ -191,11 +191,6 @@ public class SelfJobStoreTX extends JobStoreCMT {
                             noLaterThan + timeWindow,
                             this.getMisfireTime(),
                             maxCount);
-//                    List<TriggerKey> keys = selectTriggerToAcquire(conn,
-//                            noLaterThan + timeWindow,
-//                            this.getMisfireTime(),
-//                            maxCount,
-//                            appJob);
                     if (keys != null && keys.size() != 0) {
                         long batchEnd = noLaterThan;
                         Iterator i$ = keys.iterator();

@@ -16,10 +16,11 @@ import com.sumu.jobscheduler.scheduler.modal.enume.JavaJobInfo;
 import com.sumu.jobscheduler.scheduler.modal.job.ExecutorResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+
+import static com.sumu.jobscheduler.scheduler.core.store.SelfConstants.EXECUTOR_WORKER_ZERO;
 
 /**
  * @author 陈龙
@@ -79,7 +80,13 @@ public class JobExecutor extends AbstractJobExecutor {
                 .appId(appId)
                 .enable(true)
                 .list();
-
+        if (CollectionUtils.isEmpty(workers)) {
+            ExecutorResult executorResult = new ExecutorResult(new Date(),
+                    "",
+                    EXECUTOR_WORKER_ZERO);
+            updateInstance(jobInstanceDO.getId(), executorResult);
+            return;
+        }
         JavaJobInfo.Strategy schedulerStrategy = JavaJobInfo.Strategy.getStrategy(strategy);
         //调度
         switch (schedulerStrategy) {
@@ -105,7 +112,7 @@ public class JobExecutor extends AbstractJobExecutor {
         for (Worker workerDO : workers) {
             RpcAddress rpcAddress = new RpcAddress(workerDO.getIp(), workerDO.getPort());
             sb.append(rpcAddress.getRpcAddress() + " ");
-            LOG.info("RpcAddress,{},handlerName,{}", rpcAddress.getRpcAddress(), handlerName);
+            LOG.info("id,{},RpcAddress,{},handlerName,{}", jobInstanceDO.getJobDefinitionId(), rpcAddress.getRpcAddress(), handlerName);
             RpcResult<Void> rpcResult = FeignUtil.jobNotify(rpcAddress,
                     handlerName,
                     String.valueOf(jobInstanceDO.getId()));
@@ -128,7 +135,7 @@ public class JobExecutor extends AbstractJobExecutor {
         for (Worker workerDO : workers) {
             RpcAddress rpcAddress = new RpcAddress(workerDO.getIp(), workerDO.getPort());
             sb.append(rpcAddress.getRpcAddress() + " ");
-            LOG.info("RpcAddress,{},handlerName,{}", rpcAddress.getRpcAddress(), handlerName);
+            LOG.info("id,{},RpcAddress,{},handlerName,{}", jobInstanceDO.getJobDefinitionId(), rpcAddress.getRpcAddress(), handlerName);
             RpcResult<Void> rpcResult = FeignUtil.jobNotify(rpcAddress,
                     handlerName,
                     String.valueOf(jobInstanceDO.getId()));
@@ -179,7 +186,7 @@ public class JobExecutor extends AbstractJobExecutor {
         //
         Set<Map.Entry<Worker, List<Integer>>> set = map.entrySet();
         StringBuilder sb = new StringBuilder();
-        int result = 0;
+        int result = 1;
         for (Map.Entry<Worker, List<Integer>> entry : set) {
             Worker workerDO = entry.getKey();
             //分片索引
@@ -191,7 +198,7 @@ public class JobExecutor extends AbstractJobExecutor {
             stringBuilder.deleteCharAt(stringBuilder.length() - 1);
             RpcAddress rpcAddress = new RpcAddress(workerDO.getIp(), workerDO.getPort());
             sb.append(rpcAddress.getRpcAddress() + " ");
-            LOG.info("RpcAddress,{},handlerName,{}", rpcAddress.getRpcAddress(), handlerName);
+            LOG.info("id,{},RpcAddress,{},handlerName,{}", jobInstanceDO.getJobDefinitionId(), rpcAddress.getRpcAddress(), handlerName);
             RpcResult<Void> rpcResult = FeignUtil.jobNotify(rpcAddress,
                     handlerName,
                     String.valueOf(jobInstanceDO.getId()),

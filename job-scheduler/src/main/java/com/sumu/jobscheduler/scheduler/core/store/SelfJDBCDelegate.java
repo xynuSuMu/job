@@ -51,6 +51,8 @@ public class SelfJDBCDelegate extends StdJDBCDelegate {
         return app;
     }
 
+    //Query {0}TRIGGERS table
+    @Override
     public List<TriggerKey> selectTriggerToAcquire(Connection conn,
                                                    long noLaterThan,
                                                    long noEarlierThan,
@@ -70,9 +72,7 @@ public class SelfJDBCDelegate extends StdJDBCDelegate {
             if (maxCount < 1)
                 maxCount = 1;
             ps.setMaxRows(maxCount);
-
             ps.setFetchSize(maxCount);
-
             ps.setString(1, STATE_WAITING);
             ps.setBigDecimal(2, new BigDecimal(String.valueOf(noLaterThan)));
             ps.setBigDecimal(3, new BigDecimal(String.valueOf(noEarlierThan)));
@@ -94,6 +94,7 @@ public class SelfJDBCDelegate extends StdJDBCDelegate {
 
     }
 
+    @Override
     public int insertTrigger(Connection conn, OperableTrigger trigger, String state,
                              JobDetail jobDetail) throws SQLException, IOException {
 
@@ -137,6 +138,7 @@ public class SelfJDBCDelegate extends StdJDBCDelegate {
             ps.setInt(13, trigger.getMisfireInstruction());
             setBytes(ps, 14, baos);
             ps.setInt(15, trigger.getPriority());
+            //更改表结构
             if (JobApplicationContext.getSpecial() != null && JobApplicationContext.getSpecial())
                 ps.setString(16, trigger.getKey().getGroup());
             else

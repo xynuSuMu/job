@@ -3,6 +3,11 @@
   "groups": [],
   "properties": [
     {
+      "name": "job.zkAddress",
+      "description": "ZK地址",
+      "type": "java.lang.String"
+    },
+    {
       "name": "job.special.app",
       "description": "只执行指定APP下的Job",
       "type": "java.lang.String"

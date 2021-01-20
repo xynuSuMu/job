@@ -60,7 +60,7 @@ public class PostSchedulerFactoryBean implements SchedulerFactoryBeanCustomizer 
             mergedProps.setProperty("org.quartz.threadPool.class", LocalTaskExecutorThreadPool.class.getName());
         } else {
             mergedProps.setProperty("org.quartz.threadPool.class", SimpleThreadPool.class.getName());
-            mergedProps.setProperty("org.quartz.threadPool.threadCount", Integer.toString(10));
+            mergedProps.setProperty("org.quartz.threadPool.threadCount", Integer.toString(50));
         }
         Field field3 = schedulerFactoryBean.getClass().getDeclaredField("configLocation");
         field3.setAccessible(true);

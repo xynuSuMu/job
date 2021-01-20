@@ -7,11 +7,13 @@ import org.quartz.impl.jdbcjobstore.StdJDBCConstants;
  * @author 陈龙
  * @version 1.0
  * @date 2021-01-16 19:55
+ * @desc 自定义SQL
  */
 public interface SelfConstants extends StdJDBCConstants, Constants {
 
     String JOB_APP = "JOB_APP";
 
+    String EXECUTOR_WORKER_ZERO = "当前任务可调度机器为0";
 
     String SELECT_NEXT_TRIGGER_TO_ACQUIRE = "SELECT "
             + COL_TRIGGER_NAME + ", " + COL_TRIGGER_GROUP + ", "
