@@ -53,7 +53,7 @@ CREATE TABLE `JOB_CUSTOM_JOB_INSTANCE` (
   `end_time` timestamp NULL DEFAULT NULL COMMENT ''结束时间'',
   `trigger_type` int(1) NOT NULL COMMENT ''执行类型'',
   `trigger_worker` varchar(500) NOT NULL DEFAULT '''' COMMENT ''执行机器'',
-  `trigger_result` int(1) DEFAULT NULL COMMENT ''执行结果'',
+  `trigger_result` varchar(1500) DEFAULT NULL COMMENT '执行结果',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=305 DEFAULT CHARSET=utf8;
 
