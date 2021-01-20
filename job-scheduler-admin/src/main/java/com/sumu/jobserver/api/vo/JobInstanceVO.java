@@ -14,7 +14,7 @@ public class JobInstanceVO {
     private String endTime;
     private int triggerType;
     private String triggerWorker;
-    private int triggerResult;
+    private String triggerResult;
 
     public int getId() {
         return id;
@@ -56,11 +56,11 @@ public class JobInstanceVO {
         this.triggerWorker = triggerWorker;
     }
 
-    public int getTriggerResult() {
+    public String getTriggerResult() {
         return triggerResult;
     }
 
-    public void setTriggerResult(int triggerResult) {
+    public void setTriggerResult(String triggerResult) {
         this.triggerResult = triggerResult;
     }
 }

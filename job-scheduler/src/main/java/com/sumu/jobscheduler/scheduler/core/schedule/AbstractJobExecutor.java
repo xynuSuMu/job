@@ -6,6 +6,7 @@ import com.sumu.jobscheduler.scheduler.core.service.impl.JobDefinitionServiceImp
 import com.sumu.jobscheduler.scheduler.core.service.impl.JobInstanceServiceImpl;
 import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.definition.JobDefinition;
 import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.instance.JobInstance;
+import com.sumu.jobscheduler.scheduler.modal.job.ExecutorResult;
 import com.sumu.jobscheduler.util.SpringContextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,15 +53,15 @@ public abstract class AbstractJobExecutor {
 
     public abstract void executorByQuartz(JobDefinition jobDefinitionDO, JobInstance jobInstance);
 
-    protected void updateInstance(int instanceId, int result, String worker) {
+
+    protected void updateInstance(int instanceId, ExecutorResult result) {
         JobInstanceService jobInstanceService =
                 SpringContextUtils.getBean(JobInstanceServiceImpl.class);
-        Date endTime = new Date();
         jobInstanceService.createBuilder()
                 .id(instanceId)
-                .endTime(endTime)
-                .triggerResult(result)
-                .triggerWorker(worker)
+                .endTime(result.getEndTime())
+                .triggerResult(result.getResult())
+                .triggerWorker(result.getWorker())
                 .create();
     }
 

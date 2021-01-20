@@ -31,7 +31,7 @@ public class TransactionInterceptor extends AbstractCommandInterceptor {
         TransactionTemplate transactionTemplate = new TransactionTemplate(this.transactionManager);
         //设置事务传播
         transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-        //
+        //事务隔离级别
         transactionTemplate.setIsolationLevel(TransactionIsolationLevel.REPEATABLE_READ.getLevel());
         T result = transactionTemplate.execute(new TransactionCallback<T>() {
             public T doInTransaction(TransactionStatus status) {

@@ -21,6 +21,6 @@ public interface JobInstanceEntity  extends  JobInstance{
 
     void setTriggerWorker(String triggerWorker);
 
-    void setTriggerResult(int triggerResult);
+    void setTriggerResult(String triggerResult);
 
 }

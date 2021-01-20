@@ -15,7 +15,7 @@ public class JobInstanceEntityImpl implements JobInstanceEntity {
     private Date endTime;
     private int triggerType;
     private String triggerWorker;
-    private int triggerResult;
+    private String triggerResult;
 
     public int getId() {
         return id;
@@ -41,7 +41,7 @@ public class JobInstanceEntityImpl implements JobInstanceEntity {
         return triggerWorker;
     }
 
-    public int getTriggerResult() {
+    public String getTriggerResult() {
         return triggerResult;
     }
 
@@ -69,7 +69,7 @@ public class JobInstanceEntityImpl implements JobInstanceEntity {
         this.triggerWorker = triggerWorker;
     }
 
-    public void setTriggerResult(int triggerResult) {
+    public void setTriggerResult(String triggerResult) {
         this.triggerResult = triggerResult;
     }
 }

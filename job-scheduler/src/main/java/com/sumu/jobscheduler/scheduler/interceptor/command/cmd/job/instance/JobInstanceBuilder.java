@@ -33,7 +33,7 @@ public class JobInstanceBuilder {
         return this;
     }
 
-    public JobInstanceBuilder triggerResult(int triggerResult) {
+    public JobInstanceBuilder triggerResult(String triggerResult) {
         jobInstanceEntity.setTriggerResult(triggerResult);
         return this;
     }

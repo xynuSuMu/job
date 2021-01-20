@@ -13,6 +13,7 @@ import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.defin
 import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.job.instance.JobInstance;
 import com.sumu.jobscheduler.scheduler.interceptor.command.entity.data.worker.Worker;
 import com.sumu.jobscheduler.scheduler.modal.enume.JavaJobInfo;
+import com.sumu.jobscheduler.scheduler.modal.job.ExecutorResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,7 +116,10 @@ public class JobExecutor extends AbstractJobExecutor {
             result = rpcResult.isSuccess() ? 1 : 0;
             break;
         }
-        updateInstance(jobInstanceDO.getId(), result, sb.toString());
+        ExecutorResult executorResult = new ExecutorResult(new Date(),
+                sb.toString(),
+                result == 1 ? "Success" : "Fail");
+        updateInstance(jobInstanceDO.getId(), executorResult);
     }
 
     private void clusterStrategy(List<Worker> workers, String handlerName, JobInstance jobInstanceDO) {
@@ -133,8 +137,10 @@ public class JobExecutor extends AbstractJobExecutor {
             }
             result = rpcResult.isSuccess() ? 1 : 0;
         }
-
-        updateInstance(jobInstanceDO.getId(), result, sb.toString());
+        ExecutorResult executorResult = new ExecutorResult(new Date(),
+                sb.toString(),
+                result == 1 ? "Success" : "Fail");
+        updateInstance(jobInstanceDO.getId(), executorResult);
     }
 
     //分片策略
@@ -199,8 +205,10 @@ public class JobExecutor extends AbstractJobExecutor {
                 result = 0;
             }
         }
-
-        updateInstance(jobInstanceDO.getId(), result, sb.toString());
+        ExecutorResult executorResult = new ExecutorResult(new Date(),
+                sb.toString(),
+                result == 1 ? "Success" : "Fail");
+        updateInstance(jobInstanceDO.getId(), executorResult);
     }
 
 }

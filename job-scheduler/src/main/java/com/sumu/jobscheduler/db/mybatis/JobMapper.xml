@@ -124,7 +124,7 @@
             <if test="jobInstanceEntity.triggerWorker!=null and jobInstanceEntity.triggerWorker!=''">
                 `trigger_worker` = #{jobInstanceEntity.triggerWorker},
             </if>
-            <if test="jobInstanceEntity.triggerResult==0 or jobInstanceEntity.triggerResult==1">
+            <if test="jobInstanceEntity.triggerResult!=null or jobInstanceEntity.triggerResult!=''">
                 `trigger_result` = #{jobInstanceEntity.triggerResult},
             </if>
             <if test="jobInstanceEntity.endTime!=null">

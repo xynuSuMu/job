@@ -39,7 +39,7 @@ public class JobInstanceQuery {
         return this;
     }
 
-    public JobInstanceQuery triggerResult(int triggerResult) {
+    public JobInstanceQuery triggerResult(String triggerResult) {
         jobInstanceEntity.setTriggerResult(triggerResult);
         return this;
     }

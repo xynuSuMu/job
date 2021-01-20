@@ -21,5 +21,5 @@ public interface JobInstance {
 
     String getTriggerWorker();
 
-    int getTriggerResult();
+    String getTriggerResult();
 }
