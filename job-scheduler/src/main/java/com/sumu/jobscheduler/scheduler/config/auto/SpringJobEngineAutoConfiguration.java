@@ -58,10 +58,8 @@ public class SpringJobEngineAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public JobSchedule jobSchedule(
-            DataSource dataSource,
-            QuartzProperties quartzProperties,
             Scheduler scheduler) {
-        return new JobSchedule(dataSource, quartzProperties, scheduler);
+        return new JobSchedule(scheduler);
     }
 
     @Bean

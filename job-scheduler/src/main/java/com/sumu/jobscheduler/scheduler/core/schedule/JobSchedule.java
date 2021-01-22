@@ -23,24 +23,9 @@ public class JobSchedule {
 
     private Scheduler scheduler;
 
-    private DataSource dataSource;
+    public JobSchedule(Scheduler scheduler) {
 
-    private QuartzProperties quartzProperties;
-
-    private final String tablePrefix;
-
-    private final String TABLE = "TRIGGERS";
-
-    private String UPDATE_TRIGGER = "UPDATE {0} set JOB_APP = {1} where TRIGGER_NAME = {2} and TRIGGER_GROUP = {3}";
-
-
-    public JobSchedule(DataSource dataSource, QuartzProperties quartzProperties, Scheduler scheduler) {
-        this.quartzProperties = quartzProperties;
-        this.dataSource = dataSource;
         this.scheduler = scheduler;
-        this.tablePrefix = quartzProperties
-                .getProperties()
-                .getOrDefault("org.quartz.jobStore.tablePrefix", "QRTZ_");
 
     }
 
