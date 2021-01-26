@@ -178,7 +178,7 @@ public class JobService {
                 .enable(false)
                 .id(id)
                 .deploy();
-        jobSchedule.removeIfExist(String.valueOf(jobDefinitionDO.getId()), appDO.getAppCode());
+        jobSchedule.pauseJob(String.valueOf(jobDefinitionDO.getId()), appDO.getAppCode());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -216,9 +216,10 @@ public class JobService {
                 .id(id)
                 .deploy();
         //增加到调度中心
-        jobSchedule.addJob(String.valueOf(jobDefinitionDO.getId()),
-                appDO.getAppCode(),
-                jobDefinitionDO.getCron());
+//        jobSchedule.addJob(String.valueOf(jobDefinitionDO.getId()),
+//                appDO.getAppCode(),
+//                jobDefinitionDO.getCron());
+        jobSchedule.resumeJob(String.valueOf(jobDefinitionDO.getId()), appDO.getAppCode());
     }
 
     public Page<List<JobDefinitionVO>> jobDefinitionList(JobDefinitionQuery jobDefinitionQuery) {

@@ -51,6 +51,30 @@ public class JobSchedule {
         LOG.info("add Job: jobDetail:{}, cronTrigger:{}, date:{}", jobDetail, cronTrigger, date);
     }
 
+    public void pauseJob(String jobName, String jobGroup) throws SchedulerException {
+        TriggerKey triggerKey = TriggerKey.triggerKey(jobName, jobGroup);
+
+        boolean exists = scheduler.checkExists(triggerKey);
+
+        if (!exists) {
+            LOG.info("{} not exist", triggerKey);
+        } else {
+            scheduler.pauseTrigger(triggerKey);
+        }
+    }
+
+    public void resumeJob(String jobName, String jobGroup) throws SchedulerException {
+        TriggerKey triggerKey = TriggerKey.triggerKey(jobName, jobGroup);
+
+        boolean exists = scheduler.checkExists(triggerKey);
+
+        if (!exists) {
+            LOG.info("{} not exist", triggerKey);
+        } else {
+            scheduler.resumeTrigger(triggerKey);
+        }
+    }
+
     public void removeIfExist(String jobName, String jobGroup) throws SchedulerException {
 
         TriggerKey triggerKey = TriggerKey.triggerKey(jobName, jobGroup);
